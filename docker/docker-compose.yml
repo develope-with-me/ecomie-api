@@ -1,0 +1,43 @@
+version: '3'
+
+networks:
+  auth_service_network:
+    driver: bridge
+
+services:
+
+  Auth_Service:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: auth_service
+    depends_on:
+      - PostgreSQL
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
+        #spring.sql.init.platform=postgres
+        #spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/ecomie
+      - SPRING_DATASOURCE_USERNAME=ecomie
+      - SPRING_DATASOURCE_PASSWORD=ecomie
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA__JPA_REPOSITORIES_ENABLED=true
+      - SPRING_JPA_SHOWSQL=true
+      - SPRING_JPA_DATABASE=mysql
+    networks:
+      - auth_service_network
+
+  PostgreSQL:
+    image: postgres:13.1-alpine
+    container_name: db
+    environment:
+      - POSTGRES_USER=ecomie
+      - POSTGRES_PASSWORD=ecomie
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./PostgreSQL:/var/lib/postgresql
+    networks:
+      - auth_service_network
