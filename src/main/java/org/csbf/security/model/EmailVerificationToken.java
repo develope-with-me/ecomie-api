@@ -12,6 +12,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class EmailVerificationToken {
     private static final int EXPIRATION = 60 * 24;
 

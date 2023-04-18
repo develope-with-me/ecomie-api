@@ -39,10 +39,14 @@ public class AuthenticationController {
         String appUrl = servletRequest.getContextPath();
 
         AuthenticationResponse response = service.authenticate(request);
-        if( !response.getUser().isEnabled())
+        var user = response.getUser();
+        response.setUser(null);
+        if( user==null)
+            return ResponseEntity.ok(response);
+        if( !user.isEnabled())
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(response.getUser(),
                     servletRequest.getLocale(), appUrl));
-        return ResponseEntity.ok(service.authenticate(request));
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/confirm-registration")
