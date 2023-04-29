@@ -30,7 +30,7 @@ public class OnRegistrationCompleteEventListener implements ApplicationListener<
         private void confirmRegistration(OnRegistrationCompleteEvent event) {
             User user = event.getUser();
             String token = UUID.randomUUID().toString();
-            service.createEmailVerificationToken(user, token);
+//            service.createEmailVerificationToken(user, token);
 
             String recipientAddress = user.getEmail();
             String subject = "Registration Confirmation";

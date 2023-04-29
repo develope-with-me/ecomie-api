@@ -21,13 +21,15 @@ import java.util.*;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
     private String firstname;
     private String lastname;
     private String email;
     private String password;
     private boolean accountEnabled;
+    private String emailVerificationToken;
+    private boolean accountBlocked;
 
 //    @Enumerated(EnumType.STRING)
     private String roles;
@@ -70,7 +72,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !this.accountBlocked;
     }
 
     @Override
@@ -82,4 +84,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {return this.accountEnabled;}
 
     public boolean toggleEnable() {return !this.accountEnabled;}
+    public boolean toggleBlock() {return !this.accountBlocked;}
+
 }

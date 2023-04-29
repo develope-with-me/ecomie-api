@@ -6,16 +6,17 @@ import org.csbf.security.model.User;
 import org.csbf.security.payload.AuthenticationRequest;
 import org.csbf.security.payload.AuthenticationResponse;
 import org.csbf.security.payload.RegisterRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 public interface AuthenticationService {
     AuthenticationResponse register(RegisterRequest request);
 
     AuthenticationResponse authenticate(AuthenticationRequest request);
-    void createEmailVerificationToken(User user, String token);
-
+    String createEmailVerificationToken();
     EmailVerificationToken getEmailVerificationToken(String VerificationToken);
-    User getUser(String verificationToken);
-    Map confirmRegistration(HttpServletRequest servletRequest, String token);
+    Map confirmEmail(String email, String token) throws UnsupportedEncodingException;
 }

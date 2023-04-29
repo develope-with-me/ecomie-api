@@ -26,6 +26,10 @@ public class EmailVerificationToken {
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Date expiryDate;
 
     public EmailVerificationToken(User user) {
