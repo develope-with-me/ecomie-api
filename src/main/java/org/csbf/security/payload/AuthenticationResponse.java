@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.csbf.security.model.User;
+import org.csbf.security.dto.UserDTO;
 
 @Data
 @Builder
@@ -14,5 +14,5 @@ public class AuthenticationResponse {
     private String token;
     private String message;
     private boolean success;
-    private User user;
+    private UserDTO user;
 }

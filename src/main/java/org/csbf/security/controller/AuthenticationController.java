@@ -95,8 +95,8 @@ log.info("Email {}", email);
         emailService.sendEmailVerificationToken(emailDTO.getEmail());
         Map<String, Object> response = new HashMap<>();
 //        String message = success ? "email sent" : "email not sent";
-        response.put("success", "success");
-        response.put("message", "message");
+        response.put("success", true);
+        response.put("message", "email resent");
 //
 //        return response;
 //        return ResponseEntity.ok(emailService.sendEmail(email));

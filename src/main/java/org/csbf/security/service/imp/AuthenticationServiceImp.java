@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.constant.Role;
+import org.csbf.security.dto.UserDTO;
 import org.csbf.security.event.OnRegistrationCompleteEvent;
 import org.csbf.security.model.EmailVerificationToken;
 import org.csbf.security.model.User;
@@ -47,13 +48,9 @@ public class AuthenticationServiceImp implements AuthenticationService {
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
+        String msg = "user already exist";
         if (userRepo.findByEmail(request.getEmail()).isPresent())
-                return AuthenticationResponse.builder()
-                        .success(false)
-                        .message("user already exist")
-                        .token(null)
-                        .user(null)
-                        .build();
+            return getAuthenticationResponse(false, msg, null, null);
 
 //        String appUrl = servletRequest.getContextPath();
 //        String roles = Role.USER.name()+"_"+Role.ADMIN.name();
@@ -69,40 +66,26 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .accountEnabled(false)
                 .build();
         User registeredUser = userRepo.save(user);
+
 //        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registeredUser,
 //                servletRequest.getLocale(), appUrl));
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .success(true)
-                .message("user created")
-                .token(jwtToken)
-                .user(registeredUser)
-                .build();
+        msg = "user created";
+        return getAuthenticationResponse(true, msg, jwtToken, registeredUser);
     }
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-
-//        var user = userRepo.findByEmail(request.getEmail())
-//                .orElseThrow();
+        String message =  "user does not exist";
         if (!userRepo.findByEmail(request.getEmail()).isPresent())
-            return AuthenticationResponse.builder()
-                    .success(false)
-                    .message("user does not exist")
-                    .token(null)
-                    .user(null)
-                    .build();
+            return getAuthenticationResponse(false, message, null, null);
 
         var user = userRepo.findByEmail(request.getEmail())
                 .orElseThrow();
 
         if (!user.isEnabled()) {
-            return AuthenticationResponse.builder()
-                    .success(false)
-                    .message("account not enabled")
-                    .token(null)
-                    .user(user)
-                    .build();
+            message = "account not enabled";
+            return getAuthenticationResponse(false, message, null, null);
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -112,12 +95,8 @@ public class AuthenticationServiceImp implements AuthenticationService {
         );
 
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .success(true)
-                .message("authenticated")
-                .token(jwtToken)
-                .user(user)
-                .build();
+        message = "authenticated";
+        return getAuthenticationResponse(true, message, jwtToken, user);
     }
 
     @Override
@@ -141,22 +120,9 @@ public class AuthenticationServiceImp implements AuthenticationService {
     }
     @Override
     public Map confirmEmail(String email, String token) throws UnsupportedEncodingException {
-
-//        EmailVerificationToken verificationToken = verificationTokenRepo.findByToken(token);
-
-//        if(verificationToken != null)
-//        {
-//            User user = userRepo.findByEmail(verificationToken.getUser().getEmail()).get();
-//            user.setAccountEnabled(true);
-//            userRepo.save(user);
-//            return ResponseEntity.ok("Email verified successfully!");
-//        }
-//        Locale locale = servletRequest.getLocale();
-
         String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
         String message = null;
         Map<String, Object> map = new HashMap<String, Object>( );
-        System.out.println(email + "  " + token);
         var obj = userRepo.findByEmail(email);
         var obj1 = userRepo.findByEmail(decodedEmail);
         log.info("decodedEmail {}", email);
@@ -199,5 +165,24 @@ public class AuthenticationServiceImp implements AuthenticationService {
         map.put("token", user.getEmailVerificationToken());
         map.put("message", message);
         return map;
+    }
+
+    public UserDTO getUserDTO(User user) {
+       return user == null ? null : UserDTO.builder()
+                .id(user.getId())
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .email(user.getEmail())
+                .accountEnabled(user.isAccountEnabled())
+                .accountBlocked(user.isAccountBlocked())
+                .build();
+    }
+    private AuthenticationResponse getAuthenticationResponse(boolean success, String message,  String jwtToken, User user) {
+        return AuthenticationResponse.builder()
+                .success(success)
+                .message(message)
+                .token(jwtToken)
+                .user(getUserDTO(user))
+                .build();
     }
 }
