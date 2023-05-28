@@ -28,7 +28,7 @@ public class SecurityConfig {
                 // Allow access to unauthenticated users
                 .requestMatchers("/api/v1/auth/**", "/api/v1/demo-controller**").permitAll()
                 // Allow swagger routes
-                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "**/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/webjars/**").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "**/swagger-resources/**", "/v2/api-docs", "/v3/api-docs/**", "/webjars/**").permitAll()
 //                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 // permit users with roles, USER and ADMIN
                 .requestMatchers("/api/v1/secure/user**").hasAnyAuthority("USER", "ADMIN")

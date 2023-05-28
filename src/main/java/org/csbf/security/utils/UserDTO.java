@@ -1,12 +1,14 @@
-package org.csbf.security.dto;
+package org.csbf.security.utils;
 
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Builder
 public class UserDTO {
-    private Integer id;
+    private UUID id;
     private String firstname;
     private String lastname;
     private String email;

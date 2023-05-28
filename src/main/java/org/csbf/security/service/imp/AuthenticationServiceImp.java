@@ -1,12 +1,9 @@
 package org.csbf.security.service.imp;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.constant.Role;
-import org.csbf.security.dto.UserDTO;
-import org.csbf.security.event.OnRegistrationCompleteEvent;
+import org.csbf.security.utils.UserDTO;
 import org.csbf.security.model.EmailVerificationToken;
 import org.csbf.security.model.User;
 import org.csbf.security.payload.AuthenticationRequest;
@@ -16,27 +13,22 @@ import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.JwtService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.sql.Array;
 import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImp implements AuthenticationService {
-//    private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImp.class)
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -53,7 +45,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
             return getAuthenticationResponse(false, msg, null, null);
 
 //        String appUrl = servletRequest.getContextPath();
-//        String roles = Role.USER.name()+"_"+Role.ADMIN.name();
+//        String roles = Role.USER.name()+"-"+Role.ADMIN.name();
         String roles = Role.USER.name();
 
         var user = User.builder()

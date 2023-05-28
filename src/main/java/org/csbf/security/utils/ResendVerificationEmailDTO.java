@@ -1,4 +1,4 @@
-package org.csbf.security.dto;
+package org.csbf.security.utils;
 
 import lombok.Data;
 

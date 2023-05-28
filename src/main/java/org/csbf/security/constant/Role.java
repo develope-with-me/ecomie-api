@@ -7,6 +7,8 @@ public enum Role {
     MISSIONARY, //(SMICT)
     PRAYER_WARRIOR, //Prayer_Warrior (CCP)
     SPONSOR, //SENDER (3Jean2)
-    ADMIN
+    ADMIN,
+    SUPER_ADMIN
+
 
 }

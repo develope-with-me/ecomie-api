@@ -3,9 +3,7 @@ package org.csbf.security.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.csbf.security.dto.ResendVerificationEmailDTO;
-import org.csbf.security.event.OnRegistrationCompleteEvent;
-import org.csbf.security.model.EmailVerificationToken;
+import org.csbf.security.utils.ResendVerificationEmailDTO;
 import org.csbf.security.payload.AuthenticationRequest;
 import org.csbf.security.payload.AuthenticationResponse;
 import org.csbf.security.payload.RegisterRequest;
@@ -15,14 +13,11 @@ import org.csbf.security.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @RestController
