@@ -44,7 +44,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 30L)) // Expires after 30days
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * Long.parseLong(env.getProperty("ecomie.jwt.access-token.duration.days")))) // Expires after 30days
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

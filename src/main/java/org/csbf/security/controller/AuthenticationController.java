@@ -1,23 +1,15 @@
 package org.csbf.security.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.csbf.security.utils.ResendVerificationEmailDTO;
-import org.csbf.security.payload.AuthenticationRequest;
-import org.csbf.security.payload.AuthenticationResponse;
-import org.csbf.security.payload.RegisterRequest;
-import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -25,81 +17,44 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService service;
-    @Autowired
-    ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    EmailVerificationTokenRepository verificationTokenRepo;
-
     private final EmailService emailService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletRequest servletRequest) throws UnsupportedEncodingException {
+    @Operation(summary = "Register", description = "Create account", tags = {"Authentication"})
+    public ResponseEntity<HelperDto.AuthenticationResponse> register(@RequestBody HelperDto.RegisterRequest request, HttpServletRequest servletRequest) {
 
-        AuthenticationResponse response = service.register(request);
-        var user = response.getUser();
-        response.setUser(null);
-        if( response.isSuccess()) {
-                        emailService.sendEmailVerificationToken(user.getEmail());
-//            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(response.getUser(),
-//                    servletRequest.getLocale(), appUrl));
+        HelperDto.AuthenticationResponse response = service.register(request);
+        var user = response.user();
+        if (response.success()) {
+            emailService.sendEmailVerificationToken(servletRequest.getHeader("host"), request.email());
         }
 
         return ResponseEntity.ok(response);
     }
+
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest servletRequest) {
+    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = {"Authentication"})
+    public ResponseEntity<HelperDto.AuthenticationResponse> authenticate(@RequestBody HelperDto.AuthenticationRequest request, HttpServletRequest servletRequest) {
         String appUrl = servletRequest.getContextPath();
 
-        AuthenticationResponse response = service.authenticate(request);
-        var user = response.getUser();
-//        response.setUser(null);
-//        if( user==null)
-//            return ResponseEntity.ok(response);
-//        if( !user.isEnabled())
-//            String token = UUID.randomUUID().toString();
-//            EmailVerificationToken emailVerificationToken = new EmailVerificationToken(user);
-//            emailVerificationToken.setToken(token);
-//
-//
-//            verificationTokenRepo.save(emailVerificationToken);
-//
-//            SimpleMailMessage mailMessage = new SimpleMailMessage();
-//            mailMessage.setTo(user.getEmail());
-//            mailMessage.setSubject("Complete Registration!");
-//            mailMessage.setText("To confirm your account, please click here : "
-//                    + "http://localhost:8080/confirm-account?token=" + emailVerificationToken.getToken());
-//            emailService.sendEmail(mailMessage);
-
-//            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(response.getUser(),
-//                    servletRequest.getLocale(), appUrl));
-
+        HelperDto.AuthenticationResponse response = service.authenticate(request);
+        var user = response.user();
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(value="/confirm-account", method= {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<Map> confirmUserAccount(@RequestParam("email") String email, @RequestParam("token") String token) throws UnsupportedEncodingException {
-log.info("Email {}", email);
+    @RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
+    @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"Authentication"})
+    public ResponseEntity<HelperDto.ConfirmEmailResponse> confirmUserAccount(@RequestParam("email") String email, @RequestParam("token") String token) {
+        log.info("Email {}", email);
         return ResponseEntity.ok(service.confirmEmail(email, token));
     }
 
-    @RequestMapping(value="/resend-link", method= {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<Map> resendUserEmailConfirmationLink(@RequestBody ResendVerificationEmailDTO emailDTO) throws UnsupportedEncodingException {
+    @RequestMapping(value = "/resend-link", method = {RequestMethod.POST})
+    @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = {"Authentication"})
+    public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody HelperDto.ResendVerificationEmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
 
-        emailService.sendEmailVerificationToken(emailDTO.getEmail());
-        Map<String, Object> response = new HashMap<>();
-//        String message = success ? "email sent" : "email not sent";
-        response.put("success", true);
-        response.put("message", "email resent");
-//
-//        return response;
-//        return ResponseEntity.ok(emailService.sendEmail(email));
-        return ResponseEntity.ok(response);
+        emailService.sendEmailVerificationToken(servletRequest.getHeader("host"), emailDTO.email());
+        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage("email resent"));
     }
-
-//    @RequestMapping(value="/confirm-account", method= {RequestMethod.GET, RequestMethod.POST})
-//    public ResponseEntity<?> confirmUserAccount(@RequestParam("token")String confirmationToken) {
-//        return userService.confirmEmail(confirmationToken);
-//    }
 }

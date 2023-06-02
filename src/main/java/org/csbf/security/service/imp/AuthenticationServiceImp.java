@@ -3,17 +3,15 @@ package org.csbf.security.service.imp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.constant.Role;
-import org.csbf.security.utils.UserDTO;
+import org.csbf.security.exceptions.BaseException;
 import org.csbf.security.model.EmailVerificationToken;
 import org.csbf.security.model.User;
-import org.csbf.security.payload.AuthenticationRequest;
-import org.csbf.security.payload.AuthenticationResponse;
-import org.csbf.security.payload.RegisterRequest;
 import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -33,15 +31,12 @@ public class AuthenticationServiceImp implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    @Autowired
-    ApplicationEventPublisher eventPublisher;
-    @Autowired
-    private EmailVerificationTokenRepository verificationTokenRepo;
+    private final EmailVerificationTokenRepository verificationTokenRepo;
 
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
+    public HelperDto.AuthenticationResponse register(HelperDto.RegisterRequest request) {
         String msg = "user already exist";
-        if (userRepo.findByEmail(request.getEmail()).isPresent())
+        if (userRepo.findByEmail(request.email()).isPresent())
             return getAuthenticationResponse(false, msg, null, null);
 
 //        String appUrl = servletRequest.getContextPath();
@@ -49,40 +44,37 @@ public class AuthenticationServiceImp implements AuthenticationService {
         String roles = Role.USER.name();
 
         var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .firstname(request.firstname())
+                .lastname(request.lastname())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
                 .roles(roles)
                 .accountBlocked(false)
                 .accountEnabled(false)
                 .build();
         User registeredUser = userRepo.save(user);
 
-//        eventPublisher.publishEvent(new OnRegistrationCompleteEvent(registeredUser,
-//                servletRequest.getLocale(), appUrl));
         var jwtToken = jwtService.generateToken(user);
         msg = "user created";
-        return getAuthenticationResponse(true, msg, jwtToken, registeredUser);
+        return getAuthenticationResponse(true, msg, jwtToken);
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public HelperDto.AuthenticationResponse authenticate(HelperDto.AuthenticationRequest request) {
         String message =  "user does not exist";
-        if (!userRepo.findByEmail(request.getEmail()).isPresent())
-            return getAuthenticationResponse(false, message, null, null);
+        if (!userRepo.findByEmail(request.email()).isPresent())
+            return getAuthenticationResponse(false, message, null);
 
-        var user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow();
+        var user = userRepo.findByEmail(request.email()).get();
 
         if (!user.isEnabled()) {
             message = "account not enabled";
-            return getAuthenticationResponse(false, message, null, null);
+            return getAuthenticationResponse(false, message, null);
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        request.email(),
+                        request.password()
                 )
         );
 
@@ -96,71 +88,36 @@ public class AuthenticationServiceImp implements AuthenticationService {
         return verificationTokenRepo.findByToken(VerificationToken);
     }
 
-//    @Override
-//    public User getUser(String verificationToken) {
-//        return null;
-//    }
-
-//    @Override
-//    public void saveRegisteredUser(User user) {
-//        repository.save(user);
-//    }
 
     @Override
     public String createEmailVerificationToken() {
         return UUID.randomUUID().toString();
     }
     @Override
-    public Map confirmEmail(String email, String token) throws UnsupportedEncodingException {
-        String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
-        String message = null;
-        Map<String, Object> map = new HashMap<String, Object>( );
+    public HelperDto.ConfirmEmailResponse confirmEmail(String email, String token) {
+        String decodedEmail;
+        try {
+            decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new BaseException("Could not encode email");
+        }
+
         var obj = userRepo.findByEmail(email);
-        var obj1 = userRepo.findByEmail(decodedEmail);
         log.info("decodedEmail {}", email);
         log.info("User {}", obj.get());
 
-//        User user = userRepo.findByEmailAndEmailVerificationToken(decodedEmail, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
         User user = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
-        if (user == null) {
-            message = "user and token do not match";
-            map.put("success", false);
-            map.put("token", null);
-            map.put("message", message);
-            return map;
+        if (user != null) {
+            user.setAccountEnabled(true);
+            userRepo.save(user);
+            return new HelperDto.ConfirmEmailResponse(user.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
         }
 
-        /*String verificationToken = user.getEmailVerificationToken();
-        if (verificationToken == null) {
-            message = "invalid token";
-            map.put("success", false);
-            map.put("token", null);
-            map.put("message", message);
-            return map;
-        }*/
-
-        /*User user = verificationToken.getUser();
-        if (verificationToken.getExpiryDate() != null) {
-            Calendar cal = Calendar.getInstance();
-            if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-                message = "expired token";
-                map.put("success", false);
-                map.put("token", null);
-                map.put("message", message);
-                return map;
-            }
-        }*/
-        user.setAccountEnabled(true);
-        userRepo.save(user);
-        message = "account verified";
-        map.put("success", true);
-        map.put("token", user.getEmailVerificationToken());
-        map.put("message", message);
-        return map;
+        return new HelperDto.ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
     }
 
-    public UserDTO getUserDTO(User user) {
-       return user == null ? null : UserDTO.builder()
+    public HelperDto.UserDto getUserDTO(User user) {
+       return user == null ? null : HelperDto.UserDto.builder()
                 .id(user.getId())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
@@ -169,12 +126,12 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .accountBlocked(user.isAccountBlocked())
                 .build();
     }
-    private AuthenticationResponse getAuthenticationResponse(boolean success, String message,  String jwtToken, User user) {
-        return AuthenticationResponse.builder()
-                .success(success)
-                .message(message)
+    private HelperDto.AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, User... users) {
+        return HelperDto.AuthenticationResponse.builder()
                 .token(jwtToken)
-                .user(getUserDTO(user))
+                .message(message)
+                .success(success)
+                .user(getUserDTO(users.length > 0 ? users[0] : null))
                 .build();
     }
 }

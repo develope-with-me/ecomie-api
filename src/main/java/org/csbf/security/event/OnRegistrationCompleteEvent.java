@@ -1,7 +1,5 @@
 package org.csbf.security.event;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.csbf.security.model.User;
 import org.springframework.context.ApplicationEvent;
 

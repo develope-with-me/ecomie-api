@@ -13,26 +13,22 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/api/v1")
-@SecurityRequirement(name = "bearer")
+@SecurityRequirement(name = "api")
 public class TestController {
     @GetMapping("/demo-controller")
-//    @RolesAllowed("USER")
+    @Operation(summary = "Unprotected test endpoint", description = "Endpoint to test unsecure request", tags = {"test"})
     public ResponseEntity<String> sayHello() {
         return ResponseEntity.ok("Hello unauthenticated user");
     }
 
     @GetMapping("/secure/user")
-//    @Role(1)
-//    @RolesAllowed("USER")
+    @Operation(summary = "User test endpoint", description = "Endpoint to test user role", tags = {"test"})
     public ResponseEntity<String> sayHelloUser() {
         return ResponseEntity.ok("Hello authenticated USER");
     }
 
     @GetMapping("/secure/admin")
-    @Operation(summary = "Edit User Profile", description = "Modify currently authenticated user's profile information including the profile", tags = {
-            "user" }, security = {})
-//    @Role(2)
-//    @RolesAllowed("ADMIN")
+    @Operation(summary = "Admin test endpoint", description = "Endpoint to test admin role", tags = {"test"})
     public ResponseEntity<String> sayHelloAdmin() throws InvalidTokenException {
         return ResponseEntity.ok("Hello authenticated ADMIN");
     }

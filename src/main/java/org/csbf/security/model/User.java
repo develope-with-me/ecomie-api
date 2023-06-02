@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.csbf.security.constant.Role;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,8 +31,9 @@ public class User implements UserDetails {
     private String email;
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String phoneNumber;
+    private String roles;
     private boolean accountEnabled;
     private String emailVerificationToken;
     private boolean accountBlocked;
@@ -43,10 +42,7 @@ public class User implements UserDetails {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-//    @Enumerated(EnumType.STRING)
-    private String roles;
-//    private Set<Role> roles  = new HashSet<>();
-//    private Role role;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

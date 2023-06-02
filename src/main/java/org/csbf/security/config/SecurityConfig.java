@@ -45,12 +45,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Override
-//    public void configure(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests()
-//                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "**/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/webjars/**")
-//                .authenticated().and().csrf().disable();
-//    }
 }

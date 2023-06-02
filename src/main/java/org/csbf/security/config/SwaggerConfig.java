@@ -1,5 +1,6 @@
 package org.csbf.security.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -58,6 +59,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                 .type(SecurityScheme.Type.HTTP)
                                 .bearerFormat("jwt") //if it is your case
                                 .name("bearer")
+                                .in(SecurityScheme.In.HEADER)
                 ));
     }
 
@@ -69,44 +71,4 @@ public class SwaggerConfig implements WebMvcConfigurer {
     }
 
 
- /*   @Bean
-    public Docket api() {
-//        return new Docket(DocumentationType.OAS_30)
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-//                .apis(RequestHandlerSelectors.any())
-//                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-                .apis(RequestHandlerSelectors.basePackage("org.csbf.security.controller"))
-                .paths(PathSelectors.any())
-                .build()
-                .forCodeGeneration(true);
-    }
-*/
-  /*  private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("CSBF-SECURITY-API")
-                .description("An api for authenticating users")
-                .contact(new Contact("Domou Brice", "https://www.linkedin.com/in/domoubrice", "domoubrice@gmail.com"))
-                .version("1.0.0")
-                .build();
-    }
-*/
-
-//    @Override
-//    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("swagger-ui.html")
-//                .addResourceLocations("classpath:/META-INF/resources/");
-//        registry.addResourceHandler("/webjars/**")
-//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
-//    }
-
-//    @Bean
-//    public Docket api() {
-//        return new Docket(DocumentationType.SWAGGER_2)
-//                .select()
-//                .apis(RequestHandlerSelectors.any())
-//                .paths(PathSelectors.any())
-//                .build();
-//    }
 }
