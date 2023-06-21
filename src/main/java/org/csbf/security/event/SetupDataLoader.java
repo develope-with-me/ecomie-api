@@ -31,6 +31,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .roles(Role.SUPER_ADMIN.name()+"-"+Role.ADMIN.name()+"-"+Role.ECOMIEST.name()+"-"+Role.MISSIONARY.name()+"-"+Role.PRAYER_WARRIOR.name()+"-"+Role.SPONSOR.name()+"-"+Role.USER.name())
                     .accountBlocked(false)
                     .accountEnabled(true)
+                    .accountSoftDeleted(false)
                     .build();
             userRepo.save(superAdminUser);
         }

@@ -12,7 +12,6 @@ import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.JwtService;
 import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -116,14 +115,15 @@ public class AuthenticationServiceImp implements AuthenticationService {
         return new HelperDto.ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
     }
 
-    public HelperDto.UserDto getUserDTO(User user) {
-       return user == null ? null : HelperDto.UserDto.builder()
+    public HelperDto.UserBasicDto getUserDTO(User user) {
+       return user == null ? null : HelperDto.UserBasicDto.builder()
                 .id(user.getId())
                 .firstname(user.getFirstname())
                 .lastname(user.getLastname())
                 .email(user.getEmail())
                 .accountEnabled(user.isAccountEnabled())
                 .accountBlocked(user.isAccountBlocked())
+                .accountSoftDeleted(user.isAccountSoftDeleted())
                 .build();
     }
     private HelperDto.AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, User... users) {

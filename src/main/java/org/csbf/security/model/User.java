@@ -31,12 +31,27 @@ public class User implements UserDetails {
     private String email;
     @Column(nullable = false)
     private String password;
+
+    /** PROFILE INFO */
     @Column(nullable = true)
     private String phoneNumber;
+    @Column(nullable = true)
+    private String country;
+    @Column(nullable = true)
+    private String region;
+    @Column(nullable = true)
+    private String city;
+    @Column(nullable = true)
+    private String language;
+    @Column(nullable = true)
+    private String profilePictureFileName;
+    /** END */
+
     private String roles;
     private boolean accountEnabled;
     private String emailVerificationToken;
     private boolean accountBlocked;
+    private boolean accountSoftDeleted;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
@@ -92,5 +107,6 @@ public class User implements UserDetails {
 
     public boolean toggleEnable() {return !this.accountEnabled;}
     public boolean toggleBlock() {return !this.accountBlocked;}
+    public boolean toggleSoftDelete() {return !this.accountSoftDeleted;}
 
 }
