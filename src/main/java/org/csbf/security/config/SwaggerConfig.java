@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 //import springfox.documentation.builders.ApiInfoBuilder;
 //import springfox.documentation.builders.PathSelectors;
 //import springfox.documentation.builders.RequestHandlerSelectors;
@@ -44,23 +47,42 @@ public class SwaggerConfig implements WebMvcConfigurer {
                         .description("An api for authenticating users")
                         .version("\"version\"")
                         .contact(new Contact().name("Domou Brice").email("domoubrice@gmail.com").url("https://www.linkedin.com/in/domoubrice"))
-                .license(new License()
+                        .license(new License()
                                 .name("\"License Name\"")
-                                .url("\"License URL\"")))
+                                .url("\"License URL\"")
+                        )
+                )
+                .servers(List.of(
+                        new Server().url("http://localhost:8081").description("Development Server"),
+                        new Server().url("https://www.ecomie.com").description("Production Server")
+                        )
+                )
                 .externalDocs(new ExternalDocumentation()
                         .description("\"External Documentation Description\"")
                         .url("\"External Documentation URL\"")
-
                 )
                 .components( new Components().addSecuritySchemes(
-                        "api",
+                        "bearerAuth",
                         new SecurityScheme()
                                 .scheme("bearer")
                                 .type(SecurityScheme.Type.HTTP)
                                 .bearerFormat("jwt") //if it is your case
                                 .name("bearer")
                                 .in(SecurityScheme.In.HEADER)
-                ));
+
+                )
+//                        .addSecuritySchemes(
+//                        "ApiKeyAuth",
+//                        new SecurityScheme()
+//                                .scheme("ApiKey")
+//                                .type(SecurityScheme.Type.APIKEY)
+////                                .bearerFormat("jwt") //if it is your case
+//                                .name("ApiKey")
+//                                .in(SecurityScheme.In.HEADER)
+//
+//                )
+        );
+//        "securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"},"ApiKeyAuth":{"type":"apiKey","in":"header","name":"ApiKey"}}
     }
 
     @Override

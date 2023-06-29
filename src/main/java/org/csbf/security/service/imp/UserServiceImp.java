@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.exceptions.BadRequestException;
+import org.csbf.security.exceptions.BaseException;
 import org.csbf.security.exceptions.ResourceNotFoundException;
 import org.csbf.security.model.User;
 import org.csbf.security.repository.UserRepository;
@@ -37,6 +38,7 @@ public class UserServiceImp implements UserService {
             String jsonData
     ) {
         Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
+        log.info("{}", authUser);
         User user = userRepository.findByEmail(authUser.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
@@ -58,6 +60,7 @@ public class UserServiceImp implements UserService {
     private ResponseMessage getUpdateResponseMessage(Optional<MultipartFile> file, String jsonData, User user) {
         HelperDto.UpdateUserProfileRequest userProfileRequest;
         try {
+            log.info(jsonData + ": {}", HelperDto.UpdateUserProfileRequest.class );
             userProfileRequest = new ObjectMapper()
                     .readValue(jsonData, HelperDto.UpdateUserProfileRequest.class);
             log.info("Test Country {}", userProfileRequest.country());
@@ -66,7 +69,7 @@ public class UserServiceImp implements UserService {
         }
 
         user.setFirstname(userProfileRequest.firstname());
-        user.setFirstname(userProfileRequest.lastname());
+        user.setLastname(userProfileRequest.lastname());
         user.setPhoneNumber(userProfileRequest.phoneNumber());
         user.setCountry(userProfileRequest.country());
         user.setRegion(userProfileRequest.region());
@@ -82,7 +85,7 @@ public class UserServiceImp implements UserService {
                 log.info("imageFileName: {}", imageFileName);
                 log.info("Uploaded the file successfully");
             } catch (Exception e) {
-                throw new RuntimeException("Could not upload the file !");
+                throw new BaseException("Could not upload the file !");
             }
             if (
                     oldFile != null && !imageFileName.equals(oldFile)
@@ -106,9 +109,9 @@ public class UserServiceImp implements UserService {
     @Override
     public HelperDto.UserFullDto getUserProfile(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
-        String application_host = Objects.requireNonNull(
-                environment.getProperty("APPLICATION_HOST")
-        );
+//        String application_host = Objects.requireNonNull(
+//                environment.getProperty("APPLICATION_HOST")
+//        );
         /*String profilePictureLink =
                 application_host + "/profile/user-profile-pic/" + user.getUserId();*/
         return new HelperDto.UserFullDto(user);
@@ -116,44 +119,68 @@ public class UserServiceImp implements UserService {
 
     @Override
     public HelperDto.UserDto getAuthUserProfile() {
+        log.info("TEST: In method");
         Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
+        log.info("{}", authUser);
+
         User user = userRepository.findByEmail(authUser.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        String application_host = Objects.requireNonNull(
-                environment.getProperty("APPLICATION_HOST")
-        );
-        /*String profilePictureLink =
-                application_host + "/profile/user-profile-pic/" + user.getUserId();*/
         return new HelperDto.UserDto(user);
     }
 
     @Override
-    public void deleteUserProfilePic(HelperDto.EmailRequest emailRequest) {
-        User user = userRepository
-                .findByEmail(emailRequest.email())
-                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+    public void deleteUserProfilePic(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+
+
         String fileName = user.getProfilePictureFileName();
-        if (fileName == null) throw new BadRequestException(
-                "User has no profile image"
-        );
+        if (fileName == null) throw new BadRequestException("User has no profile image");
         fileUploadService.deleteFile(fileName);
         user.setProfilePictureFileName(null);
         userRepository.save(user);
     }
 
+//    @Override
+//    public Resource loadUserImage(UUID userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+//
+//        String fileName = user.getProfilePictureFileName();
+//        if (fileName == null) return null;
+//        return fileUploadService.load(fileName);
+//    }
+
     @Override
     public Resource loadImage(HelperDto.EmailRequest emailRequest) {
+//        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
+
         User user = userRepository
                 .findByEmail(emailRequest.email())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         String fileName = user.getProfilePictureFileName();
         if (fileName == null) return null;
         return fileUploadService.load(fileName);
     }
 
     @Override
-    public byte[] getProfilePicture(UUID userId) {
+    public byte[] getProfilePicture() {
+        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
+
+        User user = userRepository
+                .findByEmail(authUser.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+        Resource resource = loadImage(new HelperDto.EmailRequest(user.getEmail()));
+        try {
+//            return resource == null ? null : ByteStreams.toByteArray(resource.getInputStream());
+            return resource == null ? null : resource.getInputStream().readAllBytes();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to extract user profile picture");
+        }
+    }
+
+    @Override
+    public byte[] getUserProfilePicture(UUID userId) {
         User user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
@@ -166,16 +193,21 @@ public class UserServiceImp implements UserService {
         }
     }
 
+    @Override
+    public void deleteUserProfile(UUID userId) {
+        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        userRepository.deleteById(userId);
+    }
 
 
     // Soft delete user account
     @Override
-    public ResponseMessage softDelete(HelperDto.EmailRequest deleteRequest) {
+    public ResponseMessage softDelete(UUID userId) {
 
-        User user = userRepository.findByEmail(deleteRequest.email()).orElseThrow(() -> new ResourceNotFoundException("User profile not found"));
-
-        user.toggleSoftDelete();
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User profile not found"));
+        user.setAccountSoftDeleted(!user.isAccountSoftDeleted());
         userRepository.save(user);
+
         return user.isAccountSoftDeleted() ? new ResponseMessage.SuccessResponseMessage("Account soft deleted") : new ResponseMessage.SuccessResponseMessage("Account restored");
     }
 

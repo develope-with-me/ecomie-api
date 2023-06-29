@@ -25,12 +25,16 @@ public interface UserService {
 
     HelperDto.UserDto getAuthUserProfile();
 
-    void deleteUserProfilePic(HelperDto.EmailRequest emailRequest);
+    void deleteUserProfilePic(UUID userId);
 
     Resource loadImage(HelperDto.EmailRequest emailRequest);
 
-    byte[] getProfilePicture(UUID userId);
+    byte[] getProfilePicture();
+
+    byte[] getUserProfilePicture(UUID userId);
 
     // Soft delete user account
-    ResponseMessage softDelete(HelperDto.EmailRequest deleteRequest);
+    ResponseMessage softDelete(UUID userId);
+
+    void deleteUserProfile(UUID userId);
 }

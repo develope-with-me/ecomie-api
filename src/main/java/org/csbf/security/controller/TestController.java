@@ -23,9 +23,7 @@ public class TestController {
 
     @GetMapping("/secure/user")
     @Operation(summary = "User test endpoint", description = "Endpoint to test user role", tags = {"test"})
-    public ResponseEntity<String> sayHelloUser() {
-        return ResponseEntity.ok("Hello authenticated USER");
-    }
+    public ResponseEntity<String> sayHelloUser() { return ResponseEntity.ok("Hello authenticated USER"); }
 
     @GetMapping("/secure/admin")
     @Operation(summary = "Admin test endpoint", description = "Endpoint to test admin role", tags = {"test"})

@@ -3,6 +3,7 @@ package org.csbf.security.service.imp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.exceptions.BaseException;
+import org.csbf.security.exceptions.FailedSendEmailException;
 import org.csbf.security.model.User;
 import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
@@ -68,7 +69,7 @@ public class EmailServiceImp implements EmailService {
         try {
             javaMailSender.send(mailMessage);
         }catch(MailException e) {
-            throw new BaseException(e.getMessage());
+            throw new FailedSendEmailException(e.getMessage());
         }
     }
 

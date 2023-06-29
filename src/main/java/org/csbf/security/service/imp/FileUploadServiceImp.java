@@ -1,8 +1,14 @@
 package org.csbf.security.service.imp;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.exceptions.ResourceNotFoundException;
 import org.csbf.security.service.FileUploadService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -18,14 +24,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class FileUploadServiceImp implements FileUploadService {
 
-    Environment environment;
-    private final Path root = Paths.get(environment.getProperty("IMAGE_DIR"));
+    Environment env;
+
+//    @Value("${app.profile.pics.dir}")
+//    private String dir;
+
+//    private final Path root = Paths.get(Objects.requireNonNull(env.getProperty("app.profile.pics.dir")));
+    private final Path root = Paths.get("src/main/resources/static/profile-pics");
+
 
     @Override
     public void init() {

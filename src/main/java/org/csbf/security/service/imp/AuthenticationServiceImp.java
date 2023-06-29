@@ -2,8 +2,12 @@ package org.csbf.security.service.imp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.security.constant.Role;
+import org.csbf.security.exceptions.BadRequestException;
 import org.csbf.security.exceptions.BaseException;
+import org.csbf.security.exceptions.ResourceExistsException;
+import org.csbf.security.exceptions.ResourceNotFoundException;
 import org.csbf.security.model.EmailVerificationToken;
 import org.csbf.security.model.User;
 import org.csbf.security.repository.EmailVerificationTokenRepository;
@@ -14,6 +18,7 @@ import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +41,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
     public HelperDto.AuthenticationResponse register(HelperDto.RegisterRequest request) {
         String msg = "user already exist";
         if (userRepo.findByEmail(request.email()).isPresent())
-            return getAuthenticationResponse(false, msg, null, null);
+            throw new ResourceExistsException.EmailExistsException(request.email());
 
 //        String appUrl = servletRequest.getContextPath();
 //        String roles = Role.USER.name()+"-"+Role.ADMIN.name();
@@ -50,6 +55,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .roles(roles)
                 .accountBlocked(false)
                 .accountEnabled(false)
+                .accountSoftDeleted(false)
                 .build();
         User registeredUser = userRepo.save(user);
 
@@ -61,8 +67,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
     @Override
     public HelperDto.AuthenticationResponse authenticate(HelperDto.AuthenticationRequest request) {
         String message =  "user does not exist";
-        if (!userRepo.findByEmail(request.email()).isPresent())
-            return getAuthenticationResponse(false, message, null);
+        userRepo.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException.EmailNotFoundException(request.email()));
 
         var user = userRepo.findByEmail(request.email()).get();
 
@@ -70,12 +75,17 @@ public class AuthenticationServiceImp implements AuthenticationService {
             message = "account not enabled";
             return getAuthenticationResponse(false, message, null);
         }
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()
+                    )
+            );
+        } catch(AuthenticationException e) {
+            throw new BadRequestException.InvalidAuthenticationRequestException(request.email());
+        }
 
         var jwtToken = jwtService.generateToken(user);
         message = "authenticated";
@@ -131,7 +141,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .token(jwtToken)
                 .message(message)
                 .success(success)
-                .user(getUserDTO(users.length > 0 ? users[0] : null))
+                .user(getUserDTO(!ArrayUtils.isEmpty(users) ? users[0] : null))
                 .build();
     }
 }

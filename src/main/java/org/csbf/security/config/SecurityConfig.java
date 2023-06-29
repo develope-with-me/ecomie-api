@@ -30,8 +30,8 @@ public class SecurityConfig {
                 // Allow swagger routes
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "**/swagger-resources/**", "/v2/api-docs", "/v3/api-docs/**", "/webjars/**").permitAll()
 //                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                // permit users with roles, USER and ADMIN
-                .requestMatchers("/api/v1/secure/user**").hasAnyAuthority("USER", "ADMIN")
+                // permit users with roles, USER
+                .requestMatchers("/api/v1/secure/user**").hasAnyAuthority("USER")
                 // Permit only ADMIN users
                 .requestMatchers("/api/v1/secure/admin**").hasAuthority("ADMIN")
                 .anyRequest()
