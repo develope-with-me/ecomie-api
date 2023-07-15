@@ -1,8 +1,15 @@
 package org.csbf.security.utils.helperclasses;
 
+import jakarta.persistence.*;
 import lombok.Builder;
+import org.csbf.security.model.Challenge;
+import org.csbf.security.model.ChallengeReport;
 import org.csbf.security.model.User;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class HelperDto {
@@ -56,4 +63,15 @@ this(user.getFirstname(), user.getLastname(), user.getEmail(), user.getPhoneNumb
     }
 
 
+    /** Session Helper DTO */
+    @Builder
+    public record SessionFullDto(UUID id, String name, String description, List<ChallengeReport> challengeReports, List<Challenge> challenges, LocalDateTime startDate, LocalDateTime endDate, String status, LocalDateTime createdAt, LocalDateTime updatedAt){}
+
+    @Builder
+    public record SessionCreateDto(String name, String description, LocalDateTime startDate, LocalDateTime endDate){}
+
+
+    /** Challenge Helper DTO */
+    public record ChallengeCreateDto() {
+    }
 }

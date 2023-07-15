@@ -52,6 +52,13 @@ public class User implements UserDetails {
     private String emailVerificationToken;
     private boolean accountBlocked;
     private boolean accountSoftDeleted;
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "ecomist")
+    private List<Subscription> subscriptions;
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "session")
+    private List<ChallengeReport> challengeReports;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

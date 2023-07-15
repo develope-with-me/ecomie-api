@@ -3,6 +3,8 @@ package org.csbf.security.service.imp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
+import org.csbf.security.constant.Role;
 import org.csbf.security.exceptions.BadRequestException;
 import org.csbf.security.exceptions.BaseException;
 import org.csbf.security.exceptions.ResourceNotFoundException;
@@ -19,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +56,18 @@ public class UserServiceImp implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
         return getUpdateResponseMessage(file, jsonData, user);
+    }
+
+    @Override
+    public ResponseMessage changeUserRole(String email, String role) {
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
+            throw new BadRequestException("Invalid session status");
+        if(!user.getRoles().contains(role.toUpperCase()))
+            user.setRoles(user.getRoles()+"-"+role.toUpperCase());
+
+        var updatedUser = userRepository.save(user);
+        return new ResponseMessage.SuccessResponseMessage("user role updated" + updatedUser.getRoles());
     }
 
     private ResponseMessage getUpdateResponseMessage(Optional<MultipartFile> file, String jsonData, User user) {

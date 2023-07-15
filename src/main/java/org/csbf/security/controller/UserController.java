@@ -2,21 +2,30 @@ package org.csbf.security.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
+import org.csbf.security.constant.Role;
+import org.csbf.security.constant.SessionStatus;
+import org.csbf.security.event.OnRoleChangeRequestEvent;
+import org.csbf.security.exceptions.BadRequestException;
 import org.csbf.security.service.UserService;
 import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.Email;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/api/v1/secure")
 @RequiredArgsConstructor
@@ -24,6 +33,8 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
 
     @PostMapping(value = "/user/update", consumes = { "multipart/form-data" }, produces = { "application/json" })
     @Operation(summary = "Edit User Profile", description = "Modify currently authenticated user's profile information", tags = { "user" })
@@ -37,7 +48,11 @@ public class UserController {
         return new ResponseEntity<>(userService.updateUserProfile(userId, file, jsonData), HttpStatus.CREATED);
     }
 
-//    @PreAuthorize("hasAuthority('ADMIN') ")
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @GetMapping(value = "/admin/update-user-role")
+    @Operation(summary = "Assign New Role", description = "Change user's role using userId", tags = { "admin" })
+    public ResponseMessage updateUserRole(@RequestParam("email") String email, @RequestParam("role") String role) { return userService.changeUserRole(email, role); }
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/admin/user/{userId}")
     @Operation(summary = "Get User Profile", description = "Get user's profile information using userId", tags = { "admin" })
@@ -83,5 +98,15 @@ public class UserController {
     @Operation(summary = "Soft delete User's Profile Image", description = "Soft delete user using userId", tags = { "admin" })
     public ResponseEntity<ResponseMessage> softDeleteProfile(@PathVariable(name = "userId") UUID userId) {
         return new ResponseEntity<>(userService.softDelete(userId), HttpStatus.PARTIAL_CONTENT);
+    }
+
+    @PostMapping("/user/request-to-become/{role}")
+    @Operation(summary = "Soft delete User's Profile Image", description = "Soft delete user using userId", tags = { "admin" })
+    public ResponseEntity<ResponseMessage> becomeAn(@RequestParam("email") @Email String email, @PathVariable(name = "role") String role, HttpServletRequest servletRequest) {
+        if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
+            throw new BadRequestException("Invalid user role");
+        applicationEventPublisher.publishEvent(new OnRoleChangeRequestEvent(servletRequest.getHeader("host"), email, role));
+
+        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("Request sent successfully"), HttpStatus.OK);
     }
 }

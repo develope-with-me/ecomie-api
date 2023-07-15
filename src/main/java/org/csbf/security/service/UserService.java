@@ -21,6 +21,8 @@ public interface UserService {
             String jsonData
     );
 
+    ResponseMessage changeUserRole(String email, String role);
+
     HelperDto.UserFullDto getUserProfile(UUID userId);
 
     HelperDto.UserDto getAuthUserProfile();

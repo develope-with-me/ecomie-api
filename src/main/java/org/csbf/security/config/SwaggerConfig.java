@@ -61,26 +61,26 @@ public class SwaggerConfig implements WebMvcConfigurer {
                         .description("\"External Documentation Description\"")
                         .url("\"External Documentation URL\"")
                 )
-                .components( new Components().addSecuritySchemes(
-                        "bearerAuth",
-                        new SecurityScheme()
-                                .scheme("bearer")
-                                .type(SecurityScheme.Type.HTTP)
-                                .bearerFormat("jwt") //if it is your case
-                                .name("bearer")
-                                .in(SecurityScheme.In.HEADER)
+                .components( new Components()
+                        .addSecuritySchemes(
+                                "bearerAuth",
+                                new SecurityScheme()
+                                    .scheme("bearer")
+                                    .type(SecurityScheme.Type.HTTP)
+                                    .bearerFormat("jwt") //if it is your case
+                                    .name("bearer")
+                                    .in(SecurityScheme.In.HEADER)
 
                 )
-//                        .addSecuritySchemes(
-//                        "ApiKeyAuth",
-//                        new SecurityScheme()
-//                                .scheme("ApiKey")
-//                                .type(SecurityScheme.Type.APIKEY)
-////                                .bearerFormat("jwt") //if it is your case
-//                                .name("ApiKey")
-//                                .in(SecurityScheme.In.HEADER)
-//
-//                )
+                        .addSecuritySchemes(
+                            "ApiKeyAuth",
+                                new SecurityScheme()
+                                    .scheme("ApiKey")
+                                    .type(SecurityScheme.Type.APIKEY)
+                                    .name("ApiKey")
+                                    .in(SecurityScheme.In.HEADER)
+
+                )
         );
 //        "securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"},"ApiKeyAuth":{"type":"apiKey","in":"header","name":"ApiKey"}}
     }

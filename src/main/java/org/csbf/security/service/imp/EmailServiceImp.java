@@ -2,14 +2,13 @@ package org.csbf.security.service.imp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.security.exceptions.BaseException;
 import org.csbf.security.exceptions.FailedSendEmailException;
 import org.csbf.security.model.User;
-import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.EmailService;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -61,8 +60,10 @@ public class EmailServiceImp implements EmailService {
 
     @Async
     @Override
-    public void sendEmail(String recipient, String subject, String body ) {
+    public void sendEmail(String recipient, String subject, String body, String... from ) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
+        if(!ArrayUtils.isEmpty(from))
+            mailMessage.setFrom(from[0]);
         mailMessage.setTo(recipient);
         mailMessage.setSubject(subject);
         mailMessage.setText(body);
@@ -71,6 +72,25 @@ public class EmailServiceImp implements EmailService {
         }catch(MailException e) {
             throw new FailedSendEmailException(e.getMessage());
         }
+    }
+
+    @Async
+    @Override
+    public void sendCustomEmail(String requestHost, String from, String to, String purpose) {
+        String encodedToEmail;
+        String encodedFromEmail;
+
+        try {
+            encodedToEmail = URLEncoder.encode(to, StandardCharsets.UTF_8.toString());
+            encodedFromEmail = URLEncoder.encode(from, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new BaseException("Could not encode email");
+        }
+        String recipient = to;
+        String subject = "@ECOMIE - Request To Be " + purpose;
+        String body = "I will like to become a/an " + purpose + ": \n\n If you approve of this user, click on the link to approve his/her request " + requestHost +  "/api/v1/secure/admin/update-user-role?email="+encodedFromEmail+"&role="+purpose;
+        sendEmail(recipient, subject, body, from);
+
     }
 
 }
