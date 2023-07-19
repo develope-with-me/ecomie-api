@@ -38,6 +38,9 @@ public class Session {
             joinColumns = @JoinColumn(name = "session_id"),
             inverseJoinColumns = @JoinColumn(name = "challenge_id"))
     private List<Challenge> challenges;
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "session")
+    private List<Subscription> subscriptions;
     @Immutable
     private LocalDateTime startDate;
     @Immutable

@@ -15,7 +15,7 @@ public interface ChallengeReportRepository extends JpaRepository<ChallengeReport
     ArrayList<ChallengeReport> findChallengeReportsBySessionAndEcomistAndChallenge(Session session, User user, Challenge challenge);
     int countChallengeReportsBySessionAndEcomistAndChallenge(Session session, User user, Challenge challenge);
     @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.session=:session and cr.ecomist=:user and cr.challenge=:challenge" )
-    int numberAnEcomistEvangelizedToDuringAChallengeInASession(@Param("session") Session session, @Param("user") User user, @Param("challenge") Challenge challenge);
+    int numberAnEcomistEvangelizedToViaAChallengeInASession(@Param("session") Session session, @Param("user") User user, @Param("challenge") Challenge challenge);
     @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.session=:session and cr.ecomist=:user")
     int numberAnEcomistEvangelizedToInASession(@Param("session") Session session, @Param("user") User user);
     @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.ecomist=:user")

@@ -53,12 +53,11 @@ public class User implements UserDetails {
     private boolean accountBlocked;
     private boolean accountSoftDeleted;
     @Column(nullable = true)
-    @OneToMany(mappedBy = "ecomist")
+    @OneToMany(mappedBy = "user")
     private List<Subscription> subscriptions;
     @Column(nullable = true)
     @OneToMany(mappedBy = "session")
     private List<ChallengeReport> challengeReports;
-
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

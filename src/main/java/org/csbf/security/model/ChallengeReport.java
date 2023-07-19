@@ -47,21 +47,17 @@ public class ChallengeReport {
     private LocalDateTime updatedAt;
 
 
-    public long getTotalNumberEvangelizedTo() {
-
-        Session session = this.session;
-        Challenge challenge = this.challenge;
-        User ecomist = this.ecomist;
-
-        return reportRepo.numberAnEcomistEvangelizedToDuringAChallengeInASession(session, ecomist, challenge);
+    public long getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() {
+        return reportRepo.numberAnEcomistEvangelizedToViaAChallengeInASession(this.session,this.ecomist, this.challenge);
     }
 
     public long getTotalNumberLeftToMeetTarget() {
+        LocalDateTime now = LocalDateTime.now();
 
-        return this.challenge.getTarget() -  getTotalNumberEvangelizedTo();
+        return this.challenge.getTarget() -  getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession();
     }
 
     public boolean isCompleted() {
-        return (getTotalNumberEvangelizedTo() == this.challenge.getTarget());
+        return (getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() == this.challenge.getTarget());
     }
 }

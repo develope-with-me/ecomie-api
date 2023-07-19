@@ -102,6 +102,7 @@ public class SessionServiceImp implements SessionService {
                 .startDate(session.getStartDate())
                 .endDate(session.getEndDate())
                 .challenges(session.getChallenges())
+                .subscriptions(session.getSubscriptions())
                 .challengeReports(session.getChallengeReports())
                 .createdAt(session.getCreatedAt())
                 .updatedAt(session.getUpdatedAt())

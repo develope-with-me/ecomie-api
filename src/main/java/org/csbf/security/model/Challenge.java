@@ -40,10 +40,6 @@ public class Challenge {
     @ManyToMany(mappedBy = "challenges")
     private List<Session> sessions;
     private String type;
-    @Immutable
-    private LocalDateTime startDate;
-    @Immutable
-    private LocalDateTime endDate;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

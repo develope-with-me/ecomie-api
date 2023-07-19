@@ -27,10 +27,16 @@ public class Subscription {
     private long target;
     @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private User ecomist;
+    private User user;
     @Column(nullable = false)
     @ManyToOne(fetch=FetchType.LAZY)
     private Challenge challenge;
+    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Session session;
+    @Column(nullable = false)
+    @OneToMany(mappedBy = "subscription")
+    private List<ChallengeReport> challengeReports;
 //    private String challengeType;
 //    private LocalDateTime targetDeadLine;
 //    private LocalDateTime startDate;
