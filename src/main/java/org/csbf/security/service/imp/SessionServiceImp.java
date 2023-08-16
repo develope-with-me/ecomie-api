@@ -14,6 +14,7 @@ import org.csbf.security.service.SessionService;
 import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -81,14 +82,18 @@ public class SessionServiceImp implements SessionService {
     }
 
     @Override
+    @Transactional
     public HelperDto.SessionFullDto assignChallenges(UUID sessionId, UUID[] challengeIds) {
         var session = sessionRepo.findById(sessionId).orElseThrow(()->new ResourceNotFoundException("session not found"));
-        ArrayList challenges = new ArrayList<Challenge>();
+//        ArrayList challenges = new ArrayList<Challenge>();
         Arrays.asList(challengeIds).forEach(challId -> {
-            challenges.add(challengeRepo.findById(challId).orElseThrow(()->new ResourceNotFoundException("challenge not found")));
+            var challenge = challengeRepo.findById(challId).orElseThrow(()->new ResourceNotFoundException("challenge not found"));
+            session.addChallenge(challenge);
+
+            challengeRepo.save(challenge);
         });
 
-        session.setChallenges(challenges);
+//        session.setChallenges(challenges);
 
         return copySessionToDto(sessionRepo.save(session));
     }

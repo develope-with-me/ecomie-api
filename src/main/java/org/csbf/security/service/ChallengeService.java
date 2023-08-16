@@ -8,14 +8,9 @@ import java.util.UUID;
 
 public interface ChallengeService {
     ResponseMessage store(HelperDto.ChallengeCreateDto challengeCreateDto);
+    ResponseMessage changeType(UUID id, String status);
 
-//    ResponseMessage changeStatus(UUID id, String status);
-//
-//    ResponseMessage update(UUID id, HelperDto.SessionCreateDto sessionCreateDto);
-//
-//    HelperDto.SessionFullDto getSession(UUID id);
-//
-//    List<HelperDto.SessionFullDto> getSessions();
-//
-//    HelperDto.SessionFullDto assignChallenges(UUID sessionId, UUID[] challengeIds);
+    ResponseMessage update(UUID id, HelperDto.ChallengeCreateDto challengeCreateDto);
+    HelperDto.ChallengeFullDto getChallenge(UUID id);
+    List<HelperDto.ChallengeFullDto> getChallenges();
 }

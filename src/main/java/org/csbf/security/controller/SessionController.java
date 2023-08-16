@@ -29,40 +29,40 @@ public class SessionController {
     private final SessionService sessionService;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/secure/admin/store-ses")
+    @PostMapping(value = "/secure/admin/store-session")
     @Operation(summary = "Create Session", description = "Create new session", tags = { "admin" })
     protected ResponseMessage createSession(@RequestBody HelperDto.SessionCreateDto sessionCreateDto) {
         return sessionService.store(sessionCreateDto);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/secure/admin/update-ses/{sessionId}")
+    @PostMapping(value = "/secure/admin/update-session/{sessionId}")
     @Operation(summary = "Update Session", description = "Update session", tags = { "admin" })
     public ResponseMessage updateSession(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody HelperDto.SessionCreateDto sessionCreateDto) {
         return sessionService.update(sessionId, sessionCreateDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/session/{sessionId}")
+    @GetMapping(value = "/secure/user/session/{sessionId}")
     @Operation(summary = "Get Session", description = "Get session", tags = { "user", "admin" })
     public HelperDto.SessionFullDto getSession(@PathVariable(name = "sessionId") UUID sessionId) {
         return sessionService.getSession(sessionId);
     }
 
-    @GetMapping(value = "/secure/admin/get-sess")
-    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "user", "admin" })
+    @GetMapping(value = "/secure/admin/get-session")
+    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "admin" })
     public ResponseEntity<List<HelperDto.SessionFullDto>> getSessions() {
         return ResponseEntity.ok(sessionService.getSessions());
     }
 
-    @PostMapping(value = "/secure/admin/ses-status/{sessionId}")
-    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "user", "admin" })
+    @PostMapping(value = "/secure/admin/session-status/{sessionId}")
+    @Operation(summary = "Update Session Status", description = "Update session's status. valid values {INACTIVE, ONGOING, PAUSED, ENDED}", tags = { "user", "admin" })
     public ResponseEntity<ResponseMessage> changeSessionStatus(@PathVariable(name = "sessionId") UUID sessionId, @RequestParam String status) {
         return new ResponseEntity<>(sessionService.changeStatus(sessionId, status), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @PostMapping(value = "/secure/admin/ses/{sessionId}/assign-challenges")
-    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "user", "admin" })
+    @PostMapping(value = "/secure/admin/session/{sessionId}/assign-challenges")
+    @Operation(summary = "Assign Challenges", description = "Assign challenges to session", tags = { "user", "admin" })
     public ResponseEntity<HelperDto.SessionFullDto> assignChallenges(@PathVariable(name = "sessionId") UUID sessionId, @RequestParam UUID[] challengeIds) {
         return new ResponseEntity<>(sessionService.assignChallenges(sessionId, challengeIds), HttpStatus.PARTIAL_CONTENT);
     }

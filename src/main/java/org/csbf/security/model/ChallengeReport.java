@@ -22,21 +22,24 @@ public class ChallengeReport {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private UUID id;
-    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User ecomist;
-    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
+//    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private User ecomiest;
+//    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Session session;
-    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
+//    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Challenge challenge;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Subscription subscription;
     @Column(nullable = false, columnDefinition = "integer default 0")
-    private long numberEvangelizedTo;
+    private int numberEvangelizedTo;
     @Column(nullable = false, columnDefinition = "integer default 0")
-    private long numberOfNewConverts;
+    private int numberOfNewConverts;
     @Column(nullable = false, columnDefinition = "integer default 0")
-    private long numberFollowedUp;
+    private int numberFollowedUp;
     @Column(nullable = true)
     private String difficulties;
     @Column(nullable = true)
@@ -47,11 +50,11 @@ public class ChallengeReport {
     private LocalDateTime updatedAt;
 
 
-    public long getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() {
-        return reportRepo.numberAnEcomistEvangelizedToViaAChallengeInASession(this.session,this.ecomist, this.challenge);
+    public int getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() {
+        return reportRepo.numberAnEcomiestEvangelizedToViaAChallengeInASession(this.session,this.ecomiest, this.challenge);
     }
 
-    public long getTotalNumberLeftToMeetTarget() {
+    public int getTotalNumberLeftToMeetTarget() {
         LocalDateTime now = LocalDateTime.now();
 
         return this.challenge.getTarget() -  getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession();

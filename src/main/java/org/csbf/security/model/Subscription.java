@@ -24,19 +24,26 @@ public class Subscription {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private UUID id;
     @Column(unique = true, nullable = false)
-    private long target;
-    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
+    private int target;
+
+    @Column(unique = true, nullable = false)
+    private boolean blocked;
+//    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
-    @Column(nullable = false)
-    @ManyToOne(fetch=FetchType.LAZY)
+//    @Column(nullable = false)
+    @ManyToOne(fetch=FetchType.LAZY, optional = false)
     private Challenge challenge;
-    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Session session;
-    @Column(nullable = false)
-    @OneToMany(mappedBy = "subscription")
+
+    @Column(nullable = true)
+    @OneToMany(mappedBy = "challenge")
     private List<ChallengeReport> challengeReports;
+//    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Session session;
+//    @Column(nullable = false)
+//    @OneToMany(mappedBy = "subscription")
+//    private List<ChallengeReport> challengeReports;
 //    private String challengeType;
 //    private LocalDateTime targetDeadLine;
 //    private LocalDateTime startDate;
@@ -45,4 +52,14 @@ public class Subscription {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void addChallengeReport(ChallengeReport challengeReport) {
+        this.challengeReports.add(challengeReport);
+        challengeReport.setSubscription(this);
+    }
+
+    public void removeChallengeReport(ChallengeReport challengeReport) {
+        this.challengeReports.remove(challengeReport);
+        challengeReport.setChallenge(null);
+    }
 }

@@ -53,10 +53,10 @@ public class User implements UserDetails {
     private boolean accountBlocked;
     private boolean accountSoftDeleted;
     @Column(nullable = true)
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions;
     @Column(nullable = true)
-    @OneToMany(mappedBy = "session")
+    @OneToMany(mappedBy = "ecomiest")
     private List<ChallengeReport> challengeReports;
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -114,5 +114,26 @@ public class User implements UserDetails {
     public boolean toggleEnable() {return !this.accountEnabled;}
     public boolean toggleBlock() {return !this.accountBlocked;}
     public boolean toggleSoftDelete() {return !this.accountSoftDeleted;}
+
+
+    public void addSubscription(Subscription subscription) {
+        this.subscriptions.add(subscription);
+        subscription.setUser(this);
+    }
+
+    public void removeSubscription(Subscription subscription) {
+        this.subscriptions.remove(subscription);
+        subscription.setUser(null);
+    }
+
+    public void addChallengeReport(ChallengeReport report) {
+        this.challengeReports.add(report);
+        report.setEcomiest(this);
+    }
+
+    public void removeChallengeReport(ChallengeReport report) {
+        this.challengeReports.remove(report);
+        report.setEcomiest(null);
+    }
 
 }

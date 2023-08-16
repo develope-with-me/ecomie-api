@@ -72,12 +72,28 @@ this(user.getFirstname(), user.getLastname(), user.getEmail(), user.getPhoneNumb
 
     /** Challenge Helper DTO */
     @Builder
-    public record ChallengeFullDto(UUID id, String name, String description, long target, List<Subscription> subscriptions, List<ChallengeReport> challengeReports, List<Session> sessions, String type, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public record ChallengeFullDto(UUID id, String name, String description, int target, List<Subscription> subscriptions, List<ChallengeReport> challengeReports, List<Session> sessions, String type, LocalDateTime createdAt, LocalDateTime updatedAt) {
 
     }
 
     @Builder
-    public record ChallengeCreateDto(String name, String description, long target, List<Session> sessions, String type) {
+    public record ChallengeCreateDto(String name, String description, int target, UUID[] sessionIds, String type) {
+        public ChallengeCreateDto(String name, String description, int target, String type) {
+            this(name, description, target, null, type);
+        }
+
+    }
+
+    /** Subscription Helper DTO */
+    @Builder
+    public record SubscriptionFullDto(UUID id, int target, boolean blocked, User user, Challenge challenge, Session session, LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+    }
+    @Builder
+    public record SubscriptionCreateDto(int target, UUID challengeId, UUID sessionId) {
+//        public SubscriptionCreateDto withUserId(UUID userId) {
+//            return new SubscriptionCreateDto(target, userId, challengeId, sessionId);
+//        }
 
     }
 }

@@ -41,9 +41,10 @@ public class Session {
     @Column(nullable = true)
     @OneToMany(mappedBy = "session")
     private List<Subscription> subscriptions;
-    @Immutable
+
+    @Column(nullable = false, updatable = false)
     private LocalDateTime startDate;
-    @Immutable
+    @Column(nullable = false, updatable = false)
     private LocalDateTime endDate;
     @Column(nullable = false, columnDefinition = "varchar(255) default INACTIVE")
     private String status;
@@ -51,4 +52,24 @@ public class Session {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void addSubscription(Subscription subscription) {
+        this.subscriptions.add(subscription);
+        subscription.setSession(this);
+    }
+
+    public void removeSubscription(Subscription subscription) {
+        this.subscriptions.remove(subscription);
+        subscription.setSession(null);
+    }
+
+    public void addChallenge(Challenge challenge) {
+        this.challenges.add(challenge);
+        challenge.getSessions().add(this);
+    }
+
+    public void removeChallenge(Challenge challenge) {
+        this.challenges.remove(challenge);
+        challenge.getSessions().remove(this);
+    }
 }

@@ -29,14 +29,14 @@ public class Challenge {
     @Column(nullable = true)
     private String description;
     @Column(nullable = false)
-    private long target;
+    private int target;
     @Column(nullable = true)
     @OneToMany(mappedBy = "challenge")
     private List<Subscription> subscriptions;
     @Column(nullable = true)
     @OneToMany(mappedBy = "challenge")
     private List<ChallengeReport> challengeReports;
-    @Column(nullable = false)
+    @Column(nullable = true)
     @ManyToMany(mappedBy = "challenges")
     private List<Session> sessions;
     private String type;
@@ -50,4 +50,33 @@ public class Challenge {
         return null;
     }
 
+
+    public void addSubscription(Subscription subscription) {
+        this.subscriptions.add(subscription);
+        subscription.setChallenge(this);
+    }
+
+    public void removeSubscription(Subscription subscription) {
+        this.subscriptions.remove(subscription);
+        subscription.setChallenge(null);
+    }
+    public void addChallengeReport(ChallengeReport report) {
+        this.challengeReports.add(report);
+        report.setChallenge(this);
+    }
+
+    public void removeChallengeReport(ChallengeReport report) {
+        this.challengeReports.remove(report);
+        report.setChallenge(null);
+    }
+
+    public void addSession(Session session) {
+        this.sessions.add(session);
+        session.getChallenges().add(this);
+    }
+
+    public void removeSession(Session session) {
+        this.challengeReports.remove(session);
+        session.getChallenges().remove(this);
+    }
 }
