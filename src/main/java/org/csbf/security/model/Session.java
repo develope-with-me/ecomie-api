@@ -28,9 +28,9 @@ public class Session {
     private String name;
     @Column(nullable = true)
     private String description;
-    @Column(nullable = true)
-    @OneToMany(mappedBy = "session")
-    private List<ChallengeReport> challengeReports;
+//    @Column(nullable = true)
+//    @OneToMany(mappedBy = "session")
+//    private List<ChallengeReport> challengeReports;
     @ManyToMany
     @Column(nullable = true)
     @JoinTable(

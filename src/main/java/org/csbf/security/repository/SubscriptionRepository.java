@@ -23,9 +23,9 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
     Optional<Subscription> findBySessionAndChallengeAndUserAndBlocked(Session session, Challenge challenge, User user, boolean blocked);
 
     @Query(value = "SELECT sub.session from Subscription sub where sub.user=:user")
-    List<Session> selectAllSessionsUserHasSubscribedTo(@Param("user") User user);
+    List<Session> selectAllSessionsThisUserHasSubscribedTo(@Param("user") User user);
     @Query(value = "SELECT sub.session from Subscription sub where sub.session=:session and sub.blocked=true")
-    List<Session> selectAllUsersBlockedInSession(@Param("session") Session session);
+    List<User> selectAllUsersBlockedInSession(@Param("session") Session session);
     @Query(value = "SELECT sub.user from Subscription sub where sub.session=:session and sub.challenge=:challenge")
     List<User> selectAllUsersSubscribedToSessionViaChallenge(@Param("session") Session session, @Param("challenge") Challenge challenge);
     @Query(value = "SELECT sub.user from Subscription sub where sub.session=:session")

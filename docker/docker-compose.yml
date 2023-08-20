@@ -22,7 +22,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/ecomie
       - SPRING_DATASOURCE_USERNAME=ecomie
       - SPRING_DATASOURCE_PASSWORD=ecomie
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=updateChallengeReport
       - SPRING_JPA__JPA_REPOSITORIES_ENABLED=true
       - SPRING_JPA_SHOWSQL=true
       - SPRING_JPA_DATABASE=mysql

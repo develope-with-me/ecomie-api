@@ -5,6 +5,7 @@ import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,4 +40,10 @@ public interface UserService {
     ResponseMessage softDelete(UUID userId);
 
     void deleteUserProfile(UUID userId);
+
+    List<HelperDto.UserFullDto> getUsersInASession(UUID sessionId, boolean blocked, Optional<UUID> optionalChallengeId);
+
+//    List<HelperDto.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
+
+    List<HelperDto.UserFullDto> getAllUsers();
 }

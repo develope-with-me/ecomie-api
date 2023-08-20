@@ -55,9 +55,9 @@ public class User implements UserDetails {
     @Column(nullable = true)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions;
-    @Column(nullable = true)
-    @OneToMany(mappedBy = "ecomiest")
-    private List<ChallengeReport> challengeReports;
+//    @Column(nullable = true)
+//    @OneToMany(mappedBy = "ecomiest")
+//    private List<ChallengeReport> challengeReports;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
@@ -126,14 +126,14 @@ public class User implements UserDetails {
         subscription.setUser(null);
     }
 
-    public void addChallengeReport(ChallengeReport report) {
-        this.challengeReports.add(report);
-        report.setEcomiest(this);
-    }
-
-    public void removeChallengeReport(ChallengeReport report) {
-        this.challengeReports.remove(report);
-        report.setEcomiest(null);
-    }
+//    public void addChallengeReport(ChallengeReport report) {
+//        this.challengeReports.add(report);
+//        report.setEcomiest(this);
+//    }
+//
+//    public void removeChallengeReport(ChallengeReport report) {
+//        this.challengeReports.remove(report);
+//        report.setEcomiest(null);
+//    }
 
 }

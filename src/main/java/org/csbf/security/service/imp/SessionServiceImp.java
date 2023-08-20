@@ -10,11 +10,14 @@ import org.csbf.security.model.Challenge;
 import org.csbf.security.model.Session;
 import org.csbf.security.repository.ChallengeRepository;
 import org.csbf.security.repository.SessionRepository;
+import org.csbf.security.repository.SubscriptionRepository;
+import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.SessionService;
 import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.*;
 
@@ -23,6 +26,9 @@ import java.util.*;
 public class SessionServiceImp implements SessionService {
     private final SessionRepository sessionRepo;
     private final ChallengeRepository challengeRepo;
+    private final SubscriptionRepository subscriptionRepo;
+    private final UserRepository userRepo;
+
     @Override
     public ResponseMessage store(HelperDto.SessionCreateDto sessionCreateDto) {
         sessionRepo.findByName(sessionCreateDto.name()).ifPresent(session -> {throw new ResourceExistsException("session '" + session.getName() + "' exists");});
@@ -68,7 +74,7 @@ public class SessionServiceImp implements SessionService {
     @Override
     public HelperDto.SessionFullDto getSession(UUID id) {
         var session = sessionRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("session not found"));
-        return copySessionToDto(session);
+        return new HelperDto.SessionFullDto(session);
     }
 
     @Override
@@ -76,7 +82,7 @@ public class SessionServiceImp implements SessionService {
         var sessions = sessionRepo.findAll();
         ArrayList sessionDtos = new ArrayList<HelperDto.SessionFullDto>();
 
-        sessions.forEach(session -> {sessionDtos.add(copySessionToDto(session));});
+        sessions.forEach(session -> {sessionDtos.add(new HelperDto.SessionFullDto(session));});
 
         return sessionDtos;
     }
@@ -95,22 +101,16 @@ public class SessionServiceImp implements SessionService {
 
 //        session.setChallenges(challenges);
 
-        return copySessionToDto(sessionRepo.save(session));
+        return new HelperDto.SessionFullDto(sessionRepo.save(session));
     }
 
-    private HelperDto.SessionFullDto copySessionToDto(Session session) {
-        return HelperDto.SessionFullDto.builder()
-                .id(session.getId())
-                .name(session.getName())
-                .description(session.getDescription())
-                .status(session.getStatus())
-                .startDate(session.getStartDate())
-                .endDate(session.getEndDate())
-                .challenges(session.getChallenges())
-                .subscriptions(session.getSubscriptions())
-                .challengeReports(session.getChallengeReports())
-                .createdAt(session.getCreatedAt())
-                .updatedAt(session.getUpdatedAt())
-                .build();
+    @Override
+    public List<HelperDto.SessionFullDto> getUserSessions(UUID userId) {
+        var user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        ArrayList sessionDtos = new ArrayList<HelperDto.SessionFullDto>();
+        subscriptionRepo.selectAllSessionsThisUserHasSubscribedTo(user).forEach(session -> {sessionDtos.add(new HelperDto.SessionFullDto(session));});
+
+        return sessionDtos;
     }
+
 }

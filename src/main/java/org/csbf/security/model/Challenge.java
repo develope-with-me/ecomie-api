@@ -33,9 +33,9 @@ public class Challenge {
     @Column(nullable = true)
     @OneToMany(mappedBy = "challenge")
     private List<Subscription> subscriptions;
-    @Column(nullable = true)
-    @OneToMany(mappedBy = "challenge")
-    private List<ChallengeReport> challengeReports;
+//    @Column(nullable = true)
+//    @OneToMany(mappedBy = "challenge")
+//    private List<ChallengeReport> challengeReports;
     @Column(nullable = true)
     @ManyToMany(mappedBy = "challenges")
     private List<Session> sessions;
@@ -60,15 +60,15 @@ public class Challenge {
         this.subscriptions.remove(subscription);
         subscription.setChallenge(null);
     }
-    public void addChallengeReport(ChallengeReport report) {
-        this.challengeReports.add(report);
-        report.setChallenge(this);
-    }
-
-    public void removeChallengeReport(ChallengeReport report) {
-        this.challengeReports.remove(report);
-        report.setChallenge(null);
-    }
+//    public void addChallengeReport(ChallengeReport report) {
+//        this.challengeReports.add(report);
+//        report.setChallenge(this);
+//    }
+//
+//    public void removeChallengeReport(ChallengeReport report) {
+//        this.challengeReports.remove(report);
+//        report.setChallenge(null);
+//    }
 
     public void addSession(Session session) {
         this.sessions.add(session);
@@ -76,7 +76,7 @@ public class Challenge {
     }
 
     public void removeSession(Session session) {
-        this.challengeReports.remove(session);
+        this.sessions.remove(session);
         session.getChallenges().remove(this);
     }
 }

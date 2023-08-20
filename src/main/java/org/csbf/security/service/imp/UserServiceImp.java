@@ -9,6 +9,9 @@ import org.csbf.security.exceptions.BadRequestException;
 import org.csbf.security.exceptions.BaseException;
 import org.csbf.security.exceptions.ResourceNotFoundException;
 import org.csbf.security.model.User;
+import org.csbf.security.repository.ChallengeRepository;
+import org.csbf.security.repository.SessionRepository;
+import org.csbf.security.repository.SubscriptionRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.FileUploadService;
 import org.csbf.security.service.UserService;
@@ -21,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +36,10 @@ public class UserServiceImp implements UserService {
 
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
+    private final SessionRepository sessionRepo;
+    private final SubscriptionRepository subscriptionRepo;
+    private final ChallengeRepository challengeRepo;
+
     private final Environment environment;
 
     @Override
@@ -122,11 +131,7 @@ public class UserServiceImp implements UserService {
     @Override
     public HelperDto.UserFullDto getUserProfile(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
-//        String application_host = Objects.requireNonNull(
-//                environment.getProperty("APPLICATION_HOST")
-//        );
-        /*String profilePictureLink =
-                application_host + "/profile/user-profile-pic/" + user.getUserId();*/
+
         return new HelperDto.UserFullDto(user);
     }
 
@@ -212,7 +217,6 @@ public class UserServiceImp implements UserService {
         userRepository.deleteById(userId);
     }
 
-
     // Soft delete user account
     @Override
     public ResponseMessage softDelete(UUID userId) {
@@ -224,7 +228,40 @@ public class UserServiceImp implements UserService {
         return user.isAccountSoftDeleted() ? new ResponseMessage.SuccessResponseMessage("Account soft deleted") : new ResponseMessage.SuccessResponseMessage("Account restored");
     }
 
+    @Override
+    public List<HelperDto.UserFullDto> getUsersInASession(UUID sessionId, boolean blocked, Optional<UUID> optionalChallengeId) {
+        var session = sessionRepo.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("session not found"));
+        List<HelperDto.UserFullDto> users = new ArrayList<>();
 
+        if(optionalChallengeId.isPresent()) {
+            var challenge = challengeRepo.findById(optionalChallengeId.get()).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
+            subscriptionRepo.selectAllUsersSubscribedToSessionViaChallenge(session, challenge).forEach(user -> {users.add(new HelperDto.UserFullDto(user));});
+        } else if(blocked) {
+            subscriptionRepo.selectAllUsersBlockedInSession(session).forEach(user -> {users.add(new HelperDto.UserFullDto(user));});
+        } else {
+            subscriptionRepo.selectAllUsersSubscribedToSession(session).forEach(user -> {users.add(new HelperDto.UserFullDto(user));});
+
+        }
+        return users;
+    }
+
+//    @Override
+//    public List<HelperDto.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId) {
+//        var session = sessionRepo.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("session not found"));
+//        var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
+//
+//        List<HelperDto.UserFullDto> users = new ArrayList<>();
+//        subscriptionRepo.selectAllUsersSubscribedToSessionViaChallenge(session, challenge).forEach(user -> {users.add(new HelperDto.UserFullDto(user));});
+//
+//        return users;
+//    }
+
+    @Override
+    public List<HelperDto.UserFullDto> getAllUsers() {
+        List<HelperDto.UserFullDto> users = new ArrayList<>();
+        userRepository.findAll().forEach(user -> {users.add(new HelperDto.UserFullDto(user));});
+        return users;
+    }
     /**
      * / Create user basic user profile details from auth service route
      */

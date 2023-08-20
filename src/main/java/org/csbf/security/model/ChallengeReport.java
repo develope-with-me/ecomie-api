@@ -22,16 +22,6 @@ public class ChallengeReport {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private UUID id;
-//    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private User ecomiest;
-//    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Session session;
-//    @Column(nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Challenge challenge;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Subscription subscription;
     @Column(nullable = false, columnDefinition = "integer default 0")
@@ -40,7 +30,7 @@ public class ChallengeReport {
     private int numberOfNewConverts;
     @Column(nullable = false, columnDefinition = "integer default 0")
     private int numberFollowedUp;
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "TEXT")
     private String difficulties;
     @Column(nullable = true)
     private String remark;
@@ -50,17 +40,17 @@ public class ChallengeReport {
     private LocalDateTime updatedAt;
 
 
-    public int getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() {
-        return reportRepo.numberAnEcomiestEvangelizedToViaAChallengeInASession(this.session,this.ecomiest, this.challenge);
-    }
-
-    public int getTotalNumberLeftToMeetTarget() {
-        LocalDateTime now = LocalDateTime.now();
-
-        return this.challenge.getTarget() -  getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession();
-    }
-
-    public boolean isCompleted() {
-        return (getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() == this.challenge.getTarget());
-    }
+//    public int getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() {
+//        return reportRepo.numberAnEcomiestEvangelizedToViaAChallengeInASession(this.session,this.ecomiest, this.challenge);
+//    }
+//
+//    public int getTotalNumberLeftToMeetTarget() {
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        return this.challenge.getTarget() -  getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession();
+//    }
+//
+//    public boolean isCompleted() {
+//        return (getTotalNumberThisEcomistEvangelizedToViaThisChallengeInThisSession() == this.challenge.getTarget());
+//    }
 }

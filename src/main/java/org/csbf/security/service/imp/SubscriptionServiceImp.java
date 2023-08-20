@@ -54,6 +54,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
 
 
     @Override
+    @Transactional
     public ResponseMessage unSubscribeUser(UUID subscriptionId, UUID userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("user not found"));
         Subscription subscription = subscriptionRepo.findByIdAndUser(subscriptionId, user).orElseThrow(() -> new ResourceNotFoundException("subscription not found"));
@@ -79,13 +80,13 @@ public class SubscriptionServiceImp implements SubscriptionService {
         subscription.setChallenge(challengeRepo.findById(subscriptionCreateDto.challengeId()).orElseThrow(() -> new ResourceNotFoundException("challenge not found")));
         subscription.setSession(sessionRepo.findById(subscriptionCreateDto.sessionId()).orElseThrow(() -> new ResourceNotFoundException("session not found")));
 
-        return copySubscriptionToDto(subscriptionRepo.save(subscription));
+        return new HelperDto.SubscriptionFullDto(subscriptionRepo.save(subscription));
     }
 
     @Override
     public HelperDto.SubscriptionFullDto getSubscription(UUID subscriptionId) {
 
-        return copySubscriptionToDto(subscriptionRepo
+        return new HelperDto.SubscriptionFullDto(subscriptionRepo
                 .findById(subscriptionId)
                 .orElseThrow(
                         () -> new ResourceNotFoundException("subscription not found")
@@ -95,7 +96,7 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     public List<HelperDto.SubscriptionFullDto> getSubscriptions() {
         List subscriptionFullDtos = new ArrayList<HelperDto.SubscriptionFullDto>();
-        subscriptionRepo.findAll().forEach(sub -> {subscriptionFullDtos.add(copySubscriptionToDto(sub));});
+        subscriptionRepo.findAll().forEach(sub -> {subscriptionFullDtos.add(new HelperDto.SubscriptionFullDto(sub));});
         return subscriptionFullDtos;
     }
 
@@ -122,19 +123,8 @@ public class SubscriptionServiceImp implements SubscriptionService {
 
         subscription = subscriptionRepo.save(subscription);
 
-        return copySubscriptionToDto(subscription);
+        return new HelperDto.SubscriptionFullDto(subscription);
     }
-    private HelperDto.SubscriptionFullDto copySubscriptionToDto(@NotNull Subscription subscription) {
-        return HelperDto.SubscriptionFullDto.builder()
-                .id(subscription.getId())
-                .session(subscription.getSession())
-                .challenge(subscription.getChallenge())
-                .user(subscription.getUser())
-                .target(subscription.getTarget())
-                .blocked(subscription.isBlocked())
-                .createdAt(subscription.getCreatedAt())
-                .updatedAt(subscription.getUpdatedAt())
-                .build();
-    }
+
 
 }

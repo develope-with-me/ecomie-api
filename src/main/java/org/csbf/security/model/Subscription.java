@@ -36,7 +36,7 @@ public class Subscription {
     private Challenge challenge;
 
     @Column(nullable = true)
-    @OneToMany(mappedBy = "challenge")
+    @OneToMany(mappedBy = "subscription")
     private List<ChallengeReport> challengeReports;
 //    @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -60,6 +60,6 @@ public class Subscription {
 
     public void removeChallengeReport(ChallengeReport challengeReport) {
         this.challengeReports.remove(challengeReport);
-        challengeReport.setChallenge(null);
+        challengeReport.setSubscription(null);
     }
 }

@@ -29,7 +29,7 @@ public class ChallengeServiceImp implements ChallengeService {
 
     @Override
     @Transactional
-    public ResponseMessage store(HelperDto.ChallengeCreateDto challengeCreateDto) {
+    public ResponseMessage store(HelperDto.ChallengeCreateDto challengeCreateDto, UUID[] sessionIds) {
 
         if (!EnumUtils.isValidEnum(ChallengeType.class, challengeCreateDto.type().toUpperCase()))
             throw new BadRequestException("Invalid challenge type");
@@ -41,18 +41,7 @@ public class ChallengeServiceImp implements ChallengeService {
                 .target(challengeCreateDto.target())
                 .build();
 
-        if(challengeCreateDto.sessionIds().length > 0) {
-            Arrays.asList(challengeCreateDto.sessionIds()).forEach(id -> {
-                var session = sessionRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("session not found"));
-                challenge.addSession(session);
-
-                sessionRepo.save(session);
-            });
-
-        }
-
-
-        challengeRepo.save(challenge);
+        addSessionToChallenge(sessionIds, challenge);
         return new ResponseMessage.SuccessResponseMessage("challenge created. Type: " + challenge.getType());
 
     }
@@ -69,9 +58,12 @@ public class ChallengeServiceImp implements ChallengeService {
     }
 
     @Override
-    public ResponseMessage update(UUID id, HelperDto.ChallengeCreateDto challengeCreateDto) {
-        var challenge = challengeRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
-        challengeRepo.findByName(challengeCreateDto.name()).ifPresent(chal -> {throw new ResourceExistsException("challenge with the name '" + chal.getName() + "' already exist");});
+    @Transactional
+    public ResponseMessage update(UUID chalId, HelperDto.ChallengeCreateDto challengeCreateDto, UUID[] sessionIds) {
+        var challenge = challengeRepo.findById(chalId).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
+        challengeRepo.findByName(challengeCreateDto.name()).ifPresent(chal -> {
+            throw new ResourceExistsException("challenge with the name '" + chal.getName() + "' already exist");
+        });
 
         if (!EnumUtils.isValidEnum(ChallengeType.class, challengeCreateDto.type().toUpperCase()))
             throw new BadRequestException("Invalid challenge type");
@@ -80,15 +72,28 @@ public class ChallengeServiceImp implements ChallengeService {
         challenge.setDescription(challenge.getDescription());
         challenge.setTarget(challengeCreateDto.target());
 
-        challengeRepo.save(challenge);
+        addSessionToChallenge(sessionIds, challenge);
+
         return new ResponseMessage.SuccessResponseMessage("challenge updated. Type: " + challenge.getType());
+
+    }
+
+    private void addSessionToChallenge(UUID[] sessionIds, Challenge challenge) {
+        if (sessionIds.length > 0) {
+            Arrays.asList(sessionIds).forEach(id -> {
+                var session = sessionRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("session not found"));
+                challenge.addSession(session);
+                sessionRepo.save(session);
+            });
+        }
+        challengeRepo.save(challenge);
     }
 
     @Override
-    public HelperDto.ChallengeFullDto getChallenge(UUID id) {
-        var challenge = challengeRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
+    public HelperDto.ChallengeFullDto getChallenge(UUID chalId) {
+        var challenge = challengeRepo.findById(chalId).orElseThrow(() -> new ResourceNotFoundException("challenge not found"));
 
-        return copyChallengeToDto(challenge);
+        return new HelperDto.ChallengeFullDto(challenge);
     }
 
     @Override
@@ -96,22 +101,9 @@ public class ChallengeServiceImp implements ChallengeService {
         var challenges = challengeRepo.findAll();
         ArrayList challengeDto = new ArrayList<HelperDto.ChallengeFullDto>();
 
-        challenges.forEach(session -> {challengeDto.add(copyChallengeToDto(session));});
+        challenges.forEach(session -> {challengeDto.add(new HelperDto.ChallengeFullDto(session));});
 
         return challengeDto;
-    }
-    private static HelperDto.ChallengeFullDto copyChallengeToDto(Challenge challenge) {
-        return HelperDto.ChallengeFullDto.builder()
-                .id(challenge.getId())
-                .name(challenge.getName())
-                .type(challenge.getType())
-                .target(challenge.getTarget())
-                .sessions(challenge.getSessions())
-                .challengeReports(challenge.getChallengeReports())
-                .subscriptions(challenge.getSubscriptions())
-                .updatedAt(challenge.getUpdatedAt())
-                .createdAt(challenge.getCreatedAt())
-                .build();
     }
 
 }

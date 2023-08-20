@@ -27,7 +27,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/register")
-    @Operation(summary = "Register", description = "Create account", tags = {"Authentication"})
+    @Operation(summary = "Register", description = "Create account", tags = {"AuthenticationController"})
     public ResponseEntity<HelperDto.AuthenticationResponse> register(@RequestBody HelperDto.RegisterRequest request, HttpServletRequest servletRequest) {
         /**For Production */
         /*
@@ -45,7 +45,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = {"Authentication"})
+    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = {"AuthenticationController"})
     public ResponseEntity<HelperDto.AuthenticationResponse> authenticate(@RequestBody HelperDto.AuthenticationRequest request, HttpServletRequest servletRequest) {
         String appUrl = servletRequest.getContextPath();
 
@@ -61,14 +61,14 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
-    @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"Authentication"})
+    @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"AuthenticationController"})
     public ResponseEntity<HelperDto.ConfirmEmailResponse> confirmUserAccount(@Email @RequestParam("email") String email, @RequestParam("token") String token) {
         log.info("Email {}", email);
         return ResponseEntity.ok(service.confirmEmail(email, token));
     }
 
     @RequestMapping(value = "/resend-link", method = {RequestMethod.POST})
-    @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = {"Authentication"})
+    @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = {"AuthenticationController"})
     public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody HelperDto.ResendVerificationEmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
