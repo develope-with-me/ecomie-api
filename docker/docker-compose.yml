@@ -1,43 +1,55 @@
-version: '3'
-
-networks:
-  auth_service_network:
-    driver: bridge
-
+version: "3.8"
 services:
-
-  Auth_Service:
+  auth-service:
+    container_name: ecomie-service
     build:
-      context: .
-      dockerfile: ./Dockerfile
-    container_name: auth_service
-    depends_on:
-      - PostgreSQL
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_DRIVERCLASSNAME=org.postgresql.Driver
-        #spring.sql.init.platform=postgres
-        #spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/ecomie
-      - SPRING_DATASOURCE_USERNAME=ecomie
-      - SPRING_DATASOURCE_PASSWORD=ecomie
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=updateChallengeReport
-      - SPRING_JPA__JPA_REPOSITORIES_ENABLED=true
-      - SPRING_JPA_SHOWSQL=true
-      - SPRING_JPA_DATABASE=mysql
-    networks:
-      - auth_service_network
-
-  PostgreSQL:
-    image: postgres:13.1-alpine
-    container_name: db
-    environment:
-      - POSTGRES_USER=ecomie
-      - POSTGRES_PASSWORD=ecomie
-    ports:
-      - "5432:5432"
+      context: ./
     volumes:
-      - ./PostgreSQL:/var/lib/postgresql
-    networks:
-      - auth_service_network
+      - ./src:/build/src
+      - ./pom.xml:/build/pom.xml
+      - ./.env:/build/.env
+      - /build/target
+    ports:
+      - "8081:8081"
+    #    environment:
+    #      DATASOURCE_URL: jdbc:postgresql:${PUT_ID_DATASOURCE_URL}
+    #      DATASOURCE_USERNAME: ${PUT_ID_USERNAME}
+    #      DATASOURCE_PASSWORD: ${PUT_ID_PASSWORD}
+    #      MAIL_ADDRESS: ${PUT_ID_ADDRESS}
+    #      MAIL_PASSWORD: ${PUT_ID_PASSWORD}
+    #      MAIL_HOST: smtp.gmail.com
+    #      MAIL_PORT: 587
+    #      ACTUATOR_ALLOWED_ORIGINS: "*"
+    #      PROFILE_SERVICE_HOST: "host.docker.internal"
+    #      PROFILE_SERVICE_PORT: ${PUT_PORT}
+    #      PROFILE_SERVICE_URL: ${PUT_PROFILE_SERVICE_URL}
+    #      OTP_DURATION_IN_SECONDS: ${PUT_DURATION}
+    #      SECRET_KEY: ${PUT_ID_SECRET}
+    #      REFRESH_TOKEN_DURATION_IN_MINUTES: 60
+    #      ACCESS_TOKEN_DURATION_IN_MINUTES: 5
+    #      TWILIO_ACCOUNT_SID: ${PUT_ID_VARIABLE}
+    #      TWILIO_SERVICE_SID: ${PUT_ID_VARIABLE}
+    #      TWILIO_AUTH_TOKEN: ${PUT_ID_VARIABLE}
+    #      TWILIO_PHONE_NUMBER: ${PUT_ID_NUMBER}
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    container_name: postgres_db
+    image: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/backup:/var/lib/postgresql/backup
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U ecomie_db' ]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    environment:
+      POSTGRES_USER: ${PUT_DB_USER}
+      POSTGRES_PASSWORD: ${PUT_DB_PASSWORD}
+      POSTGRES_DB: ${PUT_DB}
