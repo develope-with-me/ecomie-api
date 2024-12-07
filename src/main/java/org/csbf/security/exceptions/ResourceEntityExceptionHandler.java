@@ -2,7 +2,7 @@ package org.csbf.security.exceptions;
 
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
-import com.sun.mail.util.MailConnectException;
+//import com.sun.mail.util.MailConnectException;
 import jakarta.mail.SendFailedException;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.utils.helperclasses.ResponseMessage.ExceptionResponseMessage;
