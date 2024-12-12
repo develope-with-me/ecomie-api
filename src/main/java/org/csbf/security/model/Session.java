@@ -48,7 +48,7 @@ public class Session {
     private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "varchar(50) default 'INACTIVE'")
+    @Column(nullable = false, columnDefinition = "VARCHAR(50) DEFAULT 'INACTIVE'")
     private SessionStatus status;
 
     @CreationTimestamp
