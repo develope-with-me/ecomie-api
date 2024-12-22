@@ -1,30 +1,27 @@
-FROM maven:3.8.3-openjdk-17 AS build
+FROM maven:3.9.9-amazoncorretto-23-alpine AS build
 
-WORKDIR /build
-#COPY . /build
+WORKDIR /app
 
-#
+COPY ./pom.xml .
 
-COPY ./pom.xml /build
+##RUN mvn clean install
 RUN mvn dependency:go-offline
 
-#RUN rm -rf /build/pom.xml
-
-COPY ./src /build/src
-
-COPY ./.env /build/.env
-#COPY ./.env /build/.env
-#RUN mvn clean install -DskipTests
-
-#RUN rm -rf /build/target
+COPY ./src ./src
+COPY ./.env .
 
 RUN mvn clean package -DskipTests
 
 
+FROM amazoncorretto:23-alpine AS runtime
 
-FROM openjdk:17-alpine AS deploy
+# Set the working directory for the runtime container
+WORKDIR /app
 
-COPY --from=build /build/target/ecomie.jar /ecomie-service/ecomie.jar
-WORKDIR /ecomie-service
-ENTRYPOINT ["java", "-jar", "ecomie.jar"]
+# Copy the packaged jar file from the previous build stage
+COPY --from=build /app/target/ecomie.jar ./ecomie.jar
+
+# Expose the application port
 EXPOSE 8081
+
+ENTRYPOINT ["java", "-jar", "ecomie.jar"]
