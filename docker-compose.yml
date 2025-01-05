@@ -11,9 +11,12 @@ services:
       - .:/build
 #      - /build/target
     ports:
-      - "8081:8081"
+      - "${HTTP_PORT}:8081"
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      LOCAL_SERVER: ${LOCAL_SERVER}
+      DEV_SERVER: ${DEV_SERVER}
+      PROD_SERVER: ${PROD_SERVER}
       ## POSTGRESQL DOCKER CONFIG
       DATABASE_TYPE: ${DATABASE_TYPE}
       DATASOURCE_URL: ${DATASOURCE_URL_FOR_DOCKER}

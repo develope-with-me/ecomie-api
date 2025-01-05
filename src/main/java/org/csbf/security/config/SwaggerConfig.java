@@ -13,6 +13,7 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -29,6 +30,13 @@ import java.util.List;
 //@EnableSwagger2
 @ConditionalOnProperty(value = "springfox.documentation.enabled", havingValue = "true", matchIfMissing = true)
 public class SwaggerConfig implements WebMvcConfigurer {
+
+    private final Environment environment;
+
+    public SwaggerConfig(Environment environment) {
+        this.environment = environment;
+    }
+
 
     @Bean
     public GroupedOpenApi ecomie() {
@@ -53,8 +61,9 @@ public class SwaggerConfig implements WebMvcConfigurer {
                         )
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8081").description("Development Server"),
-                        new Server().url("https://www.ecomie.com").description("Production Server")
+                        new Server().url(environment.getProperty("LOCAL_SERVER")).description("Local Server"),
+                        new Server().url(environment.getProperty("DEV_SERVER")).description("Development Server"),
+                        new Server().url(environment.getProperty("PROD_SERVER")).description("Production Server")
                         )
                 )
                 .externalDocs(new ExternalDocumentation()
