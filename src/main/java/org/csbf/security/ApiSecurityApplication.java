@@ -47,8 +47,6 @@ public class ApiSecurityApplication implements CommandLineRunner {
 	@Override
 	public void run(String... arg) throws Exception {
 		log.info("Setting up file upload {}", ApiSecurityApplication.class);
-		log.info("Test ENV {}, {}, {}", env.getProperty("cors.allowed-origins.local"),env.getProperty("cors.allowed-origins.dev"),env.getProperty("cors.allowed-origins.prod"));
-
 		fileUploadService.init();
 	}
 }
