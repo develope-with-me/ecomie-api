@@ -17,5 +17,4 @@ public class AuthContext {
     public void setAuthUser(UsernamePasswordAuthenticationToken authToken) {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
-
 }

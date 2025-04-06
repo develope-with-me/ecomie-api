@@ -5,60 +5,18 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-#    env_file:
-#      - ./.env
+    env_file:
+      - ./.env
     volumes:
       - .:/build
 #      - /build/target
     ports:
       - "${HTTP_PORT}:8081"
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      LOCAL_SERVER: ${LOCAL_SERVER}
-      DEV_SERVER: ${DEV_SERVER}
-      PROD_SERVER: ${PROD_SERVER}
-      ## POSTGRESQL DOCKER CONFIG
-      DATABASE_TYPE: ${DATABASE_TYPE}
-      DATASOURCE_URL: ${DATASOURCE_URL_FOR_DOCKER}
-      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
-      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
-      DATASOURCE_DRIVERCLASSNAME: ${DATASOURCE_DRIVERCLASSNAME}
-      ## PORT CONFIG
-      PORT: ${PORT}
-      ## MAILING CONFIG
-      MAIL_ADDRESS: ${MAIL_ADDRESS}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_PROP_SMTP_AUTH: ${MAIL_PROP_SMTP_AUTH}
-      MAIL_PROP_SMTP_STARTTLS: ${MAIL_PROP_SMTP_STARTTLS}
-      ACTUATOR_ALLOWED_ORIGINS: ${ACTUATOR_ALLOWED_ORIGINS}
-      ## JWT  CONFIG
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      SECRET_KEY: ${SECRET_KEY}
-      REFRESH_TOKEN_DURATION_IN_MINUTES: ${ACCESS_TOKEN_DURATION_IN_MINUTES}
-      ACCESS_TOKEN_DURATION_IN_DAYS: ${ACCESS_TOKEN_DURATION_IN_DAYS}
-      ACCESS_TOKEN_DURATION_IN_MINUTES: ${ACCESS_TOKEN_DURATION_IN_MINUTES}
-      ## SUPER ADMIN DETAILS CONFIG
-      SUPER_ADMIN_EMAIL: ${SUPER_ADMIN_EMAIL}
-      SUPER_ADMIN_FIRST_NAME: ${SUPER_ADMIN_FIRST_NAME}
-      SUPER_ADMIN_LAST_NAME: ${SUPER_ADMIN_LAST_NAME}
-      SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD}
-      SUPER_ADMIN_EMAIL_VERIFICATION_TOKEN: ${SUPER_ADMIN_EMAIL_VERIFICATION_TOKEN}
-      SUPER_ADMIN_PHONE_NUMBER: ${SUPER_ADMIN_PHONE_NUMBER}
-      SUPER_ADMIN_COUNTRY: ${SUPER_ADMIN_COUNTRY}
-      SUPER_ADMIN_REGION: ${SUPER_ADMIN_REGION}
-      SUPER_ADMIN_CITY: ${SUPER_ADMIN_CITY}
-      SUPER_ADMIN_LANGUAGE: ${SUPER_ADMIN_LANGUAGE}
-      SUPER_ADMIN_STREET_ADDRESS: ${SUPER_ADMIN_STREET_ADDRESS}
-
-      ## IMAGE CONFIG
-      IMAGE_DIR: ${IMAGE_DIR}
 #    stdin_open: true
 #    tty: true
     depends_on:
-      - ecomie-db
-#        condition: service_healthy
+      ecomie-db:
+        condition: service_healthy
     networks:
       - ecomie-network
 
@@ -67,19 +25,16 @@ services:
     image: postgres
     ports:
       - "5433:5432"
-#    env_file:
-#      - ./.env
+    env_file:
+      - ./.env
     volumes:
+      - ./.env:/app/.env
       - ./data/backup:/var/lib/postgresql/backup
-#    healthcheck:
-#      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
-#      interval: 1s
-#      timeout: 1s
-#      retries: 30
-    environment:
-      POSTGRES_USER: ${DATASOURCE_USERNAME}
-      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
-      POSTGRES_DB: ecomie_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATASOURCE_USERNAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
     networks:
       - ecomie-network
 
