@@ -50,8 +50,7 @@ public class UserServiceImp implements UserService {
             Optional<MultipartFile> file,
             String jsonData
     ) {
-//        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        log.info("{}", authContext.getAuthUser());
+        log.info("UserServiceImp.updateAuthUserProfile");
         User user = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
@@ -64,6 +63,7 @@ public class UserServiceImp implements UserService {
             Optional<MultipartFile> file,
             String jsonData
     ) {
+        log.info("UserServiceImp.updateUserProfile");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
 
@@ -72,6 +72,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public ResponseMessage changeUserRole(String email, String role) {
+        log.info("UserServiceImp.changeUserRole");
         var user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
             throw new BadRequestException("Invalid session status");
@@ -85,6 +86,7 @@ public class UserServiceImp implements UserService {
     }
 
     private ResponseMessage getUpdateResponseMessage(Optional<MultipartFile> file, String jsonData, User user) {
+        log.info("UserServiceImp.getUpdateResponseMessage");
         HelperDto.UpdateUserProfileRequest userProfileRequest;
         try {
             log.info(jsonData + ": {}", HelperDto.UpdateUserProfileRequest.class );
@@ -135,17 +137,15 @@ public class UserServiceImp implements UserService {
 
     @Override
     public HelperDto.UserFullDto getUserProfile(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
+        log.info("UserServiceImp.getUserProfile");
 
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
         return new HelperDto.UserFullDto(user);
     }
 
     @Override
     public HelperDto.UserDto getAuthUserProfile() {
-        log.info("TEST: In method");
-//        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        log.info("{}", authContext.getAuthUser());
-
+        log.info("UserServiceImp.getAuthUserProfile");
         User user = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -154,9 +154,8 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void deleteUserProfilePic(UUID userId) {
+        log.info("UserServiceImp.deleteUserProfilePic");
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User does not exist"));
-
-
         String fileName = user.getProfilePictureFileName();
         if (fileName == null) throw new BadRequestException("User has no profile image");
         fileUploadService.deleteFile(fileName);
@@ -176,8 +175,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public Resource loadImage(HelperDto.EmailRequest emailRequest) {
-//        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-
+        log.info("UserServiceImp.loadImage");
         User user = userRepository
                 .findByEmail(emailRequest.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -188,14 +186,12 @@ public class UserServiceImp implements UserService {
 
     @Override
     public byte[] getProfilePicture() {
-//        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
 
         User user = userRepository
                 .findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
         Resource resource = loadImage(new HelperDto.EmailRequest(user.getEmail()));
         try {
-//            return resource == null ? null : ByteStreams.toByteArray(resource.getInputStream());
             return resource == null ? null : resource.getInputStream().readAllBytes();
         } catch (Exception exception) {
             throw new RuntimeException("Failed to extract user profile picture");
@@ -209,7 +205,6 @@ public class UserServiceImp implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
         Resource resource = loadImage(new HelperDto.EmailRequest(user.getEmail()));
         try {
-//            return resource == null ? null : ByteStreams.toByteArray(resource.getInputStream());
             return resource == null ? null : resource.getInputStream().readAllBytes();
         } catch (Exception exception) {
             throw new RuntimeException("Failed to extract user profile picture");
