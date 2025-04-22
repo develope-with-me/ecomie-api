@@ -37,7 +37,7 @@ public class ApiSecurityApplication implements CommandLineRunner {
 				registry.addMapping("/**")
 						.allowedHeaders("*")
 						.allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS")
-						.allowedOrigins(env.getProperty("cors.allowed-origins.local"),env.getProperty("cors.allowed-origins.dev"),env.getProperty("cors.allowed-origins.prod"))
+						.allowedOrigins(env.getProperty("cors.allowed-origins.local-one"),env.getProperty("cors.allowed-origins.local-two"),env.getProperty("cors.allowed-origins.dev"),env.getProperty("cors.allowed-origins.prod"))
 						.allowCredentials(true);
 //						we can also set allowed Origins, OriginPatterns, Methods, Headers and Credentials as well as maxAge and exposedHeaders
 			}
