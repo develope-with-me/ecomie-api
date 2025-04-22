@@ -17,6 +17,7 @@ FROM amazoncorretto:23-alpine AS runtime
 
 # Set the working directory for the runtime container
 WORKDIR /app
+COPY ./src/main/resources ./src/main/resources
 
 # Copy the packaged jar file from the previous build stage
 COPY --from=build /app/target/ecomie.jar ./ecomie.jar

@@ -125,6 +125,13 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+
+		<!-- Handlebars -->
+		<dependency>
+			<groupId>com.github.jknack</groupId>
+			<artifactId>handlebars</artifactId>
+			<version>4.4.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
