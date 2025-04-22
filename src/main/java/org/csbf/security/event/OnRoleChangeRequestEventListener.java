@@ -1,5 +1,6 @@
 package org.csbf.security.event;
 
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.service.EmailService;
@@ -15,10 +16,15 @@ public class OnRoleChangeRequestEventListener implements ApplicationListener<OnR
     private final Environment env;
 
     @Override
-    public void onApplicationEvent(OnRoleChangeRequestEvent event) { this.sendEmail(event);
+    public void onApplicationEvent(OnRoleChangeRequestEvent event) {
+        try {
+            this.sendEmail(event);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
 
     }
-    private void sendEmail(OnRoleChangeRequestEvent event) {
+    private void sendEmail(OnRoleChangeRequestEvent event) throws MessagingException {
         service.sendCustomEmail(event.getRequestHeaderHost(), event.getEmail(), env.getProperty("SUPER_ADMIN_EMAIL"), event.getRole());
 }
 }
