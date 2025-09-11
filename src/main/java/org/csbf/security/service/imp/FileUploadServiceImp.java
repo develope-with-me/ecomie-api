@@ -1,6 +1,7 @@
 package org.csbf.security.service.imp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.csbf.security.exceptions.Problems;
 import org.csbf.security.exceptions.ResourceNotFoundException;
 import org.csbf.security.service.FileUploadService;
 import org.springframework.core.env.Environment;
@@ -22,6 +23,12 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Slf4j
 @Service
 public class FileUploadServiceImp implements FileUploadService {
@@ -47,7 +54,7 @@ public class FileUploadServiceImp implements FileUploadService {
 
         } catch (IOException e) {
             log.info("Could not initialize folder for upload!");
-            throw new RuntimeException("Could not initialize folder for upload!");
+            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not initialize folder for upload!").toException();
         }
     }
 
@@ -66,7 +73,7 @@ public class FileUploadServiceImp implements FileUploadService {
             Files.copy(file.getInputStream(), imageUrl, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             log.error("{}", e.getMessage());
-            throw new RuntimeException("Could not store the file.");
+            throw Problems.OBJECT_VALIDATION_ERROR.withProblemError("file.name", "Could not store file %s".formatted(file.getOriginalFilename())).toException();
         }
         return fileName;
     }
@@ -81,10 +88,10 @@ public class FileUploadServiceImp implements FileUploadService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new ResourceNotFoundException("Could not read the file!");
+                throw Problems.NOT_FOUND.withProblemError("file.name", "Could not read file %s".formatted(normalizedFileName)).toException();
             }
         } catch (MalformedURLException e) {
-            throw new ResourceNotFoundException("Error: " + e.getMessage());
+            throw Problems.NOT_FOUND.appendDetail("Error: " + e.getMessage()).toException();
         }
     }
 
@@ -103,7 +110,7 @@ public class FileUploadServiceImp implements FileUploadService {
             Resource resource = new UrlResource(file.toUri());
             return (resource.exists() || resource.isReadable());
         } catch (MalformedURLException e) {
-            throw new ResourceNotFoundException("Error: " + e.getMessage());
+            throw Problems.NOT_FOUND.appendDetail("Error: " + e.getMessage()).toException();
         }
     }
 
@@ -119,11 +126,11 @@ public class FileUploadServiceImp implements FileUploadService {
                 file1.delete();
             } else {
                 log.info("FileUploadServiceImp.deleteFile --- Old file does not exist, fileName : {}", fileName);
-                throw new ResourceNotFoundException("Could not read OLD file or it doesn't exist!");
+                throw Problems.NOT_FOUND.withProblemError("file.name", "Could not read file %s or it does not exists".formatted(normalizedFileName)).toException();
             }
         } catch (MalformedURLException e) {
             log.error("{}", e.getMessage());
-            throw new RuntimeException("Could not delete file");
+            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not delete file").toException();
         }
     }
 
@@ -132,7 +139,7 @@ public class FileUploadServiceImp implements FileUploadService {
         try {
             return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
         } catch (IOException e) {
-            throw new RuntimeException("Could not load the files!");
+            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not load the files!").toException();
         }
     }
 }

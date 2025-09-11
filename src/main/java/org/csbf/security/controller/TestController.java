@@ -18,11 +18,11 @@ public class TestController {
     @GetMapping("/demo-controller")
     @Operation(summary = "Unprotected test endpoint", description = "Endpoint to test unsecure request", tags = {"test"})
     public ResponseEntity<String> sayHello() {
-        return ResponseEntity.ok("Hello unauthenticated user");
+        return ResponseEntity.ok("Hello unauthenticated userEntity");
     }
 
     @GetMapping("/secure/user")
-    @Operation(summary = "User test endpoint", description = "Endpoint to test user role", tags = {"test"})
+    @Operation(summary = "UserEntity test endpoint", description = "Endpoint to test userEntity role", tags = {"test"})
     public ResponseEntity<String> sayHelloUser() { return ResponseEntity.ok("Hello authenticated USER"); }
 
     @GetMapping("/secure/admin")

@@ -7,7 +7,7 @@ public class ResourceNotFoundException extends BaseException {
 
     public static class EmailNotFoundException extends ResourceNotFoundException {
         public EmailNotFoundException(String email) {
-            super("User with email " + email + " not found");
+            super("UserEntity with email " + email + " not found");
         }
     }
 

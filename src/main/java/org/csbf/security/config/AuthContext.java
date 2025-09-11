@@ -7,6 +7,14 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthContext {

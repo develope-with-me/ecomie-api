@@ -13,6 +13,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
@@ -22,7 +28,7 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> repository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("UserEntity not found"));
     }
 
     @Bean

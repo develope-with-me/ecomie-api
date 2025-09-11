@@ -2,21 +2,24 @@ package org.csbf.security.repository;
 
 import org.csbf.security.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public interface ChallengeReportRepository extends JpaRepository<ChallengeReport, UUID> {
-    List<ChallengeReport> findAllBySubscription(Subscription subscription);
-//    int  countChallengeReportsBySessionAndEcomiestAndChallenge(Session session, User user, Challenge challenge);
-    int  countAllBySubscription(Subscription subscription);
-//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.session=:session and cr.ecomiest=:user and cr.challenge=:challenge" )
-//    int numberAnEcomiestEvangelizedToViaAChallengeInASession(@Param("session") Session session, @Param("user") User user, @Param("challenge") Challenge challenge);
-//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.session=:session and cr.ecomiest=:user")
-//    int numberAnEcomiestEvangelizedToInASession(@Param("session") Session session, @Param("user") User user);
-//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReport cr where cr.ecomiest=:user")
-//    int numberAnEcomiestEvangelizedTo(@Param("user") User user);
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
+public interface ChallengeReportRepository extends JpaRepository<ChallengeReportEntity, UUID> {
+    List<ChallengeReportEntity> findAllBySubscription(SubscriptionEntity subscriptionEntity);
+//    int  countChallengeReportsBySessionAndEcomiestAndChallenge(SessionEntity sessionEntity, UserEntity userEntity, ChallengeEntity challengeEntity);
+    int  countAllBySubscription(SubscriptionEntity subscriptionEntity);
+//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReportEntity cr where cr.sessionEntity=:sessionEntity and cr.ecomiest=:userEntity and cr.challengeEntity=:challengeEntity" )
+//    int numberAnEcomiestEvangelizedToViaAChallengeInASession(@Param("sessionEntity") SessionEntity sessionEntity, @Param("userEntity") UserEntity userEntity, @Param("challengeEntity") ChallengeEntity challengeEntity);
+//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReportEntity cr where cr.sessionEntity=:sessionEntity and cr.ecomiest=:userEntity")
+//    int numberAnEcomiestEvangelizedToInASession(@Param("sessionEntity") SessionEntity sessionEntity, @Param("userEntity") UserEntity userEntity);
+//    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReportEntity cr where cr.ecomiest=:userEntity")
+//    int numberAnEcomiestEvangelizedTo(@Param("userEntity") UserEntity userEntity);
 }

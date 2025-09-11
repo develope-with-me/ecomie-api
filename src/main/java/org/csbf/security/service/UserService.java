@@ -1,6 +1,7 @@
 package org.csbf.security.service;
 
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.mapper.UserMapper;
+import org.csbf.security.utils.helperclasses.HelperDto.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,41 +10,46 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface UserService {
 
     ResponseMessage updateAuthUserProfile(
             Optional<MultipartFile> file,
-            String jsonData
+            MinimalUser user
     );
 
     ResponseMessage updateUserProfile(
             UUID userId,
             Optional<MultipartFile> file,
-            String jsonData
+            User user
     );
 
     ResponseMessage changeUserRole(String email, String role);
 
-    HelperDto.UserFullDto getUserProfile(UUID userId);
+    User getUserProfile(UUID userId);
 
-    HelperDto.UserDto getAuthUserProfile();
+    MinimalUser getAuthUserProfile();
 
     void deleteUserProfilePic(UUID userId);
 
-    Resource loadImage(HelperDto.EmailRequest emailRequest);
+    Resource loadImage(EmailRequest emailRequest);
 
     byte[] getProfilePicture();
 
     byte[] getUserProfilePicture(UUID userId);
 
-    // Soft delete user account
+    // Soft delete userEntity account
     ResponseMessage softDelete(UUID userId);
 
     void deleteUserProfile(UUID userId);
 
-    List<HelperDto.UserFullDto> getUsersInASession(UUID sessionId, boolean blocked, Optional<String> optionalChallengeId);
+    List<User> getUsersInASession(UUID sessionId, boolean blocked, Optional<String> optionalChallengeId);
 
 //    List<HelperDto.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
 
-    List<HelperDto.UserFullDto> getAllUsers();
+    List<User> getAllUsers();
 }

@@ -8,10 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.csbf.security.exceptions.EmailTemplateException;
-import org.csbf.security.exceptions.FailedSendEmailException;
-import org.csbf.security.exceptions.ResourceNotFoundException;
-import org.csbf.security.model.User;
+import org.csbf.security.exceptions.Problems;
+import org.csbf.security.model.UserEntity;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.EmailService;
@@ -30,6 +28,12 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -46,31 +50,31 @@ public class EmailServiceImp implements EmailService {
         String token = authService.createEmailVerificationToken();
         boolean success = false;
         if (userRepo.findByEmail(email).isPresent()) {
-            User user = userRepo.findByEmail(email).get();
-            user.setEmailVerificationToken(token);
-            userRepo.save(user);
+            UserEntity userEntity = userRepo.findByEmail(email).get();
+            userEntity.setEmailVerificationToken(token);
+            userRepo.save(userEntity);
 
             String encodedEmail;
-            encodedEmail = URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8);
+            encodedEmail = URLEncoder.encode(userEntity.getEmail(), StandardCharsets.UTF_8);
 
-            String recipient = user.getEmail();
+            String recipient = userEntity.getEmail();
             String subject = "Complete Registration!";
 
             // Validate email and token
-            if (recipient == null || recipient.isEmpty() || user.getEmailVerificationToken() == null) {
-                throw new ResourceNotFoundException("Invalid email or verification token");
+            if (recipient == null || recipient.isEmpty() || userEntity.getEmailVerificationToken() == null) {
+                throw Problems.INVALID_PARAMETER_ERROR.appendDetail("Invalid email or verification token").toException();
             }
 
             // Construct the confirmation link
             String confirmationLink = String.format("%s://%s/api/v1/auth/confirm-account?email=%s&token=%s",
-                    request.getScheme(), requestHost, encodedEmail, user.getEmailVerificationToken());
+                    request.getScheme(), requestHost, encodedEmail, userEntity.getEmailVerificationToken());
             log.info("Confirmation Link: {}", confirmationLink);
             String logoUrl = env.getProperty("app.logo.url");
             log.info("Logo URL: {}", logoUrl);
 
             // Create the data map
             Map<String, Object> data = new HashMap<>();
-            data.put("firstName", user.getFirstname());
+            data.put("firstName", userEntity.getFirstName());
             data.put("confirmationLink", confirmationLink);
             data.put("logoUrl", logoUrl);
 
@@ -95,7 +99,7 @@ public class EmailServiceImp implements EmailService {
                 sendEmail(recipient, subject, body);
 
             } catch (IOException | MessagingException e) {
-                throw new EmailTemplateException("Could not load email template");
+                throw Problems.OBJECT_VALIDATION_ERROR.appendDetail("Could not load email template").toException();
             }
         }
     }
@@ -120,7 +124,7 @@ public class EmailServiceImp implements EmailService {
             javaMailSender.send(mimeMessage);
             log.info("EmailService.sendEmail - Successfully sent email");
         }catch(MailException e) {
-            throw new FailedSendEmailException(e.getMessage());
+            throw Problems.OBJECT_VALIDATION_ERROR.appendDetail(e.getMessage()).toException();
         }
     }
 
@@ -133,7 +137,7 @@ public class EmailServiceImp implements EmailService {
         encodedToEmail = URLEncoder.encode(to, StandardCharsets.UTF_8);
         encodedFromEmail = URLEncoder.encode(from, StandardCharsets.UTF_8);
         String subject = "@ECOMIE - Request To Be " + purpose;
-        String body = "I will like to become a/an " + purpose + ": \n\n If you approve of this user, click on the link to approve his/her request " + requestHost +  "/api/v1/secure/admin/update-user-role?email="+encodedFromEmail+"&role="+purpose;
+        String body = "I will like to become a/an " + purpose + ": \n\n If you approve of this userEntity, click on the link to approve his/her request " + requestHost +  "/api/v1/secure/admin/update-userEntity-role?email="+encodedFromEmail+"&role="+purpose;
         sendEmail(to, subject, body, from);
 
     }

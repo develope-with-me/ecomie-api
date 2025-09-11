@@ -6,6 +6,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface FileUploadService {
 
     void init();

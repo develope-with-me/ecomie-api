@@ -8,13 +8,13 @@ import org.springframework.context.ApplicationEvent;
 public class OnRegistrationCompleteEvent extends ApplicationEvent {
 //    private String appUrl;
 //    private Locale locale;
-//    private User user;
+//    private UserEntity userEntity;
 
 
-//    public OnRegistrationCompleteEvent(User user, Locale locale, String appUrl) {
-//        super(user);
+//    public OnRegistrationCompleteEvent(UserEntity userEntity, Locale locale, String appUrl) {
+//        super(userEntity);
 //
-//        this.user = user;
+//        this.userEntity = userEntity;
 //        this.locale = locale;
 //        this.appUrl = appUrl;
 //    }
@@ -35,12 +35,12 @@ public class OnRegistrationCompleteEvent extends ApplicationEvent {
 //        this.locale = locale;
 //    }
 //
-//    public User getUser() {
-//        return user;
+//    public UserEntity getUserEntity() {
+//        return userEntity;
 //    }
 //
-//    public void setUser(User user) {
-//        this.user = user;
+//    public void setUserEntity(UserEntity userEntity) {
+//        this.userEntity = userEntity;
 //    }
         private String requestHeaderHost;
         private String email;

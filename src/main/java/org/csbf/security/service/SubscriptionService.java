@@ -8,6 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface SubscriptionService {
     HelperDto.SubscriptionFullDto subscribe(HelperDto.SubscriptionCreateDto subscriptionCreateDto);
     HelperDto.SubscriptionFullDto subscribeUser(UUID userId, HelperDto.SubscriptionCreateDto subscriptionCreateDto);

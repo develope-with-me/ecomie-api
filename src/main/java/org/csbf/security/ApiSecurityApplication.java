@@ -13,6 +13,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Slf4j
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class ApiSecurityApplication implements CommandLineRunner {

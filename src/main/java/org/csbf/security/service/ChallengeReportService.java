@@ -6,6 +6,12 @@ import org.csbf.security.utils.helperclasses.ResponseMessage;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface ChallengeReportService {
     ResponseMessage storeReport(UUID sessionId, HelperDto.ChallengeReportCreateDto challengeReportCreateDto);
 

@@ -7,6 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface SessionService {
     ResponseMessage store(HelperDto.SessionCreateDto sessionCreateDto);
 

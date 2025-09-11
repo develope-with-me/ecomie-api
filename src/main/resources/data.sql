@@ -1,6 +1,6 @@
 
 -- -- USER
--- INSERT INTO public._user(id, account_blocked, account_enabled, account_soft_deleted, city, country, created_at, email, email_verification_token, firstname, language, lastname, password, phone_number, profile_picture_file_name, region, role, updated_at)
+-- INSERT INTO public._user(id, account_blocked, account_enabled, account_soft_deleted, city, country, created_at, email, email_verification_token, firstName, language, lastName, password, phone_number, profile_picture_file_name, region, role, updated_at)
 -- VALUES (gen_random_uuid(), false, true, false, 'Buea', 'Cameroon', CURRENT_TIMESTAMP, 'ndip.lawrence@email.gmail.com', gen_random_uuid(), 'Lawrence', 'English', 'Ndip', '$2a$12$3Y4A.Y2uvL5bXKf49i3WTu5TgQLz294GGljO5hX0.I200sPTFeBMG', '+237670000000', null, 'Southwest', 'ECOMIEST', current_timestamp);
 
 INSERT INTO public._user(id, account_blocked, account_enabled, account_soft_deleted, city, country, created_at, email, email_verification_token, firstname, language, lastname, password, phone_number, profile_picture_file_name, region, role, updated_at)
@@ -52,22 +52,22 @@ INSERT INTO public._user(id, account_blocked, account_enabled, account_soft_dele
 VALUES ('ac2e322a-eb51-47ce-b88a-031095cbd983', false, true, false, 'Maroua', 'Cameroon', '2023-04-21T17:56:58+00:00', 'dadanna.samira@email.gmail.com', 'dd373c8b-bfed-49fc-b752-873ee4d37b98', 'Samira', 'French', 'Dadanna', '$2a$12$3Y4A.Y2uvL5bXKf49i3WTu5TgQLz294GGljO5hX0.I200sPTFeBMG', '+237670000015', null, 'Far North', 'USER', '2022-08-02T17:30:58+00:00') ON DUPLICATE KEY UPDATE;
 
 -- SESSION
-INSERT INTO public.session(id, created_at, description, end_date, name, start_date, status, updated_at)
-VALUES ('0f799c5c-6ebd-49f8-aeac-86f65c266c0d', '2023-07-21T17:56:58+00:00', 'This is a test session 1', '2023-12-21T17:56:58+00:00', '2022 - 2023 Session', '2023-08-21T17:56:58+00:00', 'ONGOING', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
+INSERT INTO public.sessionEntity(id, created_at, description, end_date, name, start_date, status, updated_at)
+VALUES ('0f799c5c-6ebd-49f8-aeac-86f65c266c0d', '2023-07-21T17:56:58+00:00', 'This is a test sessionEntity 1', '2023-12-21T17:56:58+00:00', '2022 - 2023 SessionEntity', '2023-08-21T17:56:58+00:00', 'ONGOING', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
 
-INSERT INTO public.session(id, created_at, description, end_date, name, start_date, status, updated_at)
-VALUES ('16329109-ee7a-4637-96f3-b4b9add32572', '2023-07-21T17:56:58+00:00', 'This is a test session 2', '2024-12-21T17:56:58+00:00', '2022 - 2023 Session II', '2024-01-01T17:56:58+00:00', 'INACTIVE', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
+INSERT INTO public.sessionEntity(id, created_at, description, end_date, name, start_date, status, updated_at)
+VALUES ('16329109-ee7a-4637-96f3-b4b9add32572', '2023-07-21T17:56:58+00:00', 'This is a test sessionEntity 2', '2024-12-21T17:56:58+00:00', '2022 - 2023 SessionEntity II', '2024-01-01T17:56:58+00:00', 'INACTIVE', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
 
 
 -- CHALLENGE
-INSERT INTO public.challenge(id, created_at, description, name, target, type, updated_at)
+INSERT INTO public.challengeEntity(id, created_at, description, name, target, type, updated_at)
 VALUES ('e0735546-441c-44cf-bbb5-64b9e33e9bf7', '2023-07-21T17:56:58+00:00', 'Evangelize to FIVE (5) persons per week', '5 Per Week', 5, 'NORMAL', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
 
-INSERT INTO public.challenge(id, created_at, description, name, target, type, updated_at)
+INSERT INTO public.challengeEntity(id, created_at, description, name, target, type, updated_at)
 VALUES ('b52d227d-8ea5-492c-b5cb-16d747043231', '2023-07-21T17:56:58+00:00', 'Evangelize to THREE (3) persons per week', '3 Per Week', 3, 'NORMAL', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
 
-INSERT INTO public.challenge(id, created_at, description, name, target, type, updated_at)
+INSERT INTO public.challengeEntity(id, created_at, description, name, target, type, updated_at)
 VALUES ('0eaffe9e-660c-458b-911b-f0440f7473d0', '2023-07-21T17:56:58+00:00', 'Evangelize to ONE (1) person per week', '1 Per Week', 1, 'NORMAL', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
 
-INSERT INTO public.challenge(id, created_at, description, name, target, type, updated_at)
-VALUES ('3af6e2d2-20e4-4a9c-b291-7a73026afc9c', '2023-07-21T17:56:58+00:00', 'Evangelize to a 100 persons in 3 weeks', 'Ketsinami Challenge', 100, 'EVENT', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;
+INSERT INTO public.challengeEntity(id, created_at, description, name, target, type, updated_at)
+VALUES ('3af6e2d2-20e4-4a9c-b291-7a73026afc9c', '2023-07-21T17:56:58+00:00', 'Evangelize to a 100 persons in 3 weeks', 'Ketsinami ChallengeEntity', 100, 'EVENT', '2023-08-21T17:56:58+00:00') ON DUPLICATE KEY UPDATE;

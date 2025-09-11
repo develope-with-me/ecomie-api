@@ -3,6 +3,12 @@ package org.csbf.security.service;
 import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Async;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface EmailService {
     @Async
     void sendEmailVerificationToken(String requestHost, String email);

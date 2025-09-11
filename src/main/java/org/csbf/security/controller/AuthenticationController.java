@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.event.OnRegistrationCompleteEvent;
 import org.csbf.security.service.AuthenticationService;
+import org.csbf.security.utils.commons.ExtendedEmailValidator;
 import org.csbf.security.utils.helperclasses.HelperDto;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.context.ApplicationEventPublisher;
@@ -14,8 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Slf4j
 @Validated
 @RestController
@@ -47,7 +54,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = {"Unauthenticated"})
+    @Operation(summary = "Authenticate", description = "Authenticate userEntity using email and password", tags = {"Unauthenticated"})
     public ResponseEntity<HelperDto.AuthenticationResponse> authenticate(@RequestBody HelperDto.AuthenticationRequest request, HttpServletRequest servletRequest) {
         String appUrl = servletRequest.getContextPath();
 
@@ -64,7 +71,7 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
     @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"Unauthenticated"})
-    public ResponseEntity<HelperDto.ConfirmEmailResponse> confirmUserAccount(@Email @RequestParam("email") String email, @RequestParam("token") String token) {
+    public ResponseEntity<HelperDto.ConfirmEmailResponse> confirmUserAccount(@ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
         log.info("Email {}", email);
         return ResponseEntity.ok(service.confirmEmail(email, token));
     }

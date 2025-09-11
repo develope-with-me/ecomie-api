@@ -4,12 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.security.constant.Role;
-import org.csbf.security.exceptions.BadRequestException;
-import org.csbf.security.exceptions.BaseException;
-import org.csbf.security.exceptions.ResourceExistsException;
-import org.csbf.security.exceptions.ResourceNotFoundException;
-import org.csbf.security.model.EmailVerificationToken;
-import org.csbf.security.model.User;
+import org.csbf.security.exceptions.*;
+import org.csbf.security.model.EmailVerificationTokenEntity;
+import org.csbf.security.model.UserEntity;
 import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
@@ -27,6 +24,12 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,15 +42,15 @@ public class AuthenticationServiceImp implements AuthenticationService {
 
     @Override
     public HelperDto.AuthenticationResponse register(HelperDto.RegisterRequest request) {
-        String msg = "user already exist";
+        String msg = "userEntity already exist";
         if (userRepo.findByEmail(request.email()).isPresent())
-            throw new ResourceExistsException.EmailExistsException(request.email());
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Email (%s) already in use".formatted(request.email())).toException();
 
 //        String appUrl = servletRequest.getContextPath();
 //        String roles = Role.USER.name()+"-"+Role.ADMIN.name();
 //        String roles = Role.USER.name();
 
-        var user = User.builder()
+        var user = UserEntity.builder()
                 .firstname(request.firstname())
                 .lastname(request.lastname())
                 .email(request.email())
@@ -57,16 +60,16 @@ public class AuthenticationServiceImp implements AuthenticationService {
                 .accountEnabled(false)
                 .accountSoftDeleted(false)
                 .build();
-        User registeredUser = userRepo.save(user);
+        UserEntity registeredUserEntity = userRepo.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        msg = "user created";
+        msg = "userEntity created";
         return getAuthenticationResponse(true, msg, jwtToken);
     }
 
     @Override
     public HelperDto.AuthenticationResponse authenticate(HelperDto.AuthenticationRequest request) {
-        String message =  "user does not exist";
+        String message =  "userEntity does not exist";
         userRepo.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException.EmailNotFoundException(request.email()));
 
         var user = userRepo.findByEmail(request.email()).get();
@@ -84,7 +87,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
                     )
             );
         } catch(AuthenticationException e) {
-            throw new BadRequestException.InvalidAuthenticationRequestException("Email '" + request.email() + "' and password do not match");
+            throw Problems.UNAUTHORIZED.withDetail("Email and password do not match").toException();
         }
 
         var jwtToken = jwtService.generateToken(user);
@@ -93,7 +96,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
     }
 
     @Override
-    public EmailVerificationToken getEmailVerificationToken(String VerificationToken) {
+    public EmailVerificationTokenEntity getEmailVerificationToken(String VerificationToken) {
         return verificationTokenRepo.findByToken(VerificationToken);
     }
 
@@ -108,40 +111,40 @@ public class AuthenticationServiceImp implements AuthenticationService {
         try {
             decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
-            throw new BaseException("Could not encode email");
+            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Could not encode email").toException();
         }
 
         var obj = userRepo.findByEmail(email);
         log.info("decodedEmail {}", email);
-        log.info("User {}", obj.get());
+        log.info("UserEntity {}", obj.get());
 
-        User user = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
-        if (user != null) {
-            user.setAccountEnabled(true);
-            userRepo.save(user);
-            return new HelperDto.ConfirmEmailResponse(user.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
+        UserEntity userEntity = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
+        if (userEntity != null) {
+            userEntity.setAccountEnabled(true);
+            userRepo.save(userEntity);
+            return new HelperDto.ConfirmEmailResponse(userEntity.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
         }
 
-        return new HelperDto.ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
+        return new HelperDto.ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("userEntity and token do not match"));
     }
 
-    public HelperDto.UserBasicDto getUserDTO(User user) {
-       return user == null ? null : HelperDto.UserBasicDto.builder()
-                .id(user.getId())
-                .firstname(user.getFirstname())
-                .lastname(user.getLastname())
-                .email(user.getEmail())
-                .accountEnabled(user.isAccountEnabled())
-                .accountBlocked(user.isAccountBlocked())
-                .accountSoftDeleted(user.isAccountSoftDeleted())
+    public HelperDto.UserBasicDto getUserDTO(UserEntity userEntity) {
+       return userEntity == null ? null : HelperDto.UserBasicDto.builder()
+                .id(userEntity.getId())
+                .firstname(userEntity.getFirstName())
+                .lastname(userEntity.getLastName())
+                .email(userEntity.getEmail())
+                .accountEnabled(userEntity.isAccountEnabled())
+                .accountBlocked(userEntity.isAccountBlocked())
+                .accountSoftDeleted(userEntity.isAccountSoftDeleted())
                 .build();
     }
-    private HelperDto.AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, User... users) {
+    private HelperDto.AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity... userEntities) {
         return HelperDto.AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message(message)
                 .success(success)
-                .user(getUserDTO(!ArrayUtils.isEmpty(users) ? users[0] : null))
+                .user(getUserDTO(!ArrayUtils.isEmpty(userEntities) ? userEntities[0] : null))
                 .build();
     }
 }

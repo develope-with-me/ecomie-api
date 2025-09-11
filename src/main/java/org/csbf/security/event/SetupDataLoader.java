@@ -3,7 +3,7 @@ package org.csbf.security.event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.csbf.security.constant.Role;
-import org.csbf.security.model.User;
+import org.csbf.security.model.UserEntity;
 import org.csbf.security.repository.UserRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -22,7 +22,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     @Transactional
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (!userRepo.existsByEmail(env.getProperty("super.admin.email"))) {
-            User superAdminUser = User.builder()
+            UserEntity superAdminUserEntity = UserEntity.builder()
                     .email(env.getProperty("super.admin.email"))
                     .firstname(env.getProperty("super.admin.first-name"))
                     .lastname(env.getProperty("super.admin.last-name"))
@@ -39,7 +39,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .accountEnabled(true)
                     .accountSoftDeleted(false)
                     .build();
-            userRepo.save(superAdminUser);
+            userRepo.save(superAdminUserEntity);
         }
     }
 }

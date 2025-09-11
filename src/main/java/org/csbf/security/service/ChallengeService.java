@@ -6,6 +6,12 @@ import org.csbf.security.utils.helperclasses.ResponseMessage;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 public interface ChallengeService {
     ResponseMessage store(HelperDto.ChallengeCreateDto challengeCreateDto);
     ResponseMessage changeType(UUID id, String status);

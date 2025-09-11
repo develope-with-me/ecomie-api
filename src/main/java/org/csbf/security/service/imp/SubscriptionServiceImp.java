@@ -5,12 +5,11 @@ import org.csbf.security.config.AuthContext;
 import org.csbf.security.constant.Role;
 import org.csbf.security.constant.SessionStatus;
 import org.csbf.security.exceptions.BadRequestException;
-import org.csbf.security.exceptions.ResourceExistsException;
-import org.csbf.security.exceptions.ResourceNotFoundException;
-import org.csbf.security.model.Challenge;
-import org.csbf.security.model.Session;
-import org.csbf.security.model.Subscription;
-import org.csbf.security.model.User;
+import org.csbf.security.exceptions.Problems;
+import org.csbf.security.model.ChallengeEntity;
+import org.csbf.security.model.SessionEntity;
+import org.csbf.security.model.SubscriptionEntity;
+import org.csbf.security.model.UserEntity;
 import org.csbf.security.repository.ChallengeRepository;
 import org.csbf.security.repository.SessionRepository;
 import org.csbf.security.repository.SubscriptionRepository;
@@ -28,6 +27,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Service
 @RequiredArgsConstructor
 public class SubscriptionServiceImp implements SubscriptionService {
@@ -42,8 +47,8 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Transactional
     public HelperDto.SubscriptionFullDto subscribe(HelperDto.SubscriptionCreateDto subscriptionCreateDto) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return createSubscription(subscriptionCreateDto, user);
+        UserEntity userEntity = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+        return createSubscription(subscriptionCreateDto, userEntity);
 
     }
 
@@ -52,8 +57,8 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     @Transactional
     public HelperDto.SubscriptionFullDto subscribeUser(UUID id, HelperDto.SubscriptionCreateDto subscriptionCreateDto) {
-        User user = userRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return createSubscription(subscriptionCreateDto, user);
+        UserEntity userEntity = userRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(id.toString())).toException());
+        return createSubscription(subscriptionCreateDto, userEntity);
     }
 
 
@@ -61,50 +66,50 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     @Transactional
     public ResponseMessage removeUserFromSession(UUID sessionId, UUID userId) {
-        Subscription subscription = subscriptionRepo.findBySession_IdAndUser_Id(sessionId, userId).orElseThrow(() -> new ResourceNotFoundException("User not subscribed to session"));
-        return unSubscribeUser(subscription.getId());
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySession_IdAndUser_Id(sessionId, userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "UserEntity not subscribed to sessionEntity").toException());
+        return unSubscribeUser(subscriptionEntity.getId());
     }
 
 
     @Override
     @Transactional
     public ResponseMessage unSubscribeUser(UUID subscriptionId) {
-        Subscription subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
 
-        Session session = subscription.getSession();
-        session.removeSubscription(subscription);
-        sessionRepo.save(session);
+        SessionEntity sessionEntity = subscriptionEntity.getSessionEntity();
+        sessionEntity.removeSubscription(subscriptionEntity);
+        sessionRepo.save(sessionEntity);
 
-        Challenge challenge = subscription.getChallenge();
-        challenge.removeSubscription(subscription);
-        challengeRepo.save(challenge);
+        ChallengeEntity challengeEntity = subscriptionEntity.getChallengeEntity();
+        challengeEntity.removeSubscription(subscriptionEntity);
+        challengeRepo.save(challengeEntity);
 
-        subscriptionRepo.delete(subscription);
-        return new ResponseMessage.SuccessResponseMessage("Subscription deleted");
+        subscriptionRepo.delete(subscriptionEntity);
+        return new ResponseMessage.SuccessResponseMessage("SubscriptionEntity deleted");
     }
 
     @Override
     public HelperDto.SubscriptionFullDto update(UUID subscriptionId,HelperDto.@NotNull SubscriptionCreateDto subscriptionCreateDto) {
-        Subscription subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
-        if (!subscription.getSession().getStatus().equals(SessionStatus.ONGOING)) {
-            throw new BadRequestException("Cannot modify subscription of session that is not ongoing");
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
+        if (!subscriptionEntity.getSessionEntity().getStatus().equals(SessionStatus.ONGOING)) {
+            throw Problems.PAYLOAD_VALIDATION_ERROR.appendDetail("Cannot modify subscriptionEntity of sessionEntity that is not ongoing").toException();
         }
 
 
-        subscription.setTarget(subscriptionCreateDto.target());
-        subscription.setChallenge(challengeRepo.findById(subscriptionCreateDto.challengeId()).orElseThrow(() -> new ResourceNotFoundException("Challenge not found")));
+        subscriptionEntity.setTarget(subscriptionCreateDto.target());
+        subscriptionEntity.setChallengeEntity(challengeRepo.findById(subscriptionCreateDto.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "challengeEntity with id (%s) not found".formatted(subscriptionCreateDto.challengeId())).toException()));
 
-        return new HelperDto.SubscriptionFullDto(subscriptionRepo.save(subscription));
+        return new HelperDto.SubscriptionFullDto(subscriptionRepo.save(subscriptionEntity));
     }
 
     @Override
     public HelperDto.SubscriptionFullDto getSubscription(UUID subscriptionId) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+        var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
 //        if (!authUser.getAuthorities().contains("ADMIN")) {
         if (authContext.getAuthUser().getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()))) {
-            if (!subscription.getUser().getEmail().equals(authContext.getAuthUser().getName())) {
-                throw new BadRequestException.InvalidAuthenticationRequestException("User not subscribed");
+            if (!subscription.getUserEntity().getEmail().equals(authContext.getAuthUser().getName())) {
+                throw Problems.INCONSISTENT_STATE_ERROR.appendDetail("UserEntity not subscribed").toException();
 
             }
         }
@@ -122,38 +127,37 @@ public class SubscriptionServiceImp implements SubscriptionService {
     @Override
     public HelperDto.SubscriptionFullDto getSessionSubscription(UUID sessionId) {
                 Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepo.findByEmail(authUser.getName()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        Session session = sessionRepo.findById(sessionId).orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        Subscription subscription = subscriptionRepo.findBySessionAndUser(session, user).orElseThrow(() -> new ResourceNotFoundException("User not subscribed to session"));
-        return new HelperDto.SubscriptionFullDto(subscription);
+        UserEntity userEntity = userRepo.findByEmail(authUser.getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authUser.getName())).toException());
+        SessionEntity sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySessionAndUser(sessionEntity, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "UserEntity not subscribed to sessionEntity").toException());
+        return new HelperDto.SubscriptionFullDto(subscriptionEntity);
     }
 
 
-    private HelperDto.SubscriptionFullDto createSubscription(HelperDto.SubscriptionCreateDto subscriptionCreateDto, @NotNull User user) {
-//        if(!user.getRoles().contains("ECOMIEST")) {
-        if(!user.getRole().equals(Role.ECOMIEST)) {
-            throw new BadRequestException("User not an ECOMIEST");
+    private HelperDto.SubscriptionFullDto createSubscription(HelperDto.SubscriptionCreateDto subscriptionCreateDto, @NotNull UserEntity userEntity) {
+        if(!userEntity.getRole().equals(Role.ECOMIEST)) {
+            throw new BadRequestException("UserEntity not an ECOMIEST");
         }
-        if (sessionRepo.existsBySubscriptions_UserId(user.getId())){
-            throw new ResourceExistsException("Subscription already exists");
+        if (sessionRepo.existsBySubscriptions_UserId(userEntity.getId())){
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.appendDetail("UserEntity has already subscribed to this sessionEntity").toException();
         }
-        Session session = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        Challenge challenge = challengeRepo.findById(subscriptionCreateDto.challengeId()).orElseThrow(() -> new ResourceNotFoundException("Challenge does not exist"));
+        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
+        ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionCreateDto.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "ChallengeEntity with id (%s) does not exist".formatted(subscriptionCreateDto.challengeId().toString())).toException());
 
-        var subscription = Subscription.builder()
+        var subscription = SubscriptionEntity.builder()
 //                .id(UUID.randomUUID())
                 .target(subscriptionCreateDto.target())
-                .session(session)
-                .user(user)
-                .challenge(challenge)
+                .sessionEntity(sessionEntity)
+                .userEntity(userEntity)
+                .challengeEntity(challengeEntity)
                 .build();
 
-//        session.addSubscription(subscription);
-//        session = sessionRepo.save(session);
-//        challenge.addSubscription(subscription);
-//        challenge = challengeRepo.save(challenge);
-//        user.addSubscription(subscription);
-//        user = userRepo.save(user);
+//        sessionEntity.addSubscription(subscriptionEntity);
+//        sessionEntity = sessionRepo.save(sessionEntity);
+//        challengeEntity.addSubscription(subscriptionEntity);
+//        challengeEntity = challengeRepo.save(challengeEntity);
+//        userEntity.addSubscription(subscriptionEntity);
+//        userEntity = userRepo.save(userEntity);
 
         subscription = subscriptionRepo.save(subscription);
 

@@ -4,35 +4,34 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.csbf.security.utils.commons.BaseEntity;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class EmailVerificationToken {
-    private static final int EXPIRATION = 60 * 24;
+@Table(name = "email_verification_tokens")
+public class EmailVerificationTokenEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private static final int EXPIRATION = 60 * 24;
 
     private String token;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @OneToOne(targetEntity = UserEntity.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
-    private User user;
+    private UserEntity user;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date expiryDate;
-
-    public EmailVerificationToken(User user) {
+    public EmailVerificationTokenEntity(UserEntity user) {
     }
 
     private Date calculateExpiryDate(int expiryTimeInMinutes) {
@@ -41,6 +40,4 @@ public class EmailVerificationToken {
         cal.add(Calendar.MINUTE, expiryTimeInMinutes);
         return new Date(cal.getTime().getTime());
     }
-
-    // standard constructors, getters and setters
 }

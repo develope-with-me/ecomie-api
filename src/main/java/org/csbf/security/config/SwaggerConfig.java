@@ -26,6 +26,12 @@ import java.util.List;
 //import springfox.documentation.spi.DocumentationType;
 //import springfox.documentation.spring.web.plugins.Docket;
 
+
+/**
+ * Ecomie Project.
+ *
+ * @author DB.Tech
+ */
 @Configuration
 //@EnableSwagger2
 @ConditionalOnProperty(value = "springfox.documentation.enabled", havingValue = "true", matchIfMissing = true)
