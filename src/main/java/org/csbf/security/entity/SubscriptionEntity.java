@@ -1,4 +1,4 @@
-package org.csbf.security.model;
+package org.csbf.security.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.csbf.security.utils.commons.BaseEntity;
-
-import java.util.List;
 
 
 /**

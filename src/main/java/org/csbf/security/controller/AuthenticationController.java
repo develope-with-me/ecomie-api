@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.event.OnRegistrationCompleteEvent;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.utils.commons.ExtendedEmailValidator;
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -37,14 +37,14 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @Operation(summary = "Register", description = "Create account", tags = {"Unauthenticated"})
-    public ResponseEntity<HelperDto.AuthenticationResponse> register(@RequestBody HelperDto.RegisterRequest request, HttpServletRequest servletRequest) {
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
         /**For Production */
         /*
         * if (EmailValidator.getInstance().isValid(request.email()))
         *    throw new BadRequestException("Invalid '" + request.email() + "' email address");
         * */
 
-        HelperDto.AuthenticationResponse response = service.register(request);
+        AuthenticationResponse response = service.register(request);
         log.info("{}", response.toString());
         if (response.success()) {
             applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(servletRequest.getHeader("host"), request.email()));
@@ -55,7 +55,7 @@ public class AuthenticationController {
 
     @PostMapping("/authenticate")
     @Operation(summary = "Authenticate", description = "Authenticate userEntity using email and password", tags = {"Unauthenticated"})
-    public ResponseEntity<HelperDto.AuthenticationResponse> authenticate(@RequestBody HelperDto.AuthenticationRequest request, HttpServletRequest servletRequest) {
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest servletRequest) {
         String appUrl = servletRequest.getContextPath();
 
         /**For Production */
@@ -64,21 +64,21 @@ public class AuthenticationController {
          *    throw new BadRequestException("Invalid '" + request.email() + "' email address");
          * */
 
-        HelperDto.AuthenticationResponse response = service.authenticate(request);
+        AuthenticationResponse response = service.authenticate(request);
         var user = response.user();
         return ResponseEntity.ok(response);
     }
 
     @RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
     @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"Unauthenticated"})
-    public ResponseEntity<HelperDto.ConfirmEmailResponse> confirmUserAccount(@ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
+    public ResponseEntity<ConfirmEmailResponse> confirmUserAccount(@ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
         log.info("Email {}", email);
         return ResponseEntity.ok(service.confirmEmail(email, token));
     }
 
     @RequestMapping(value = "/resend-link", method = {RequestMethod.POST})
     @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = {"Unauthenticated"})
-    public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody HelperDto.ResendVerificationEmailDTO emailDTO, HttpServletRequest servletRequest) {
+    public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody ResendVerificationEmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
         /*

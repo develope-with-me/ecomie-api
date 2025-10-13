@@ -1,13 +1,10 @@
 package org.csbf.security.utils.commons;
 
-import org.csbf.security.config.AuthContext;
-import org.csbf.security.model.UserEntity;
-import org.springframework.security.core.Authentication;
+import org.csbf.security.entity.UserEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.UUID;
 
 public interface Domain extends Thing {

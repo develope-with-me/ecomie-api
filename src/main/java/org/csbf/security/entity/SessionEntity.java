@@ -1,4 +1,4 @@
-package org.csbf.security.model;
+package org.csbf.security.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

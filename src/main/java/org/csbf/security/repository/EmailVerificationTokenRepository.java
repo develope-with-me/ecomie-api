@@ -1,7 +1,7 @@
 package org.csbf.security.repository;
 
-import org.csbf.security.model.EmailVerificationTokenEntity;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.EmailVerificationTokenEntity;
+import org.csbf.security.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

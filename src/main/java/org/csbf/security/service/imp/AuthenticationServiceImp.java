@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.security.constant.Role;
 import org.csbf.security.exceptions.*;
-import org.csbf.security.model.EmailVerificationTokenEntity;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.EmailVerificationTokenEntity;
+import org.csbf.security.entity.UserEntity;
 import org.csbf.security.repository.EmailVerificationTokenRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.JwtService;
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,7 +41,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
     private final EmailVerificationTokenRepository verificationTokenRepo;
 
     @Override
-    public HelperDto.AuthenticationResponse register(HelperDto.RegisterRequest request) {
+    public AuthenticationResponse register(RegisterRequest request) {
         String msg = "userEntity already exist";
         if (userRepo.findByEmail(request.email()).isPresent())
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Email (%s) already in use".formatted(request.email())).toException();
@@ -51,8 +51,8 @@ public class AuthenticationServiceImp implements AuthenticationService {
 //        String roles = Role.USER.name();
 
         var user = UserEntity.builder()
-                .firstname(request.firstname())
-                .lastname(request.lastname())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
@@ -68,7 +68,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
     }
 
     @Override
-    public HelperDto.AuthenticationResponse authenticate(HelperDto.AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
         String message =  "userEntity does not exist";
         userRepo.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException.EmailNotFoundException(request.email()));
 
@@ -91,6 +91,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
         }
 
         var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.(user);
         message = "authenticated";
         return getAuthenticationResponse(true, message, jwtToken, user);
     }
@@ -106,7 +107,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
         return UUID.randomUUID().toString();
     }
     @Override
-    public HelperDto.ConfirmEmailResponse confirmEmail(String email, String token) {
+    public ConfirmEmailResponse confirmEmail(String email, String token) {
         String decodedEmail;
         try {
             decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
@@ -122,25 +123,25 @@ public class AuthenticationServiceImp implements AuthenticationService {
         if (userEntity != null) {
             userEntity.setAccountEnabled(true);
             userRepo.save(userEntity);
-            return new HelperDto.ConfirmEmailResponse(userEntity.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
+            return new ConfirmEmailResponse(userEntity.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
         }
 
-        return new HelperDto.ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("userEntity and token do not match"));
+        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("userEntity and token do not match"));
     }
 
-    public HelperDto.UserBasicDto getUserDTO(UserEntity userEntity) {
-       return userEntity == null ? null : HelperDto.UserBasicDto.builder()
+    public UserBasicDto getUserDTO(UserEntity userEntity) {
+       return userEntity == null ? null : UserBasicDto.builder()
                 .id(userEntity.getId())
-                .firstname(userEntity.getFirstName())
-                .lastname(userEntity.getLastName())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
                 .email(userEntity.getEmail())
                 .accountEnabled(userEntity.isAccountEnabled())
                 .accountBlocked(userEntity.isAccountBlocked())
                 .accountSoftDeleted(userEntity.isAccountSoftDeleted())
                 .build();
     }
-    private HelperDto.AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity... userEntities) {
-        return HelperDto.AuthenticationResponse.builder()
+    private AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity... userEntities) {
+        return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message(message)
                 .success(success)

@@ -14,20 +14,19 @@ import org.csbf.security.utils.commons.Domain;
 @Data
 @Builder
 @AllArgsConstructor
-public class ResponseMessage<T extends Domain> {
+public class ResponseMessage  {
     private boolean success;
     private String description;
-    private T domain;
 
     public static class SuccessResponseMessage extends ResponseMessage {
         public SuccessResponseMessage(String description) {
-            super(true, description, null);
+            super(true, description);
         }
     }
 
     public static class ExceptionResponseMessage extends ResponseMessage {
         public ExceptionResponseMessage(String description) {
-            super(false, description, null);
+            super(false, description);
         }
     }
 }

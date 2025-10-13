@@ -1,7 +1,6 @@
 package org.csbf.security.service;
 
-import org.csbf.security.mapper.UserMapper;
-import org.csbf.security.utils.helperclasses.HelperDto.*;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,7 +48,7 @@ public interface UserService {
 
     List<User> getUsersInASession(UUID sessionId, boolean blocked, Optional<String> optionalChallengeId);
 
-//    List<HelperDto.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
+//    List<HelperDomain.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
 
     List<User> getAllUsers();
 }

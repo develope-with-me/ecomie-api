@@ -1,6 +1,6 @@
 package org.csbf.security.repository;
 
-import org.csbf.security.model.ChallengeEntity;
+import org.csbf.security.entity.ChallengeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

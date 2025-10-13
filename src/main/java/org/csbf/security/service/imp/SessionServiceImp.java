@@ -7,17 +7,17 @@ import org.csbf.security.constant.Role;
 import org.csbf.security.constant.SessionStatus;
 import org.csbf.security.exceptions.BadRequestException;
 import org.csbf.security.exceptions.Problems;
-import org.csbf.security.model.SessionEntity;
+import org.csbf.security.mapper.SessionMapper;
 import org.csbf.security.repository.ChallengeRepository;
 import org.csbf.security.repository.SessionRepository;
 import org.csbf.security.repository.SubscriptionRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.SessionService;
-import org.csbf.security.utils.helperclasses.HelperDto;
-import org.csbf.security.utils.helperclasses.ResponseMessage;
+import org.csbf.security.utils.commons.Mapper;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
+import org.csbf.security.utils.helperclasses.ResponseMessage.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -35,31 +35,28 @@ public class SessionServiceImp implements SessionService {
     private final SubscriptionRepository subscriptionRepo;
     private final UserRepository userRepo;
     private final AuthContext authContext;
+    private final SessionMapper mapper;
 
 
     @Override
-    public ResponseMessage store(HelperDto.SessionCreateDto sessionCreateDto) {
-        sessionRepo.findByName(sessionCreateDto.name()).ifPresent(session -> {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "SessionEntity %s exists".formatted(session.getName())).toException();
+    public SuccessResponseMessage store(Session session) {
+        sessionRepo.findByName(session.name()).ifPresent(sessionEntity -> {
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "SessionEntity %s exists".formatted(sessionEntity.getName())).toException();
         });
-        var session = SessionEntity.builder()
-                .name(sessionCreateDto.name())
-                .description(sessionCreateDto.description())
-                .startDate(sessionCreateDto.startDate())
-                .endDate(sessionCreateDto.endDate())
-                .status(SessionStatus.INACTIVE)
-                .build();
-        var createdSession = sessionRepo.save(session);
-        return new ResponseMessage.SuccessResponseMessage("SessionEntity created. Status: " + createdSession.getStatus());
+        var sessionEntity = mapper.asEntity(session);
+        sessionEntity.setStatus(SessionStatus.INACTIVE);
+
+        var createdSession = sessionRepo.save(sessionEntity);
+        return new SuccessResponseMessage("SessionEntity created. Status: " + createdSession.getStatus());
     }
 
     @Override
-    public ResponseMessage changeStatus(UUID id, String status) {
+    public SuccessResponseMessage changeStatus(UUID id, String status) {
         var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
 
         String statusUpperCase = status.toUpperCase();
         if (!EnumUtils.isValidEnum(SessionStatus.class, statusUpperCase)) {
-            throw new BadRequestException("Invalid sessionEntity status");
+            throw Problems.BAD_REQUEST.withProblemError("status", "Invalid sessionEntity status(%s)".formatted(status)).toException();
         }
         if ( SessionStatus.ONGOING.name().equals(statusUpperCase) && sessionRepo.existsByStatus(SessionStatus.valueOf(statusUpperCase))) {
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Only one sessionEntity can be active at a time. Please end currently ongoing sessionEntity first").toException();
@@ -67,122 +64,103 @@ public class SessionServiceImp implements SessionService {
         session.setStatus(SessionStatus.valueOf(statusUpperCase));
 
         var updatedSession = sessionRepo.save(session);
-        return new ResponseMessage.SuccessResponseMessage("SessionEntity status changed. Status: " + updatedSession.getStatus());
+        return new SuccessResponseMessage("SessionEntity status changed. Status: " + updatedSession.getStatus());
     }
 
     @Override
-    public ResponseMessage update(UUID id, HelperDto.SessionCreateDto sessionCreateDto) {
-        var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
-        sessionRepo.findByName(sessionCreateDto.name()).ifPresent(ses -> {
+    public SuccessResponseMessage update(UUID id, Session session) {
+        var sessionEntity = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
+        sessionRepo.findByName(session.name()).ifPresent(ses -> {
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "SessionEntity %s exists".formatted(ses.getName())).toException();
         });
 
-        session.setName(sessionCreateDto.name());
-        session.setDescription(sessionCreateDto.description());
-        if (session.getStatus() != SessionStatus.ONGOING) {
-            if (sessionCreateDto.startDate() != null)
-                session.setStartDate(sessionCreateDto.startDate());
-            if (sessionCreateDto.endDate() != null)
-                session.setEndDate(sessionCreateDto.endDate());
-        }
+        var oldSession = mapper.asDomainObject(sessionEntity);
+        var oldJsonSession = Mapper.toJsonObject(oldSession);
+        var newJsonSession = Mapper.toJsonObject(session);
+        oldJsonSession.putAll(newJsonSession);
+        session = Mapper.fromJsonObject(oldJsonSession, Session.class);
 
-        var updatedSession = sessionRepo.save(session);
-        return new ResponseMessage.SuccessResponseMessage("SessionEntity updated. Status: " + updatedSession.getStatus());
+        var updatedSession = sessionRepo.save(mapper.asEntity(session));
+        return new SuccessResponseMessage("SessionEntity updated. Status: " + updatedSession.getStatus());
     }
 
     @Override
-    public HelperDto.SessionFullDto getSession(UUID id) {
+    public Session getSession(UUID id) {
         Authentication authUser = authContext.getAuthUser();
-        var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
-
+        var sessionEntity = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
+        var session = mapper.asDomainObject(sessionEntity);
         if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))){
-//            var userEntity = userRepo.findByEmail(authUser.getName()).orElseThrow(()->new ResourceNotFoundException("UserEntity not found"));
-//            if (subscriptionRepo.findAllByUserAndChallenge(userEntity, challengeEntity).isEmpty()) {
-//                throw new BadRequestException.InvalidAuthenticationRequestException("UserEntity not subscribed");
-//            }
-            return HelperDto.SessionFullDto.justMinimal(session);
+            return session.justMinimal();
         }
-        return new HelperDto.SessionFullDto(session);
+        return session;
     }
 
     @Override
-    public List<HelperDto.SessionFullDto> getSessions() {
+    public List<Session> getSessions() {
         Authentication authUser = authContext.getAuthUser();
-        var sessions = sessionRepo.findAll();
-        ArrayList sessionDtos = new ArrayList<HelperDto.SessionFullDto>();
-
+        var sessionEntities = sessionRepo.findAll();
+        var sessions = mapper.asDomainObjects(sessionEntities);
         if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))) {
-//            var userEntity = userRepo.findByEmail(authUser.getName()).orElseThrow(()->new ResourceNotFoundException("UserEntity not found"));
-            sessions.forEach(session -> {
-//                if (subscriptionRepo.findAllByUserAndChallenge(userEntity, challengeEntity).isEmpty()) {
-//                    throw new BadRequestException.InvalidAuthenticationRequestException("UserEntity not subscribed");
-//                }
-                sessionDtos.add(HelperDto.SessionFullDto.justMinimal(session));
-            });
-            return sessionDtos;
+            List<Session> minimalSessions = new ArrayList<>();
+            sessions.forEach(session -> minimalSessions.add(session.justMinimal()));
+            return minimalSessions;
         }
 
-        sessions.forEach(session -> sessionDtos.add(new HelperDto.SessionFullDto(session)));
-
-        return sessionDtos;
+        return sessions;
     }
 
     @Override
-    @Transactional
-    public HelperDto.SessionFullDto assignChallenges(UUID sessionId, UUID[] challengeIds) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+//    @Transactional
+    public Session assignChallenges(UUID sessionId, List<UUID> challengeIds) {
+        var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
 
-        Arrays.asList(challengeIds).forEach(challengeId -> {
+        challengeIds.forEach(challengeId -> {
             var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-            session.addChallenge(challenge);
+            sessionEntity.addChallenge(challenge);
         });
 
-        return new HelperDto.SessionFullDto(sessionRepo.save(session));
+        return mapper.asDomainObject(sessionRepo.save(sessionEntity));
     }
 
     @Override
-    @Transactional
-    public HelperDto.SessionFullDto assignChallenge(UUID sessionId, UUID challengeId) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+//    @Transactional
+    public Session assignChallenge(UUID sessionId, UUID challengeId) {
+        var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
 
         var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-        session.addChallenge(challenge);
+        sessionEntity.addChallenge(challenge);
 
-        return new HelperDto.SessionFullDto(sessionRepo.save(session));
+        return mapper.asDomainObject(sessionRepo.save(sessionEntity));
     }
 
     @Override
-    @Transactional
-    public HelperDto.SessionFullDto removeChallenges(UUID sessionId, UUID[] challengeIds) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+//    @Transactional
+    public Session removeChallenges(UUID sessionId, List<UUID> challengeIds) {
+        var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
 
-        Arrays.asList(challengeIds).forEach(challengeId -> {
+        challengeIds.forEach(challengeId -> {
             var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-            session.removeChallenge(challenge);
+            sessionEntity.removeChallenge(challenge);
         });
 
-        return new HelperDto.SessionFullDto(sessionRepo.save(session));
+        return mapper.asDomainObject(sessionRepo.save(sessionEntity));
     }
 
     @Override
-    @Transactional
-    public HelperDto.SessionFullDto removeChallenge(UUID sessionId, UUID challengeId) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
-        var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-        session.removeChallenge(challenge);
+//    @Transactional
+    public Session removeChallenge(UUID sessionId, UUID challengeId) {
+        var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
+        sessionEntity.removeChallenge(challengeEntity);
 
-        return new HelperDto.SessionFullDto(sessionRepo.save(session));
+        return mapper.asDomainObject(sessionRepo.save(sessionEntity)) ;
     }
 
     @Override
-    public List<HelperDto.SessionFullDto> getUserSessions(UUID userId) {
+    public List<Session> getUserSessions(UUID userId) {
         var user = userRepo.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
-        ArrayList sessionDtos = new ArrayList<HelperDto.SessionFullDto>();
-        subscriptionRepo.selectAllSessionsThisUserHasSubscribedTo(user).forEach(session -> {
-            sessionDtos.add(new HelperDto.SessionFullDto(session));
-        });
-
-        return sessionDtos;
+        var sessionEntities = subscriptionRepo.selectAllSessionsThisUserHasSubscribedTo(user);
+        return mapper.asDomainObjects(sessionEntities);
     }
 
 }

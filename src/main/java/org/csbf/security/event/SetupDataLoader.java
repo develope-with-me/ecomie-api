@@ -3,7 +3,7 @@ package org.csbf.security.event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.csbf.security.constant.Role;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.UserEntity;
 import org.csbf.security.repository.UserRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

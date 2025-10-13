@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.security.exceptions.Problems;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.UserEntity;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.AuthenticationService;
 import org.csbf.security.service.EmailService;

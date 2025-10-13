@@ -1,8 +1,7 @@
-package org.csbf.security.model;
+package org.csbf.security.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.csbf.security.repository.ChallengeReportRepository;
 import org.csbf.security.utils.commons.BaseEntity;
 
 

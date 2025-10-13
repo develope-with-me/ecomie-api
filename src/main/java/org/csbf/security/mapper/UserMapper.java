@@ -1,11 +1,10 @@
 package org.csbf.security.mapper;
 
 
-import org.csbf.security.utils.helperclasses.HelperDto.User;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.utils.helperclasses.HelperDomain.User;
+import org.csbf.security.entity.UserEntity;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 

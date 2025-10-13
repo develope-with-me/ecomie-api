@@ -1,7 +1,7 @@
 package org.csbf.security.repository;
 
 import org.csbf.security.constant.SessionStatus;
-import org.csbf.security.model.SessionEntity;
+import org.csbf.security.entity.SessionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

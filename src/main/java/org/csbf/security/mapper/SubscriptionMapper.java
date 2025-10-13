@@ -1,13 +1,12 @@
 package org.csbf.security.mapper;
 
 
-import org.csbf.security.model.SubscriptionEntity;
-import org.csbf.security.utils.helperclasses.HelperDto;
-import org.csbf.security.utils.helperclasses.HelperDto.Challenge;
-import org.csbf.security.utils.helperclasses.HelperDto.ChallengeReport;
-import org.csbf.security.utils.helperclasses.HelperDto.Session;
-import org.csbf.security.utils.helperclasses.HelperDto.User;
-import org.csbf.security.utils.helperclasses.HelperDto.Subscription;
+import org.csbf.security.entity.SubscriptionEntity;
+import org.csbf.security.utils.helperclasses.HelperDomain.Challenge;
+import org.csbf.security.utils.helperclasses.HelperDomain.ChallengeReport;
+import org.csbf.security.utils.helperclasses.HelperDomain.Session;
+import org.csbf.security.utils.helperclasses.HelperDomain.User;
+import org.csbf.security.utils.helperclasses.HelperDomain.Subscription;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mappings;

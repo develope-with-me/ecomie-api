@@ -1,9 +1,9 @@
 package org.csbf.security.repository;
 
-import org.csbf.security.model.ChallengeEntity;
-import org.csbf.security.model.SessionEntity;
-import org.csbf.security.model.SubscriptionEntity;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.ChallengeEntity;
+import org.csbf.security.entity.SessionEntity;
+import org.csbf.security.entity.SubscriptionEntity;
+import org.csbf.security.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

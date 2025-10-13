@@ -1,6 +1,6 @@
 package org.csbf.security.service;
 
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,15 +15,15 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface SubscriptionService {
-    HelperDto.SubscriptionFullDto subscribe(HelperDto.SubscriptionCreateDto subscriptionCreateDto);
-    HelperDto.SubscriptionFullDto subscribeUser(UUID userId, HelperDto.SubscriptionCreateDto subscriptionCreateDto);
+    Subscription subscribe(SubscriptionCreateDto subscriptionCreateDto);
+    Subscription subscribeUser(UUID userId, SubscriptionCreateDto subscriptionCreateDto);
     ResponseMessage unSubscribeUser(UUID subscriptionId);
 
     @Transactional
     ResponseMessage removeUserFromSession(UUID sessionId, UUID userId);
 
-    HelperDto.SubscriptionFullDto update(UUID subscriptionId, HelperDto.@NotNull SubscriptionCreateDto subscriptionCreateDto);
-    HelperDto.SubscriptionFullDto getSubscription(UUID subscriptionId);
-    List<HelperDto.SubscriptionFullDto> getSubscriptions();
-    HelperDto.SubscriptionFullDto getSessionSubscription(UUID sessionId);
+    Subscription update(UUID subscriptionId, @NotNull SubscriptionCreateDto subscriptionCreateDto);
+    Subscription getSubscription(UUID subscriptionId);
+    List<Subscription> getSubscriptions();
+    Subscription getSessionSubscription(UUID sessionId);
 }

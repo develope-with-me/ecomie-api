@@ -1,15 +1,14 @@
 package org.csbf.security.utils.helperclasses;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.csbf.security.config.AuthContext;
-import org.csbf.security.model.*;
+import org.csbf.security.entity.*;
 import org.csbf.security.utils.commons.Domain;
 import org.csbf.security.utils.commons.ExtendedEmailValidator;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -21,12 +20,13 @@ import java.util.*;
  * @author DB.Tech
  */
 @RequiredArgsConstructor
-public class HelperDto {
+public class HelperDomain {
 
+    private static final String VALID_DATE_TIME = "^(\\d{4})(-(\\d{2}))(-(\\d{2}))(T(\\d{2}):(\\d{2})(:(\\d{2})))$";
 
 
     @Builder
-    public record RegisterRequest(String firstname, String lastname, @ExtendedEmailValidator String email, @Size(min=8) String password) {
+    public record RegisterRequest(String firstName, String lastName, @ExtendedEmailValidator String email, @Size(min=8) String password) {
     }
 
     @Builder
@@ -175,9 +175,10 @@ public class HelperDto {
     }
 
     @Builder
-    public record Session(UUID id, String name, String description, List<Challenge> challenges,
-                                 List<Subscription> subscriptions, LocalDateTime startDate, LocalDateTime endDate,
-                                 String status, LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain{
+    public record Session(UUID id, @NotBlank String name, String description, @Pattern(regexp =VALID_DATE_TIME) LocalDateTime startDate,
+                          @Pattern(regexp =VALID_DATE_TIME) LocalDateTime endDate, String status, List<Challenge> challenges,
+                          LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain{
+
 
         @Override
         public String alternateName() {
@@ -185,9 +186,13 @@ public class HelperDto {
         }
 
         public static Session justMinimal(SessionEntity sessionEntity) {
-            return new Session(sessionEntity.getId(), sessionEntity.getName(), sessionEntity.getDescription(), null,
-                    null, sessionEntity.getStartDate(), sessionEntity.getEndDate(), sessionEntity.getStatus().name(),
+            return new Session(sessionEntity.getId(), sessionEntity.getName(), sessionEntity.getDescription(),
+                    sessionEntity.getStartDate(), sessionEntity.getEndDate(), sessionEntity.getStatus().name(), null,
                     sessionEntity.getCreatedAt(), sessionEntity.getUpdatedAt(), sessionEntity.getCreatedBy(), sessionEntity.getUpdatedBy());
+        }
+
+        public Session justMinimal() {
+            return new Session (id, name, description, startDate, endDate, status, null, createdAt, updatedAt, createdBy, updatedBy);
         }
     }
 
@@ -225,7 +230,7 @@ public class HelperDto {
 
 
     @Builder
-    public record ChallengeCreateDto(String name, String description, int target, String type, UUID[] sessions) {
+    public record ChallengeCreateDto(String name, String description, int target, String type, List<UUID> sessions) {
     }
 
     public static List<ChallengeFullDto> getMinimalChallenges(List<ChallengeEntity> challengeEntities) {
@@ -235,7 +240,7 @@ public class HelperDto {
     }
 
     @Builder
-    public record Challenge(UUID id, String name, String description, int target,
+    public record Challenge(UUID id, @NotBlank String name, String description, @Min(value = 1) int target,
                                     List<Session> sessions, List<Subscription> subscriptions, String type,
                             LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
 
@@ -248,6 +253,11 @@ public class HelperDto {
             return new Challenge(challengeEntity.getId(), challengeEntity.getName(), challengeEntity.getDescription(), challengeEntity.getTarget(),
                     null, null, challengeEntity.getType().name(), challengeEntity.getCreatedAt(),
                     challengeEntity.getUpdatedAt(), challengeEntity.getCreatedBy(), challengeEntity.getUpdatedBy());
+        }
+
+        public Challenge justMinimal () {
+            return new Challenge(id, name, description, target, null, null, type, createdAt,
+                    updatedAt, createdBy, updatedBy);
         }
 
 
@@ -292,7 +302,7 @@ public class HelperDto {
 
 
     @Builder
-    public record Subscription(UUID id, int target, boolean blocked, User user, Challenge challenge,
+    public record Subscription(UUID id, @Min(value = 1) int target, boolean blocked, User user, Challenge challenge,
                                       Session session, List<ChallengeReport> reports,
                                LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
 
@@ -317,6 +327,11 @@ public class HelperDto {
             return new Subscription(subscriptionEntity.getId(), subscriptionEntity.getTarget(), subscriptionEntity.isBlocked(), null,
                     null, null, null,  subscriptionEntity.getCreatedAt(),
                     subscriptionEntity.getUpdatedAt(), subscriptionEntity.getCreatedBy(), subscriptionEntity.getUpdatedBy());
+        }
+
+        public Subscription justMinimal () {
+            return new Subscription(id, target, blocked, null, null, null, null,
+                    createdAt, updatedAt, createdBy, updatedBy);
         }
     }
 
@@ -358,7 +373,7 @@ public class HelperDto {
         return null;
     }
 
-    public record RequestProps(UUID id, String status, String type, String role, UUID[] ids, boolean blocked, UUID challengeId) {
+    public record RequestProps(UUID id, String status, String type, String role, List<UUID> ids, boolean blocked, UUID challengeId) {
     }
 
 

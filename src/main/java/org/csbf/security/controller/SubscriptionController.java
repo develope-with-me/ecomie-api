@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.security.service.SubscriptionService;
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +27,13 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
     @PostMapping(value = "/ecomiest/subscriptions")
     @Operation(summary = "Create Subscriptions", description = "Create new subscriptionEntity", tags = { "ECOMIEST" })
-    protected ResponseEntity<HelperDto.SubscriptionFullDto> createSubscription(@RequestBody HelperDto.SubscriptionCreateDto subscriptionCreateDto) {
+    protected ResponseEntity<Subscription> createSubscription(@RequestBody SubscriptionCreateDto subscriptionCreateDto) {
         return new ResponseEntity<>(subscriptionService.subscribe(subscriptionCreateDto), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/admin/subscriptions/user/{userId}")
     @Operation(summary = "Subscribe UserEntity", description = "Add a userEntity to a sessionEntity", tags = { "ADMIN" })
-    public ResponseEntity<HelperDto.SubscriptionFullDto> subscribeUser(@PathVariable(name = "userId") UUID userId, @RequestBody HelperDto.SubscriptionCreateDto subscriptionCreateDto) {
+    public ResponseEntity<Subscription> subscribeUser(@PathVariable(name = "userId") UUID userId, @RequestBody SubscriptionCreateDto subscriptionCreateDto) {
         return new ResponseEntity<>(subscriptionService.subscribeUser(userId, subscriptionCreateDto), HttpStatus.PARTIAL_CONTENT);
     }
 
@@ -52,20 +52,20 @@ public class SubscriptionController {
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PostMapping(value = "/admin/subscriptions/{subscriptionId}")
     @Operation(summary = "Update SubscriptionEntity", description = "Update subscriptionEntity", tags = { "ADMIN" })
-    public HelperDto.SubscriptionFullDto updateSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody HelperDto.SubscriptionCreateDto subscriptionCreateDto) {
+    public Subscription updateSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody SubscriptionCreateDto subscriptionCreateDto) {
         return subscriptionService.update(subscriptionId, subscriptionCreateDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/{subscriptionId}")
     @Operation(summary = "Get SubscriptionEntity", description = "Get subscriptionEntity", tags = { "ECOMIEST" })
-    public HelperDto.SubscriptionFullDto getSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId) {
+    public Subscription getSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId) {
         return subscriptionService.getSubscription(subscriptionId);
     }
 
     @GetMapping(value = "/admin/subscriptions")
     @Operation(summary = "Get Subscriptions", description = "Get all subscriptionEntities", tags = { "ADMIN" })
-    public ResponseEntity<List<HelperDto.SubscriptionFullDto>> getSubscriptions() {
+    public ResponseEntity<List<Subscription>> getSubscriptions() {
         return ResponseEntity.ok(subscriptionService.getSubscriptions());
     }
 
@@ -73,7 +73,7 @@ public class SubscriptionController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/sessions/{sessionId}")
     @Operation(summary = "Get SubscriptionEntity", description = "Get subscriptionEntity", tags = { "ECOMIEST" })
-    public HelperDto.SubscriptionFullDto getSessionSubscription(@PathVariable(name = "sessionId") UUID sessionId) {
+    public Subscription getSessionSubscription(@PathVariable(name = "sessionId") UUID sessionId) {
         return subscriptionService.getSessionSubscription(sessionId);
     }
 

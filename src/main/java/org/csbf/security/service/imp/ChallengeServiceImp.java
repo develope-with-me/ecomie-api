@@ -1,19 +1,24 @@
 package org.csbf.security.service.imp;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
 import org.csbf.security.config.AuthContext;
 import org.csbf.security.constant.ChallengeType;
 import org.csbf.security.constant.Role;
 import org.csbf.security.exceptions.Problems;
-import org.csbf.security.model.ChallengeEntity;
+import org.csbf.security.entity.ChallengeEntity;
+import org.csbf.security.mapper.ChallengeMapper;
+import org.csbf.security.mapper.SessionMapper;
 import org.csbf.security.repository.ChallengeRepository;
 import org.csbf.security.repository.SessionRepository;
 import org.csbf.security.repository.SubscriptionRepository;
 import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.ChallengeService;
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.commons.Mapper;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
+import org.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 /**
@@ -38,25 +44,27 @@ public class ChallengeServiceImp implements ChallengeService {
     private final UserRepository userRepo;
     private final SubscriptionRepository subscriptionRepo;
     private final AuthContext authContext;
+    private final ChallengeMapper mapper;
+
 
     @Override
     @Transactional
-    public ResponseMessage store(HelperDto.ChallengeCreateDto challengeCreateDto) {
+    public ResponseMessage store(Challenge challenge) {
 
-        if (!EnumUtils.isValidEnum(ChallengeType.class, challengeCreateDto.type().toUpperCase())) {
-            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challengeEntity type (%s)".formatted(challengeCreateDto.type())).toException();
+        if (!EnumUtils.isValidEnum(ChallengeType.class, challenge.type().toUpperCase())) {
+            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challengeEntity type (%s)".formatted(challenge.type())).toException();
         }
-        var type = challengeCreateDto.type().toUpperCase();
-        challengeRepo.findByName(challengeCreateDto.name()).ifPresent(challenge -> {throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "ChallengeEntity with name (%s) already exist".formatted(challengeCreateDto.name())).toException();});
-        var challenge = ChallengeEntity.builder()
-                .name(challengeCreateDto.name())
-                .description(challengeCreateDto.description())
+        var type = challenge.type().toUpperCase();
+        challengeRepo.findByName(challenge.name()).ifPresent(_ -> {throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "ChallengeEntity with name (%s) already exist".formatted(challenge.name())).toException();});
+        var challengeEntity = ChallengeEntity.builder()
+                .name(challenge.name())
+                .description(challenge.description())
                 .type(ChallengeType.valueOf(type))
-                .target(challengeCreateDto.target())
+                .target(challenge.target())
                 .build();
 
-        addSessionToChallenge(challengeCreateDto.sessions(), challenge);
-        challengeRepo.save(challenge);
+        addSessionToChallenge(challenge.sessions(), challengeEntity);
+        challengeRepo.save(challengeEntity);
         return new ResponseMessage.SuccessResponseMessage("ChallengeEntity created. Type: " + type);
 
     }
@@ -75,30 +83,34 @@ public class ChallengeServiceImp implements ChallengeService {
 
     @Override
     @Transactional
-    public ResponseMessage update(UUID challengeId, HelperDto.ChallengeCreateDto challengeCreateDto) {
-        var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-        challengeRepo.findByName(challengeCreateDto.name()).ifPresent(chal -> {
+    public ResponseMessage update(UUID challengeId, Challenge challenge) {
+        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
+        challengeRepo.findByName(challenge.name()).ifPresent(chal -> {
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "ChallengeEntity with the name (%s) already exist".formatted(chal.getName())).toException();
         });
 
-        if (!EnumUtils.isValidEnum(ChallengeType.class, challengeCreateDto.type().toUpperCase())) {
-            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challengeEntity type (%s)".formatted(challengeCreateDto.type())).toException();
+        if (!EnumUtils.isValidEnum(ChallengeType.class, challenge.type().toUpperCase())) {
+            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challengeEntity type (%s)".formatted(challenge.type())).toException();
         }
 
-        challenge.setName(challengeCreateDto.name());
-        challenge.setDescription(challenge.getDescription());
-        challenge.setTarget(challengeCreateDto.target());
+        addSessionToChallenge(challenge.sessions(), challengeEntity);
 
-        addSessionToChallenge(challengeCreateDto.sessions(), challenge);
-        challengeRepo.save(challenge);
+        var oldChallenge = mapper.asDomainObject(challengeEntity);
+        var oldJsonChallenge = Mapper.toJsonObject(oldChallenge);
+        var newJsonChallenge = Mapper.toJsonObject(challenge);
+        oldJsonChallenge.putAll(newJsonChallenge);
 
-        return new ResponseMessage.SuccessResponseMessage("ChallengeEntity updated. Type: " + challenge.getType());
+        challenge = Mapper.fromJsonObject(oldJsonChallenge, Challenge.class);
 
+        var updatedChallenge = challengeRepo.save(mapper.asEntity(challenge));
+
+        return new ResponseMessage.SuccessResponseMessage("ChallengeEntity updated. Type: " + updatedChallenge.getType());
     }
 
-    private ChallengeEntity addSessionToChallenge(UUID[] sessionIds, ChallengeEntity challengeEntity) {
-        if (sessionIds.length > 0) {
-            Arrays.asList(sessionIds).forEach(id -> {
+    private ChallengeEntity addSessionToChallenge(List<Session> sessions, ChallengeEntity challengeEntity) {
+        var sessionIds = sessions.stream().map(Session::id).toList();
+        if (!sessionIds.isEmpty()) {
+            sessionIds.forEach(id -> {
                 var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
                 challengeEntity.addSession(session);
             });
@@ -107,43 +119,30 @@ public class ChallengeServiceImp implements ChallengeService {
     }
 
     @Override
-    public HelperDto.ChallengeFullDto getChallenge(UUID challengeId) {
+    public Challenge getChallenge(UUID challengeId) {
         Authentication authUser = authContext.getAuthUser();
-        var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
-
+        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
+        var challenge = mapper.asDomainObject(challengeEntity);
         if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))){
-//            var userEntity = userRepo.findByEmail(authUser.getName()).orElseThrow(()->new ResourceNotFoundException("UserEntity not found"));
-//            if (subscriptionRepo.findAllByUserAndChallenge(userEntity, challengeEntity).isEmpty()) {
-//                throw new BadRequestException.InvalidAuthenticationRequestException("UserEntity not subscribed");
-//            }
-            return HelperDto.ChallengeFullDto.justMinimal(challenge);
+            return challenge.justMinimal();
         }
 
-        return new HelperDto.ChallengeFullDto(challenge);
+        return challenge;
     }
 
     @Override
-    public List<HelperDto.ChallengeFullDto> getChallenges() {
+    public List<Challenge> getChallenges() {
         Authentication authUser = authContext.getAuthUser();
 
-        var challenges = challengeRepo.findAll();
-        ArrayList challengeFullDtos = new ArrayList<HelperDto.ChallengeFullDto>();
+        var challengeEntities = challengeRepo.findAll();
+        var challenges = mapper.asDomainObjects(challengeEntities);
 
         if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))){
-//            var userEntity = userRepo.findByEmail(authUser.getName()).orElseThrow(()->new ResourceNotFoundException("UserEntity not found"));
-            challenges.forEach(challenge -> {
-//                if (subscriptionRepo.findAllByUserAndChallenge(userEntity, challengeEntity).isEmpty()) {
-//                    throw new BadRequestException.InvalidAuthenticationRequestException("UserEntity not subscribed");
-//                }
-                challengeFullDtos.add(HelperDto.ChallengeFullDto.justMinimal(challenge));
-            });
-            return challengeFullDtos;
+            return challenges.stream().map(Challenge::justMinimal).collect(Collectors.toList());
 
         }
 
-        challenges.forEach(challenge -> challengeFullDtos.add(new HelperDto.ChallengeFullDto(challenge)));
-
-        return challengeFullDtos;
+        return challenges;
     }
 
 }

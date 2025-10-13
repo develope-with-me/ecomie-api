@@ -1,6 +1,6 @@
 package org.csbf.security.service;
 
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 
 import java.util.List;
@@ -13,16 +13,16 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface ChallengeReportService {
-    ResponseMessage storeReport(UUID sessionId, HelperDto.ChallengeReportCreateDto challengeReportCreateDto);
+    ResponseMessage storeReport(UUID sessionId, HelperDomain.ChallengeReportCreateDto challengeReportCreateDto);
 
-    ResponseMessage storeUserReport(UUID userId, UUID sessionId, HelperDto.ChallengeReportCreateDto challengeReportCreateDto);
+    ResponseMessage storeUserReport(UUID userId, UUID sessionId, HelperDomain.ChallengeReportCreateDto challengeReportCreateDto);
 
-    ResponseMessage updateChallengeReport(UUID reportId, HelperDto.ChallengeReportCreateDto challengeReportCreateDto);
+    ResponseMessage updateChallengeReport(UUID reportId, HelperDomain.ChallengeReportCreateDto challengeReportCreateDto);
 
-    ResponseMessage updateChallengeReportForUser(UUID reportId, HelperDto.ChallengeReportCreateDto challengeReportCreateDto);
+    ResponseMessage updateChallengeReportForUser(UUID reportId, HelperDomain.ChallengeReportCreateDto challengeReportCreateDto);
 
-    HelperDto.ChallengeReportFullDto getChallengeReport(UUID reportId);
+    HelperDomain.ChallengeReportFullDto getChallengeReport(UUID reportId);
 
-    List<HelperDto.ChallengeReportFullDto> getChallengeReports();
+    List<HelperDomain.ChallengeReportFullDto> getChallengeReports();
 }
 

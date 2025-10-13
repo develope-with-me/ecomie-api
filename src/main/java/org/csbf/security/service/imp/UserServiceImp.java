@@ -7,7 +7,7 @@ import org.csbf.security.config.AuthContext;
 import org.csbf.security.constant.Role;
 import org.csbf.security.exceptions.*;
 import org.csbf.security.mapper.UserMapper;
-import org.csbf.security.model.UserEntity;
+import org.csbf.security.entity.UserEntity;
 import org.csbf.security.repository.ChallengeRepository;
 import org.csbf.security.repository.SessionRepository;
 import org.csbf.security.repository.SubscriptionRepository;
@@ -15,7 +15,7 @@ import org.csbf.security.repository.UserRepository;
 import org.csbf.security.service.FileUploadService;
 import org.csbf.security.service.UserService;
 import org.csbf.security.utils.commons.Mapper;
-import org.csbf.security.utils.helperclasses.HelperDto.*;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.env.Environment;
@@ -108,6 +108,11 @@ public class UserServiceImp implements UserService {
             entityToUpdate.setProfilePictureFileName(imageFileName);
 
         }
+        var oldJsonUser = Mapper.toJsonObject(userEntity);
+        var newJsonUser = Mapper.toJsonObject(entityToUpdate);
+        oldJsonUser.putAll(newJsonUser);
+        entityToUpdate = Mapper.fromJsonObject(oldJsonUser, UserEntity.class);
+
         userRepository.save(entityToUpdate);
 
         return new ResponseMessage.SuccessResponseMessage("Updated!");
@@ -118,9 +123,7 @@ public class UserServiceImp implements UserService {
         log.info("UserServiceImp.changeUserRole");
         var user = userRepository.findByEmail(email).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(email)).toException());
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
-            throw new BadRequestException("Invalid sessionEntity status");
-//        if(!userEntity.getRoles().contains(role.toUpperCase()))
-//            userEntity.setRole(userEntity.getRoles()+"-"+role.toUpperCase());
+            throw Problems.BAD_REQUEST.withProblemError("role", "Invalid user role").toException();
         if(!user.getRole().name().equals(role.toUpperCase())) {
             user.setRole(Role.valueOf(role.toUpperCase()));
             user = userRepository.save(user);
@@ -200,7 +203,7 @@ public class UserServiceImp implements UserService {
     public byte[] getUserProfilePicture(UUID userId) {
         UserEntity userEntity = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Profile not found"));
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
         Resource resource = loadImage(new EmailRequest(userEntity.getEmail()));
         try {
             return resource == null ? null : resource.getInputStream().readAllBytes();
@@ -238,7 +241,7 @@ public class UserServiceImp implements UserService {
                 var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
                 userEntities = subscriptionRepo.selectAllUsersSubscribedToSessionViaChallenge(session, challenge);
             }catch (IllegalArgumentException e) {
-                throw new InvalidUuidException(challengeIdString);
+                throw Problems.INVALID_PARAMETER_ERROR.withProblemError("challengeId", "Invalid challengeId (%s)".formatted(challengeIdString)).toException();
             }
         } else if(blocked) {
             userEntities = subscriptionRepo.selectAllUsersBlockedInSession(session);

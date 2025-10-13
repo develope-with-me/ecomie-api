@@ -1,6 +1,6 @@
 package org.csbf.security.service;
 
-import org.csbf.security.utils.helperclasses.HelperDto;
+import org.csbf.security.utils.helperclasses.HelperDomain.*;
 import org.csbf.security.utils.helperclasses.ResponseMessage;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,24 +14,24 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface SessionService {
-    ResponseMessage store(HelperDto.SessionCreateDto sessionCreateDto);
+    ResponseMessage store(Session session);
 
     ResponseMessage changeStatus(UUID id, String status);
 
-    ResponseMessage update(UUID id, HelperDto.SessionCreateDto sessionCreateDto);
+    ResponseMessage update(UUID id, Session session);
 
-    HelperDto.SessionFullDto getSession(UUID id);
+    Session getSession(UUID id);
 
-    List<HelperDto.SessionFullDto> getSessions();
+    List<Session> getSessions();
 
-    HelperDto.SessionFullDto assignChallenges(UUID sessionId, UUID[] challengeIds);
+    Session assignChallenges(UUID sessionId, List<UUID> challengeIds);
 
     @Transactional
-    HelperDto.SessionFullDto removeChallenges(UUID sessionId, UUID[] challengeIds);
+    Session removeChallenges(UUID sessionId, List<UUID> challengeIds);
 
-    List<HelperDto.SessionFullDto> getUserSessions(UUID userId);
+    List<Session> getUserSessions(UUID userId);
 
-    HelperDto.SessionFullDto assignChallenge(UUID sessionId, UUID challengeId);
+    Session assignChallenge(UUID sessionId, UUID challengeId);
 
-    HelperDto.SessionFullDto removeChallenge(UUID sessionId, UUID challengeId);
+    Session removeChallenge(UUID sessionId, UUID challengeId);
 }

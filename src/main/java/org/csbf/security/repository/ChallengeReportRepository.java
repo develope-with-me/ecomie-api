@@ -1,6 +1,6 @@
 package org.csbf.security.repository;
 
-import org.csbf.security.model.*;
+import org.csbf.security.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
