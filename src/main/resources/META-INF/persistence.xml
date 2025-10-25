@@ -1,0 +1,31 @@
+<!--suppress ALL -->
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+    <persistence-unit name="ecomie-persistence-unit">
+        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
+        <!--        <exclude-unlisted-classes>true</exclude-unlisted-classes>-->
+
+        <class>org.csbf.ecomie.entity.entity.*</class>
+
+
+        <properties>
+<!--          <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/mydb"/>-->
+<!--          <property name="javax.persistence.jdbc.user" value="user"/>-->
+<!--          <property name="javax.persistence.jdbc.password" value="password"/>-->
+<!--          <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>-->
+<!--          <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>-->
+<!--          <property name="hibernate.hbm2ddl.auto" value="update"/>-->
+
+            <!-- SQL statement logging -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.highlight_sql" value="true"/>
+
+        </properties>
+
+    </persistence-unit>
+
+</persistence>
