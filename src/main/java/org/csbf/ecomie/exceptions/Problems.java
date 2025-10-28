@@ -59,7 +59,7 @@ public interface Problems {
     Problem EMAIL_ALREADY_VERIFIED_ERROR = new Problem("Email Verification Error",
             "Email already verified", 400, "Verification Error", "", "40000010", List.of());
 
-    Problem UNAUTHORIZED = new Problem("Unauthorized", "The request requires userEntity authentication.",
+    Problem UNAUTHORIZED = new Problem("Unauthorized", "The request requires user authentication.",
             401, "Resource Error", "", "40100000", List.of());
 
     Problem PAYMENT_REQUIRED = new Problem("Payment Required", "The request requires payment.", 402,

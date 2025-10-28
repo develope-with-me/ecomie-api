@@ -9,6 +9,7 @@ import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
@@ -100,6 +101,15 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {return this.accountEnabled;}
+
+    @Override
+    public UUID getOwnerId() {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!principal.toString().equals("anonymousUser")) {
+            return ((UserEntity) principal).id();
+        }
+        return id();
+    }
 
     public boolean toggleEnable() {return !this.accountEnabled;}
 

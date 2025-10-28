@@ -17,6 +17,7 @@ import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +45,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
-        String msg = "userEntity already exist";
+        String msg = "user already exist";
         if (userRepo.findByEmail(request.email()).isPresent())
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Email (%s) already in use".formatted(request.email())).toException();
 
@@ -65,13 +66,13 @@ public class AuthenticationServiceImp implements AuthenticationService {
         UserEntity registeredUserEntity = userRepo.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        msg = "userEntity created";
+        msg = "user created";
         return getAuthenticationResponse(true, msg, jwtToken);
     }
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        String message =  "userEntity does not exist";
+        String message =  "user does not exist";
         var user = userRepo.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException.EmailNotFoundException(request.email()));
 
 //        var user = userRepo.findByEmail(request.email()).get();
@@ -128,7 +129,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
             return new ConfirmEmailResponse(userEntity.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
         }
 
-        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("userEntity and token do not match"));
+        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
     }
 
     private AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity... userEntities) {

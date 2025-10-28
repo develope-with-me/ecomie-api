@@ -117,8 +117,6 @@ public class EmailServiceImp implements EmailService {
         helper.setTo(recipient);
         helper.setSubject(subject);
         helper.setText(body, true); // Set to true to indicate that the content is HTML
-        javaMailSender.send(mimeMessage);
-
         try {
             log.info("EmailService.sendEmail - Sending email");
             javaMailSender.send(mimeMessage);
