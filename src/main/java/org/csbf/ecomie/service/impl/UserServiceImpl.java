@@ -1,4 +1,4 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImp implements UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
@@ -55,7 +55,7 @@ public class UserServiceImp implements UserService {
             Optional<MultipartFile> file,
             MinimalUser user
     ) {
-        log.info("UserServiceImp.updateAuthUserProfile");
+        log.info("UserServiceImpl.updateAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
@@ -70,7 +70,7 @@ public class UserServiceImp implements UserService {
             Optional<MultipartFile> file,
             User user
     ) {
-        log.info("UserServiceImp.updateUserProfile");
+        log.info("UserServiceImpl.updateUserProfile");
         UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
 
@@ -120,7 +120,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public ResponseMessage changeUserRole(String email, String role) {
-        log.info("UserServiceImp.changeUserRole");
+        log.info("UserServiceImpl.changeUserRole");
         var user = userRepository.findByEmail(email).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(email)).toException());
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
             throw Problems.BAD_REQUEST.withProblemError("role", "Invalid user role").toException();
@@ -134,7 +134,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User getUserProfile(UUID userId) {
-        log.info("UserServiceImp.getUserProfile");
+        log.info("UserServiceImpl.getUserProfile");
 
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
         return mapper.asDomainObject(userEntity);
@@ -142,7 +142,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public MinimalUser getAuthUserProfile() {
-        log.info("UserServiceImp.getAuthUserProfile");
+        log.info("UserServiceImpl.getAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
@@ -152,7 +152,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User getAuthUserProfile_v2() {
-        log.info("UserServiceImp.getAuthUserProfile");
+        log.info("UserServiceImpl.getAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
@@ -161,7 +161,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void deleteUserProfilePic(UUID userId) {
-        log.info("UserServiceImp.deleteUserProfilePic");
+        log.info("UserServiceImpl.deleteUserProfilePic");
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
         String fileName = userEntity.getProfilePictureFileName();
         if (fileName == null) {
@@ -184,7 +184,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public Resource loadImage(EmailRequest emailRequest) {
-        log.info("UserServiceImp.loadImage");
+        log.info("UserServiceImpl.loadImage");
         UserEntity userEntity = userRepository
                 .findByEmail(emailRequest.email())
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(emailRequest.email())).toException());

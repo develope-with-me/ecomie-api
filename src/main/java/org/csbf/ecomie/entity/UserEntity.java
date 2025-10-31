@@ -63,8 +63,6 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     private Boolean accountEnabled;
 
-    private String emailVerificationToken;
-
     private Boolean accountBlocked;
 
     private Boolean accountSoftDeleted;

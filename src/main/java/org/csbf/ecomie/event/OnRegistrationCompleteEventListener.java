@@ -20,19 +20,5 @@ public class OnRegistrationCompleteEventListener implements ApplicationListener<
         private void confirmRegistration(OnRegistrationCompleteEvent event) {
 
             service.sendEmailVerificationToken(event.getRequestHeaderHost(), event.getEmail());
-//            UserEntity userEntity = event.getUserEntity();
-//            String token = UUID.randomUUID().toString();
-////            service.createEmailVerificationToken(userEntity, token);
-//
-//            String recipientAddress = userEntity.getEmail();
-//            String subject = "Registration Confirmation";
-//            String confirmationUrl = event.getAppUrl() + "/confirm-registration?token=" + token;
-//            String message = messages.getMessage("message.regSucc", null, event.getLocale());
-//
-//            SimpleMailMessage email = new SimpleMailMessage();
-//            email.setTo(recipientAddress);
-//            email.setSubject(subject);
-//            email.setText(message + "\r\n" + "http://localhost:8080" + confirmationUrl);
-//            mailSender.send(email);
         }
 }

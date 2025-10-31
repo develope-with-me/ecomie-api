@@ -45,15 +45,4 @@ public interface SubscriptionMapper extends
     List<HelperDomain.Subscription> asDomainObjects(List<SubscriptionEntity> entities);
 
     List<SubscriptionEntity> asEntities(List<HelperDomain.Subscription> domainObjects);
-
-    //    static domainFieldType toFieldName(UserEntity entity) {
-//        logic here
-//        return null;
-//    }
-//
-//    static entityFieldType fromFieldName(User User) {
-//        logic here
-//        return null;
-//    }
-
 }

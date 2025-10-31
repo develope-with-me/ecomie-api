@@ -1,4 +1,4 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
@@ -28,7 +28,7 @@ import java.util.*;
  */
 @Service
 @RequiredArgsConstructor
-public class SessionServiceImp implements SessionService {
+public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepo;
     private final ChallengeRepository challengeRepo;
     private final SubscriptionRepository subscriptionRepo;

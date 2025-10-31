@@ -1,4 +1,4 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.csbf.ecomie.config.AuthContext;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class ChallengeReportServiceImp implements ChallengeReportService {
+public class ChallengeReportServiceImpl implements ChallengeReportService {
     private final ChallengeReportRepository reportRepo;
     private final SessionRepository sessionRepo;
     private final SubscriptionRepository subscriptionRepo;

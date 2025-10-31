@@ -45,6 +45,30 @@ public class HelperDomain {
 
     }
 
+    /**
+     * User Token
+     */
+    @Builder
+    public record UserToken(UUID id, String token, String type, User user, LocalDateTime expiryDate,
+                            LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public String description() {
+            return "";
+        }
+
+        @Override
+        public String alternateName() {
+            return "";
+        }
+    }
+
 
     /**
      * User Domain
@@ -52,7 +76,7 @@ public class HelperDomain {
     @Builder
     public record User(UUID id, String firstName, String lastName, String email, String role, String phoneNumber,
                        String country, String region, String city, String language,
-                       String profilePictureFileName, Boolean accountEnabled, String emailVerificationToken, Boolean accountBlocked,
+                       String profilePictureFileName, Boolean accountEnabled, Boolean accountBlocked,
                        Boolean accountSoftDeleted, LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
 
 
@@ -75,14 +99,14 @@ public class HelperDomain {
            return new User(userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(),
                     userEntity.getRole().name(), userEntity.getPhoneNumber(), userEntity.getCountry(),
                     userEntity.getRegion(), userEntity.getCity(), userEntity.getLanguage(),
-                    userEntity.getProfilePictureFileName(), userEntity.getAccountEnabled(), userEntity.getEmailVerificationToken(),
+                    userEntity.getProfilePictureFileName(), userEntity.getAccountEnabled(),
                    userEntity.getAccountBlocked(), userEntity.getAccountSoftDeleted(), userEntity.createdAt(), userEntity.updatedAt(),
                     userEntity.createdBy(), userEntity.updatedBy());
         }
 
         public User justMinimal() {
             return new User(id, firstName, lastName, email, role, phoneNumber, country, region, city, language,
-                    profilePictureFileName, null, null, null, null,
+                    profilePictureFileName, null, null, null,
                     createdAt, updatedAt, createdBy, updatedBy);
         }
     }
@@ -113,7 +137,10 @@ public class HelperDomain {
     }
 
 
-    public record ResendVerificationEmailDTO(@ExtendedEmailValidator String email) {
+    public record EmailDTO(@ExtendedEmailValidator String email) {
+    }
+
+    public record PasswordDTO(String oldPassword, @NotBlank String password, @NotBlank String confirmPassword) {
     }
 
     public record UpdateUserProfileRequest(String firstName, String lastName, String phoneNumber, String country,

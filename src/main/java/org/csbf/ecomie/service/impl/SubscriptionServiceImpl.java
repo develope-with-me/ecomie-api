@@ -1,4 +1,4 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.csbf.ecomie.config.AuthContext;
@@ -33,7 +33,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class SubscriptionServiceImp implements SubscriptionService {
+public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepo;
     private final UserRepository userRepo;

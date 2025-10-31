@@ -1,14 +1,14 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.exceptions.*;
-import org.csbf.ecomie.entity.EmailVerificationTokenEntity;
+import org.csbf.ecomie.entity.UserTokenEntity;
 import org.csbf.ecomie.entity.UserEntity;
 import org.csbf.ecomie.mapper.UserMapper;
-import org.csbf.ecomie.repository.EmailVerificationTokenRepository;
+import org.csbf.ecomie.repository.UserTokenRepository;
 import org.csbf.ecomie.repository.UserRepository;
 import org.csbf.ecomie.service.AuthenticationService;
 import org.csbf.ecomie.service.JwtService;
@@ -17,14 +17,12 @@ import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 
 /**
@@ -35,12 +33,13 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImp implements AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepo;
+    private final UserTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final EmailVerificationTokenRepository verificationTokenRepo;
+    private final UserTokenRepository verificationTokenRepo;
     private final UserMapper userMapper;
 
     @Override
@@ -99,17 +98,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
         return getAuthenticationResponse(true, message, jwtToken, user);
     }
 
-    @Override
-    public EmailVerificationTokenEntity getEmailVerificationToken(String VerificationToken) {
-        return verificationTokenRepo.findByToken(VerificationToken);
-    }
-
-
-    @Override
-    public String createEmailVerificationToken() {
-        return UUID.randomUUID().toString();
-    }
-    @Override
+ @Override
     public ConfirmEmailResponse confirmEmail(String email, String token) {
         String decodedEmail;
         try {
@@ -123,10 +112,48 @@ public class AuthenticationServiceImp implements AuthenticationService {
         log.info("UserEntity {}", obj.get());
 
         UserEntity userEntity = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
+        if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
+            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Password and confirm password do not match").toException();
+        }
         if (userEntity != null) {
             userEntity.setAccountEnabled(true);
             userRepo.save(userEntity);
-            return new ConfirmEmailResponse(userEntity.getEmailVerificationToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
+            tokenEntity.setIsValid(false);
+            tokenRepo.save(tokenEntity);
+            return new ConfirmEmailResponse(tokenEntity.getToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
+        }
+
+        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
+    }
+
+    @Override
+    public ConfirmEmailResponse resetPassword(PasswordDTO passwordDTO, String email, String token) {
+        String decodedEmail;
+        try {
+            decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Could not encode email").toException();
+        }
+
+        var obj = userRepo.findByEmail(email);
+        log.info("decodedEmail {}", email);
+        log.info("UserEntity {}", obj.get());
+
+        UserEntity userEntity = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
+        if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
+            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
+        }
+        if(!passwordDTO.confirmPassword().equals(passwordDTO.password())) {
+            throw Problems.OBJECT_VALIDATION_ERROR.withDetail("Invalid or expired token").toException();
+        }
+        if (userEntity != null) {
+            userEntity.setPassword(passwordEncoder.encode(passwordDTO.password()));
+            userRepo.save(userEntity);
+            tokenEntity.setIsValid(false);
+            tokenRepo.save(tokenEntity);
+            return new ConfirmEmailResponse(tokenEntity.getToken(), new ResponseMessage.SuccessResponseMessage("Password reset successful, please login with your new password"));
         }
 
         return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));

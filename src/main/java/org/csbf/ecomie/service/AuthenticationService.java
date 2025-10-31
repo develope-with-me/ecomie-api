@@ -1,6 +1,6 @@
 package org.csbf.ecomie.service;
 
-import org.csbf.ecomie.entity.EmailVerificationTokenEntity;
+import org.csbf.ecomie.entity.UserTokenEntity;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 
 
@@ -12,7 +12,7 @@ import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 public interface AuthenticationService {
     AuthenticationResponse register(RegisterRequest request);
     AuthenticationResponse authenticate(AuthenticationRequest request);
-    String createEmailVerificationToken();
-    EmailVerificationTokenEntity getEmailVerificationToken(String VerificationToken);
     ConfirmEmailResponse confirmEmail(String email, String token);
+
+    ConfirmEmailResponse resetPassword(PasswordDTO passwordDTO, String email,String token);
 }

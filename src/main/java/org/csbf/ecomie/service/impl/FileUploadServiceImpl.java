@@ -1,4 +1,4 @@
-package org.csbf.ecomie.service.imp;
+package org.csbf.ecomie.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.csbf.ecomie.exceptions.Problems;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Service
-public class FileUploadServiceImp implements FileUploadService {
+public class FileUploadServiceImpl implements FileUploadService {
 
     Environment env;
 
@@ -124,7 +124,7 @@ public class FileUploadServiceImp implements FileUploadService {
             if (resource.exists() || resource.isReadable()) {
                 file1.delete();
             } else {
-                log.info("FileUploadServiceImp.deleteFile --- Old file does not exist, fileName : {}", fileName);
+                log.info("FileUploadServiceImpl.deleteFile --- Old file does not exist, fileName : {}", fileName);
                 throw Problems.NOT_FOUND.withProblemError("file.name", "Could not read file %s or it does not exists".formatted(normalizedFileName)).toException();
             }
         } catch (MalformedURLException e) {
