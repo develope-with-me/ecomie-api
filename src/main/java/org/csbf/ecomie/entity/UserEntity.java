@@ -14,17 +14,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
-
 /**
  * Ecomie Project.
  *
  * @author DB.Tech
  */
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Table(name = "_users")
 public class UserEntity extends BaseEntity implements UserDetails {
 
@@ -116,3 +115,4 @@ public class UserEntity extends BaseEntity implements UserDetails {
     public boolean toggleSoftDelete() {return !this.accountSoftDeleted;}
 
 }
+

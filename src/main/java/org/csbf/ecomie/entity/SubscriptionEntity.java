@@ -21,10 +21,10 @@ import org.csbf.ecomie.utils.commons.BaseEntity;
 @Table(name = "subscriptions")
 public class SubscriptionEntity extends BaseEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = false, nullable = false)
     private int target;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = false, nullable = false)
     private Boolean blocked;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

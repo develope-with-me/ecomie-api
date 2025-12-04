@@ -8,22 +8,18 @@
         <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
         <!--        <exclude-unlisted-classes>true</exclude-unlisted-classes>-->
 
-        <class>org.csbf.ecomie.entity.entity.*</class>
-
+        <class>org.csbf.ecomie.entity.UserEntity</class>
+        <class>org.csbf.ecomie.entity.UserTokenEntity</class>
+        <class>org.csbf.ecomie.entity.SessionEntity</class>
+        <class>org.csbf.ecomie.entity.ChallengeEntity</class>
+        <class>org.csbf.ecomie.entity.SubscriptionEntity</class>
+        <class>org.csbf.ecomie.entity.ChallengeReportEntity</class>
 
         <properties>
-<!--          <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/mydb"/>-->
-<!--          <property name="javax.persistence.jdbc.user" value="user"/>-->
-<!--          <property name="javax.persistence.jdbc.password" value="password"/>-->
-<!--          <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>-->
-<!--          <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>-->
-<!--          <property name="hibernate.hbm2ddl.auto" value="update"/>-->
-
             <!-- SQL statement logging -->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.highlight_sql" value="true"/>
-
         </properties>
 
     </persistence-unit>

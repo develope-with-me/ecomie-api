@@ -3,8 +3,11 @@ package org.csbf.ecomie.event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.csbf.ecomie.constant.Role;
+import org.csbf.ecomie.constant.TokenType;
 import org.csbf.ecomie.entity.UserEntity;
+import org.csbf.ecomie.entity.UserTokenEntity;
 import org.csbf.ecomie.repository.UserRepository;
+import org.csbf.ecomie.repository.UserTokenRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
@@ -17,6 +20,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     private final Environment env;
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final UserTokenRepository userTokenRepo;
 
     @Override
     @Transactional
@@ -30,7 +34,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .password(passwordEncoder.encode(env.getProperty("super.admin.password")))
 //                    .roles(Role.SUPER_ADMIN.name()+"-"+Role.ADMIN.name()+"-"+Role.ECOMIEST.name()+"-"+Role.MISSIONARY.name()+"-"+Role.PRAYER_WARRIOR.name()+"-"+Role.SPONSOR.name()+"-"+Role.USER.name())
                     .role(Role.SUPER_ADMIN)
-                    .emailVerificationToken(env.getProperty("SUPER_ADMIN_EMAIL_VERIFICATION_TOKEN"))
                     .country(env.getProperty("super.admin.country"))
                     .region(env.getProperty("super.admin.region"))
                     .city(env.getProperty("super.admin.city"))
@@ -40,6 +43,13 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .accountSoftDeleted(false)
                     .build();
             userRepo.save(superAdminUserEntity);
+
+            UserTokenEntity superAdminEmailVerificationToken = UserTokenEntity.builder()
+                    .user(superAdminUserEntity)
+                    .type(TokenType.EMAIL_VERIFICATION)
+                    .token(env.getProperty("super.admin.email-verification-token"))
+                    .build();
+            userTokenRepo.save(superAdminEmailVerificationToken);
         }
     }
 }

@@ -17,11 +17,10 @@ import java.util.Objects;
  * @author DB.Tech
  */
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
-@Entity
 @Table(name = "user_tokens")
 public class UserTokenEntity extends BaseEntity {
 
@@ -66,7 +65,7 @@ public class UserTokenEntity extends BaseEntity {
         var expiryTimeInMinutes = type.name().equalsIgnoreCase("EMAIL_VERIFICATION")
                 ? EMAIL_VERIFICATION_TOKEN_DURATION_IN_MINUTES
                 : PASSWORD_RESET_TOKEN_DURATION_IN_MINUTES;
-        expiryDate = createdAt().plusMinutes(expiryTimeInMinutes);
+        setExpiryDate(expiryTimeInMinutes);
         isValid = true;
     }
 }

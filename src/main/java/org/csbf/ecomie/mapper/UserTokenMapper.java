@@ -17,6 +17,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Ecomie Project.
@@ -51,7 +52,7 @@ public interface UserTokenMapper extends
     List<UserTokenEntity> asEntities(List<UserToken> domainObjects);
 
     static String toType(UserTokenEntity entity) {
-        return entity.getType().name();
+        return Objects.isNull(entity.getType()) ? null : entity.getType().name();
     }
 
     static Role fromType(UserToken domainObject) {
