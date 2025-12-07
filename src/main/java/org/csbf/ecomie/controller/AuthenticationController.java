@@ -109,7 +109,7 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/reset-password", method = {RequestMethod.POST})
     @Operation(summary = "Reset Password", description = "Reset password", tags = {"Unauthenticated"})
-    public ResponseEntity<ResponseMessage> resetPassword(@RequestBody PasswordDTO passwordDTO, @ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
+    public ResponseEntity<ConfirmEmailResponse> resetPassword(@RequestBody PasswordDTO passwordDTO, @ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
         log.info("AuthenticationController.resetPassword {}", AuthenticationController.class.getSimpleName());
         /**For Production */
         /*

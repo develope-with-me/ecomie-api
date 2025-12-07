@@ -15,11 +15,11 @@
 	<description>API for the ECOMIE application</description>
 	<properties>
 		<java.version>23</java.version>
-		<!-- Database properties from environment variables -->
-		<db.driver>${env.DATASOURCE_DRIVERCLASSNAME}</db.driver>
-		<db.url>${env.DATASOURCE_URL}</db.url>
-		<db.username>${env.DATASOURCE_USERNAME}</db.username>
-		<db.password>${env.DATASOURCE_PASSWORD}</db.password>
+<!--		&lt;!&ndash; Database properties from environment variables &ndash;&gt;-->
+<!--		<db.driver>${env.DATASOURCE_DRIVERCLASSNAME}</db.driver>-->
+<!--		<db.url>${env.DATASOURCE_URL}</db.url>-->
+<!--		<db.username>${env.DATASOURCE_USERNAME}</db.username>-->
+<!--		<db.password>${env.DATASOURCE_PASSWORD}</db.password>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -217,13 +217,8 @@
 				<artifactId>liquibase-maven-plugin</artifactId>
 				<version>4.27.0</version>
 				<configuration>
-					<!-- Using environment variables loaded from .env file -->
-					<driver>${db.driver}</driver>
-					<url>${db.url}</url>
-					<username>${db.username}</username>
-					<password>${db.password}</password>
-					<changeLogFile>src/main/resources/migration/db.changelog-dev.xml</changeLogFile>
-					<outputChangeLogFile>src/main/resources/migration/ddl/ddl-000-existing-database-migration.xml</outputChangeLogFile>
+					<propertyFile>liquibase.properties</propertyFile>
+					<outputChangeLogFile>src/main/resources/migrations/changelog/ddl/ddl-000-existing-database-migration.xml</outputChangeLogFile>
 				</configuration>
 			</plugin>
 		</plugins>

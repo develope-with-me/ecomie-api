@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="dbryzz (generated)" id="ddl-000-1">
+    <changeSet author="dbryzz" id="ddl-000-1">
         <createTable tableName="challenge_reports">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="challenge_reports_pkey"/>
@@ -32,7 +32,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-2">
+    <changeSet author="dbryzz" id="ddl-000-2">
         <createTable tableName="sessions">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="sessions_pkey"/>
@@ -60,7 +60,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-3">
+    <changeSet author="dbryzz" id="ddl-000-3">
         <createTable tableName="_users">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="_users_pkey"/>
@@ -81,7 +81,6 @@
             <column name="email" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="email_verification_token" type="VARCHAR(255)"/>
             <column name="first_name" type="VARCHAR(255)"/>
             <column name="language" type="VARCHAR(255)"/>
             <column name="last_name" type="VARCHAR(255)"/>
@@ -94,7 +93,7 @@
             <column name="role" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-4">
+    <changeSet author="dbryzz" id="ddl-000-4">
         <createTable tableName="challenges">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="challenges_pkey"/>
@@ -117,7 +116,7 @@
             <column name="type" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-5">
+    <changeSet author="dbryzz" id="ddl-000-5">
         <createTable tableName="subscriptions">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="subscriptions_pkey"/>
@@ -147,10 +146,25 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-6">
-        <createTable tableName="email_verification_tokens">
+    <changeSet author="dbryzz" id="ddl-000-6">
+        <createTable tableName="user_tokens">
             <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="email_verification_tokens_pkey"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_tokens_pkey"/>
+            </column>
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiry_date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_valid" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
             </column>
             <column name="created_on" type="TIMESTAMP WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
@@ -160,31 +174,21 @@
                 <constraints nullable="false"/>
             </column>
             <column name="updated_by" type="UUID"/>
-            <column name="token" type="VARCHAR(255)"/>
-            <column name="user_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-7">
-        <addUniqueConstraint columnNames="name" constraintName="ukd6x2nggi1qqrawxdmp7v9ipjh" tableName="sessions"/>
+    <changeSet author="dbryzz" id="ddl-000-7">
+        <addUniqueConstraint columnNames="name" constraintName="uk_sessions_name" tableName="sessions"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-8">
-        <addUniqueConstraint columnNames="email" constraintName="ukhchfjvwnaa27i27bfwv0y6n1x" tableName="_users"/>
+    <changeSet author="dbryzz" id="ddl-000-8">
+        <addUniqueConstraint columnNames="email" constraintName="uk_users_email" tableName="_users"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-9">
-        <addUniqueConstraint columnNames="name" constraintName="ukhr5o630reo7arwu5thvngutt1" tableName="challenges"/>
+    <changeSet author="dbryzz" id="ddl-000-9">
+        <addUniqueConstraint columnNames="name" constraintName="uk_challenges_name" tableName="challenges"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-10">
-        <addUniqueConstraint columnNames="target" constraintName="ukf2sed356v9mnr5bbvj3tdpotw" tableName="subscriptions"/>
+    <changeSet author="dbryzz" id="ddl-000-10">
+        <addUniqueConstraint columnNames="token" constraintName="uk_user_tokens_token" tableName="user_tokens"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-11">
-        <addUniqueConstraint columnNames="blocked" constraintName="uklpffmhn8w5nrymy9cmr614cct" tableName="subscriptions"/>
-    </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-12">
-        <addUniqueConstraint columnNames="user_id" constraintName="uks3mje1c85ftmp2uld6dt1bffs" tableName="email_verification_tokens"/>
-    </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-13">
+    <changeSet author="dbryzz" id="ddl-000-11">
         <createTable tableName="session_challenge">
             <column name="session_id" type="UUID">
                 <constraints nullable="false"/>
@@ -194,28 +198,28 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-14">
-        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="challenge_reports" constraintName="fkfgjpel2a16pr4v9xm9rl3iypb" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="subscriptions" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-12">
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="challenge_reports" constraintName="fk_challenge_reports_subscriptions_subscription_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="subscriptions" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-15">
-        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="session_challenge" constraintName="fkfmemj3g6l5bun1pubig39ujjo" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-13">
+        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="session_challenge" constraintName="fk_session_challenge_sessions_session_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-16">
-        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="session_challenge" constraintName="fkh5upcyj836yr1c6kx9qdr3ymf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-14">
+        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="session_challenge" constraintName="fk_session_challenge_challenges_challenge_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-17">
-        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="subscriptions" constraintName="fki3wofsjrw3u8i8datslp5o9n9" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-15">
+        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="subscriptions" constraintName="fk_subscriptions_challenges_challenge_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-18">
-        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="subscriptions" constraintName="fkj57tib9w4y9l3lj98larpb1jp" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-16">
+        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="subscriptions" constraintName="fk_subscriptions_sessions_session_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-19">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="email_verification_tokens" constraintName="fkm3r8kxuh6x1tk76sgcw0oi7bf" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-17">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_tokens" constraintName="fk_user_tokens_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-20">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="challenge_reports" constraintName="fko4351a4a4tfnkpwts4812n7k5" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-18">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="challenge_reports" constraintName="fk_challenge_reports_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
     </changeSet>
-    <changeSet author="dbryzz (generated)" id="ddl-000-21">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="subscriptions" constraintName="fkr6abdn2gx0r8kai4jamnq14wi" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    <changeSet author="dbryzz" id="ddl-000-19">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="subscriptions" constraintName="fk_subscriptions_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
     </changeSet>
 </databaseChangeLog>

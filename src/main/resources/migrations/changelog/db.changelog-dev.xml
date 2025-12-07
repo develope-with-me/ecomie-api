@@ -7,6 +7,6 @@
 
     <!-- Data -->
     <!-- Only including files that actually exist -->
-    <include file="classpath:migration/ddl/ddl-000-existing-database-migration.xml"/>
+    <include file="ddl/ddl-000-existing-database-migration.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

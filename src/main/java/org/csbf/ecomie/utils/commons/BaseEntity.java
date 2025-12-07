@@ -5,10 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.csbf.ecomie.config.EntityConfigParams;
 import org.csbf.ecomie.entity.UserEntity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -17,7 +20,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 public abstract class BaseEntity implements Entity {
-    private static final UUID ANONYMOUS_USER_ID = UUID.fromString("019a2841-513e-7b99-b042-5564a99b9ae6");
 
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
@@ -60,27 +62,12 @@ public abstract class BaseEntity implements Entity {
 
 
 public UUID getOwnerId() {
-    var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (!principal.toString().equals("anonymousUser")) {
-        return ((UserEntity) principal).id();
+    if( Objects.nonNull(SecurityContextHolder.getContext().getAuthentication())) {
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!principal.toString().equals("anonymousUser")) {
+            return ((UserEntity) principal).id();
+        }
     }
-    return ANONYMOUS_USER_ID;
+    return EntityConfigParams.getAnonymousUserId();
 }
-
-    //    @Column(name = "deleted")
-//    private boolean deleted;
-
-//    @Version
-//    @Builder.Default()
-//    private Integer version = 0;
-
-
-//    @Column(name = "owner_id")
-//    private UUID ownerId;
-
-
-//    @Override
-//    public Boolean deleted() {
-//        return this.deleted;
-//    }
 }

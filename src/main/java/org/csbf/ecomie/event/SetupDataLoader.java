@@ -42,7 +42,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                     .accountEnabled(true)
                     .accountSoftDeleted(false)
                     .build();
-            userRepo.save(superAdminUserEntity);
+            superAdminUserEntity = userRepo.save(superAdminUserEntity);
 
             UserTokenEntity superAdminEmailVerificationToken = UserTokenEntity.builder()
                     .user(superAdminUserEntity)

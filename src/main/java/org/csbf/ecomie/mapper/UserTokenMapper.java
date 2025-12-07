@@ -55,9 +55,9 @@ public interface UserTokenMapper extends
         return Objects.isNull(entity.getType()) ? null : entity.getType().name();
     }
 
-    static Role fromType(UserToken domainObject) {
+    static TokenType fromType(UserToken domainObject) {
         if (EnumUtils.isValidEnum(TokenType.class, domainObject.type().toUpperCase())) {
-            return Role.valueOf(domainObject.type().toUpperCase());
+            return TokenType.valueOf(domainObject.type().toUpperCase());
         }
 
         throw  Problems.INVALID_PARAMETER_ERROR.withProblemError("type", "Invalid userToken.type (%s)".formatted(domainObject.type())).toException();

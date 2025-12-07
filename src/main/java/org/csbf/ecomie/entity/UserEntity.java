@@ -101,9 +101,11 @@ public class UserEntity extends BaseEntity implements UserDetails {
 
     @Override
     public UUID getOwnerId() {
-        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!principal.toString().equals("anonymousUser")) {
-            return ((UserEntity) principal).id();
+        if( Objects.nonNull(SecurityContextHolder.getContext().getAuthentication())) {
+            var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (!principal.toString().equals("anonymousUser")) {
+                return ((UserEntity) principal).id();
+            }
         }
         return id();
     }

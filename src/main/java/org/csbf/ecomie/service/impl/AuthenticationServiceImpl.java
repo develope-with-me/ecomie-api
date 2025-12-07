@@ -101,21 +101,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
  @Override
     public ConfirmEmailResponse confirmEmail(String email, String token) {
         String decodedEmail;
-        try {
-            decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Could not encode email").toException();
-        }
+     decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
 
-        var obj = userRepo.findByEmail(email);
+     var obj = userRepo.findByEmail(email);
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserEntity userEntity = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
         UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
-            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Password and confirm password do not match").toException();
+            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
         }
+        var userEntity = tokenEntity.getUser();
+
         if (userEntity != null) {
             userEntity.setAccountEnabled(true);
             userRepo.save(userEntity);
@@ -130,17 +127,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ConfirmEmailResponse resetPassword(PasswordDTO passwordDTO, String email, String token) {
         String decodedEmail;
-        try {
-            decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException e) {
-            throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Could not encode email").toException();
-        }
+        decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
 
         var obj = userRepo.findByEmail(email);
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserEntity userEntity = userRepo.findByEmailAndEmailVerificationToken(email, token).isPresent() ? userRepo.findByEmailVerificationToken(token).get() : null;
         UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
             throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
@@ -148,6 +140,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(!passwordDTO.confirmPassword().equals(passwordDTO.password())) {
             throw Problems.OBJECT_VALIDATION_ERROR.withDetail("Invalid or expired token").toException();
         }
+        var userEntity = tokenEntity.getUser();
         if (userEntity != null) {
             userEntity.setPassword(passwordEncoder.encode(passwordDTO.password()));
             userRepo.save(userEntity);

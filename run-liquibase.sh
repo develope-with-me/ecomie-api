@@ -14,5 +14,5 @@ mvn liquibase:generateChangeLog \
   -Ddatasource.url=$DATASOURCE_URL \
   -Ddatasource.username=$DATASOURCE_USERNAME \
   -Ddatasource.password=$DATASOURCE_PASSWORD \
-  -Dliquibase.changeLogFile=src/main/resources/migration/db.changelog-dev.xml \
-  -Dliquibase.outputChangeLogFile=src/main/resources/migration/ddl/liquibase-initialChangeLog.xml
+  -Dliquibase.changeLogFile=src/main/resources/migrations/changelog/db.changelog-dev.xml \
+  -Dliquibase.outputChangeLogFile=src/main/resources/migrations/changelog/ddl/liquibase-initialChangeLog.xml

@@ -33,4 +33,6 @@ build/
 .vscode/
 src/main/resources/static/profile-pics**
 .env
+.env*
+liquibase.properties
 docker/.env
