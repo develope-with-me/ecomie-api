@@ -35,4 +35,5 @@ src/main/resources/static/profile-pics**
 .env
 .env*
 liquibase.properties
+ENV_SETUP.md
 docker/.env
