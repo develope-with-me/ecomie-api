@@ -62,6 +62,9 @@ public class EmailServiceImpl implements EmailService {
         boolean success = false;
         if (userRepo.findByEmail(email).isPresent()) {
             UserEntity userEntity = userRepo.findByEmail(email).get();
+            if(userEntity.isEnabled()) {
+                throw Problems.CONFLICT.withDetail("Account already verified").toException();
+            }
             var tokenEntity = UserTokenEntity.builder()
                     .user(userEntity)
                     .token(token)
@@ -78,7 +81,7 @@ public class EmailServiceImpl implements EmailService {
 
             // Validate email and token
             if (tokenEntity.getToken() == null) {
-                throw Problems.INVALID_PARAMETER_ERROR.appendDetail("Invalid email or verification token").toException();
+                throw Problems.INVALID_PARAMETER_ERROR.withDetail("Invalid email or verification token").toException();
             }
 
             // Construct the confirmation link
@@ -118,7 +121,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(mimeMessage);
             log.info("EmailService.sendEmail - Successfully sent email");
         }catch(MailException e) {
-            throw Problems.OBJECT_VALIDATION_ERROR.appendDetail(e.getMessage()).toException();
+            throw Problems.OBJECT_VALIDATION_ERROR.withDetail(e.getMessage()).toException();
         }
     }
 
@@ -146,7 +149,7 @@ public class EmailServiceImpl implements EmailService {
             var tokenEntity = UserTokenEntity.builder()
                     .user(userEntity)
                     .token(token)
-                    .type(TokenType.EMAIL_VERIFICATION)
+                    .type(TokenType.PASSWORD_RESET)
                     .build();
 //            tokenEntity.setExpiryDate(EMAIL_VERIFICATION_TOKEN_DURATION_IN_MINUTES);
             tokenEntity = tokenRepo.save(tokenEntity);
@@ -159,7 +162,7 @@ public class EmailServiceImpl implements EmailService {
 
             // Validate email and token
             if (tokenEntity.getToken() == null) {
-                throw Problems.INVALID_PARAMETER_ERROR.appendDetail("Invalid Reset Token").toException();
+                throw Problems.INVALID_PARAMETER_ERROR.withDetail("Invalid Reset Token").toException();
             }
 
             // Construct the Reset link
@@ -200,7 +203,7 @@ public class EmailServiceImpl implements EmailService {
             sendEmail(recipient, subject, body);
 
         } catch (IOException | MessagingException e) {
-            throw Problems.OBJECT_VALIDATION_ERROR.appendDetail("Could not load email template").toException();
+            throw Problems.OBJECT_VALIDATION_ERROR.withDetail("Could not load email template").toException();
         }
     }
 

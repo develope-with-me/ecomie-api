@@ -104,7 +104,7 @@ public class AuthenticationController {
 
         emailService.requestPasswordReset(servletRequest.getHeader("host"), emailDTO.email());
 
-        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage("email resent"));
+        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage("email sent"));
     }
 
     @RequestMapping(value = "/reset-password", method = {RequestMethod.POST})

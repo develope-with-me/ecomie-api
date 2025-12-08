@@ -53,7 +53,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         } catch (IOException e) {
             log.info("Could not initialize folder for upload!");
-            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not initialize folder for upload!").toException();
+            throw Problems.INTERNAL_SERVER_ERROR.withDetail("Could not initialize folder for upload!").toException();
         }
     }
 
@@ -90,7 +90,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                 throw Problems.NOT_FOUND.withProblemError("file.name", "Could not read file %s".formatted(normalizedFileName)).toException();
             }
         } catch (MalformedURLException e) {
-            throw Problems.NOT_FOUND.appendDetail("Error: " + e.getMessage()).toException();
+            throw Problems.NOT_FOUND.withDetail("Error: " + e.getMessage()).toException();
         }
     }
 
@@ -109,7 +109,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             Resource resource = new UrlResource(file.toUri());
             return (resource.exists() || resource.isReadable());
         } catch (MalformedURLException e) {
-            throw Problems.NOT_FOUND.appendDetail("Error: " + e.getMessage()).toException();
+            throw Problems.NOT_FOUND.withDetail("Error: " + e.getMessage()).toException();
         }
     }
 
@@ -129,7 +129,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         } catch (MalformedURLException e) {
             log.error("{}", e.getMessage());
-            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not delete file").toException();
+            throw Problems.INTERNAL_SERVER_ERROR.withDetail("Could not delete file").toException();
         }
     }
 
@@ -138,7 +138,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         try {
             return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
         } catch (IOException e) {
-            throw Problems.INTERNAL_SERVER_ERROR.appendDetail("Could not load the files!").toException();
+            throw Problems.INTERNAL_SERVER_ERROR.withDetail("Could not load the files!").toException();
         }
     }
 }

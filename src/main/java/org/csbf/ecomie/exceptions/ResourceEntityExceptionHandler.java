@@ -56,5 +56,11 @@ public class ResourceEntityExceptionHandler extends ResponseEntityExceptionHandl
         return new ResponseEntity<>(message, FORBIDDEN);
     }
 
+    @ExceptionHandler(EcomieException.class)
+    public ResponseEntity<Object> handleEcomieException(EcomieException ex) {
+        Problem problem = ex.getProblem();
+        return new ResponseEntity<>(problem, valueOf(problem.statusCode()));
+    }
+
 
 }

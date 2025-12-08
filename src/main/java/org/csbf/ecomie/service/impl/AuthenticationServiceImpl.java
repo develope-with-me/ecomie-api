@@ -107,7 +107,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
             throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
         }
@@ -133,7 +133,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.appendDetail("Token not found").toException());
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
             throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
         }

@@ -92,7 +92,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public HelperDomain.Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest) {
         SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
         if (!subscriptionEntity.getSession().getStatus().equals(SessionStatus.ONGOING)) {
-            throw Problems.PAYLOAD_VALIDATION_ERROR.appendDetail("Cannot modify subscriptionEntity of sessionEntity that is not ongoing").toException();
+            throw Problems.PAYLOAD_VALIDATION_ERROR.withDetail("Cannot modify subscriptionEntity of sessionEntity that is not ongoing").toException();
         }
 
         subscriptionEntity.setTarget(subscriptionRequest.target());
@@ -106,7 +106,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
         if (authContext.getAuthUser().getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()))) {
             if (!subscription.getUser().getEmail().equals(authContext.getAuthUser().getName())) {
-                throw Problems.INCONSISTENT_STATE_ERROR.appendDetail("UserEntity not subscribed").toException();
+                throw Problems.INCONSISTENT_STATE_ERROR.withDetail("UserEntity not subscribed").toException();
 
             }
         }
@@ -137,7 +137,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         if (subscriptionRepo.existsBySession_Status_AndUser_Id(SessionStatus.ONGOING, userEntity.getId())){
 //        if (subscriptionRepo.existsBySession_Id_AndUser_Id(sessionEntity.getId(), userEntity.getId())){
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.appendDetail("User has already subscribed to this sessionEntity").toException();
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withDetail("User has already subscribed to this sessionEntity").toException();
         }
         SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
 

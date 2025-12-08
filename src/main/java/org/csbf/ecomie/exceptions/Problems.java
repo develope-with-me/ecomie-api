@@ -35,7 +35,7 @@ public interface Problems {
     Problem OBJECT_VALIDATION_ERROR = new Problem("Bad Object", "The object provided is invalid.",
             400, VALIDATION_ERROR_MESSAGE, "", "40000004", List.of());
 
-    Problem INCONSISTENT_DATA_ERROR = new Problem("Inconsistent data",
+    Problem INCONSISTENT_DATA_ERROR = new Problem("Inconsistent Data",
             "The object does not match the domain.", 400, "Data Error", "", "40000005", List.of());
     Problem JSON_DESERIALIZATION_ERROR =
             new Problem(BAD_PAYLOAD, "Unable to deserialize the payload provided.", 400,
@@ -46,7 +46,7 @@ public interface Problems {
                     "Serialization/Deserialization Error", "", "40000007", List.of());
 
     Problem INCONSISTENT_STATE_ERROR =
-            new Problem("Inconsistent state", "The system state does not match expected value.",
+            new Problem("Inconsistent State", "The system state does not match expected value.",
                     400, "Data Error", "", "40000008", List.of());
 
     Problem QUERY_ERROR = new Problem("Bad Query", "An issue occurred while querying the platform.",
