@@ -14,6 +14,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Ecomie Project.
@@ -49,10 +50,13 @@ public interface SessionMapper extends
 
 
     static String toStatus(SessionEntity entity) {
-        return entity.getStatus().name();
+        return !Objects.isNull(entity.getStatus()) ? entity.getStatus().name() : null;
     }
 
     static SessionStatus fromStatus(Session domainObject) {
+        if(Objects.isNull(domainObject.status())) {
+            return null;
+        }
         if (EnumUtils.isValidEnum(SessionStatus.class, domainObject.status().toUpperCase())) {
             return SessionStatus.valueOf(domainObject.status().toUpperCase());
         }

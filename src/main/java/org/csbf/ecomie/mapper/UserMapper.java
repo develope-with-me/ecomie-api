@@ -52,10 +52,13 @@ public interface UserMapper extends
     List<UserEntity> asEntities(List<User> domainObjects);
 
     static String toRole(UserEntity entity) {
-        return entity.getRole().name();
+        return !Objects.isNull(entity.getRole()) ? entity.getRole().name() : null;
     }
 
     static Role fromRole(User domainObject) {
+        if(Objects.isNull(domainObject.role())) {
+            return null;
+        }
         if (EnumUtils.isValidEnum(Role.class, domainObject.role().toUpperCase())) {
             return Role.valueOf(domainObject.role().toUpperCase());
         }

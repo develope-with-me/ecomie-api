@@ -52,10 +52,13 @@ public interface UserTokenMapper extends
     List<UserTokenEntity> asEntities(List<UserToken> domainObjects);
 
     static String toType(UserTokenEntity entity) {
-        return Objects.isNull(entity.getType()) ? null : entity.getType().name();
+        return !Objects.isNull(entity.getType()) ? entity.getType().name() : null;
     }
 
     static TokenType fromType(UserToken domainObject) {
+        if(Objects.isNull(domainObject.type())) {
+            return null;
+        }
         if (EnumUtils.isValidEnum(TokenType.class, domainObject.type().toUpperCase())) {
             return TokenType.valueOf(domainObject.type().toUpperCase());
         }

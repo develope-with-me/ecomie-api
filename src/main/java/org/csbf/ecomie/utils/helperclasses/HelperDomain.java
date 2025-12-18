@@ -22,7 +22,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class HelperDomain {
 
-    private static final String VALID_DATE_TIME = "^(\\d{4})(-(\\d{2}))(-(\\d{2}))(T(\\d{2}):(\\d{2})(:(\\d{2})))$";
+    private static final String VALID_DATE_TIME = "^(\\d{4})(-(\\d{2}))(-(\\d{2}))??(T(\\d{2}):(\\d{2})(:(\\d{2})))$";
 
 
     @Builder
