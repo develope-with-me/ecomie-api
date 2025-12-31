@@ -58,7 +58,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .target(challenge.target())
                 .build();
 
-        addSessionToChallenge(challenge.sessions(), challengeEntity);
+        if (challenge.sessions() != null) {
+            addSessionToChallenge(challenge.sessions(), challengeEntity);
+        }
         challengeRepo.save(challengeEntity);
         return new ResponseMessage.SuccessResponseMessage("ChallengeEntity created. Type: " + type);
 
@@ -88,14 +90,15 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challengeEntity type (%s)".formatted(challenge.type())).toException();
         }
 
-        addSessionToChallenge(challenge.sessions(), challengeEntity);
+        if (challenge.sessions() != null) {
+            addSessionToChallenge(challenge.sessions(), challengeEntity);
+        }
 
         var oldChallenge = mapper.asDomainObject(challengeEntity);
         var oldJsonChallenge = Mapper.toJsonObject(oldChallenge);
         var newJsonChallenge = Mapper.toJsonObject(challenge);
-        oldJsonChallenge.putAll(newJsonChallenge);
 
-        challenge = Mapper.fromJsonObject(oldJsonChallenge, Challenge.class);
+        challenge = Mapper.withUpdateValuesOnly(oldJsonChallenge, newJsonChallenge, Challenge.class);
 
         var updatedChallenge = challengeRepo.save(mapper.asEntity(challenge));
 
@@ -138,6 +141,13 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         return challenges;
+    }
+
+    @Override
+    public ResponseMessage deleteChallenge(UUID id) {
+        challengeRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(id.toString())).toException());
+        challengeRepo.deleteById(id);
+        return new ResponseMessage.SuccessResponseMessage("Challenge deleted successfully");
     }
 
 }

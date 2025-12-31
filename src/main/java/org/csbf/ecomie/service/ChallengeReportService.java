@@ -4,6 +4,7 @@ import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -23,6 +24,10 @@ public interface ChallengeReportService {
 
     ChallengeReport getChallengeReport(UUID reportId);
 
-    List<ChallengeReport> getChallengeReports();
+    List<ChallengeReport> getChallengeReports(Optional<UUID> challengeId);
+
+    List<ChallengeReport> getChallengeReportsOfAChallenge(UUID challengeId);
+
+    ResponseMessage deleteChallengeReport(UUID id);
 }
 

@@ -2,7 +2,6 @@ package org.csbf.ecomie.mapper;
 
 
 import org.apache.commons.lang3.EnumUtils;
-import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.constant.SessionStatus;
 import org.csbf.ecomie.entity.SessionEntity;
 import org.csbf.ecomie.exceptions.Problems;

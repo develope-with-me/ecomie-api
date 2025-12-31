@@ -50,7 +50,7 @@ public class HelperDomain {
      */
     @Builder
     public record UserToken(UUID id, String token, String type, User user, LocalDateTime expiryDate,
-                            LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+                            LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
 
 
         @Override
@@ -77,7 +77,7 @@ public class HelperDomain {
     public record User(UUID id, String firstName, String lastName, String email, String role, String phoneNumber,
                        String country, String region, String city, String language,
                        String profilePictureFileName, Boolean accountEnabled, Boolean accountBlocked,
-                       Boolean accountSoftDeleted, LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+                       Boolean accountSoftDeleted, LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
 
 
         @Override
@@ -95,26 +95,31 @@ public class HelperDomain {
             return "";
         }
 
+        public User withProfilePictureFileName(String profilePictureFileName) {
+            return new User(id, firstName, lastName, email, role, phoneNumber, country, region, city, language,
+                    profilePictureFileName, accountEnabled, accountBlocked, accountSoftDeleted, createdOn, updatedOn,
+                    createdBy, updatedBy);
+        }
         public static User justMinimal(UserEntity userEntity) {
            return new User(userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(),
                     userEntity.getRole().name(), userEntity.getPhoneNumber(), userEntity.getCountry(),
                     userEntity.getRegion(), userEntity.getCity(), userEntity.getLanguage(),
                     userEntity.getProfilePictureFileName(), userEntity.getAccountEnabled(),
-                   userEntity.getAccountBlocked(), userEntity.getAccountSoftDeleted(), userEntity.createdAt(), userEntity.updatedAt(),
+                    userEntity.getAccountBlocked(), userEntity.getAccountSoftDeleted(), userEntity.createdOn(), userEntity.updatedOn(),
                     userEntity.createdBy(), userEntity.updatedBy());
         }
 
         public User justMinimal() {
             return new User(id, firstName, lastName, email, role, phoneNumber, country, region, city, language,
                     profilePictureFileName, null, null, null,
-                    createdAt, updatedAt, createdBy, updatedBy);
+                    createdOn, updatedOn, createdBy, updatedBy);
         }
     }
 
     @Builder
-    public record MinimalUser(UUID id, String firstName, String lastName, String email, String phoneNumber,
+    public record MinimalUser(UUID id, String firstName, String lastName, String email, String role, String phoneNumber,
                        String country, String region, String city, String language,
-                       String profilePictureFileName,LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+                       String profilePictureFileName,LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
 
         @Override
         public String name() {
@@ -155,9 +160,10 @@ public class HelperDomain {
      * Session Domain
      */
     @Builder
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Session(UUID id, @NotBlank String name, String description, @Pattern(regexp =VALID_DATE_TIME) LocalDateTime startDate,
                           @Pattern(regexp =VALID_DATE_TIME) LocalDateTime endDate, String status, List<Challenge> challenges,
-                          LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain{
+                          LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain{
 
 
         @Override
@@ -168,11 +174,11 @@ public class HelperDomain {
         public static Session justMinimal(SessionEntity sessionEntity) {
             return new Session(sessionEntity.getId(), sessionEntity.getName(), sessionEntity.getDescription(),
                     sessionEntity.getStartDate(), sessionEntity.getEndDate(), sessionEntity.getStatus().name(), null,
-                    sessionEntity.getCreatedAt(), sessionEntity.getUpdatedAt(), sessionEntity.getCreatedBy(), sessionEntity.getUpdatedBy());
+                    sessionEntity.getCreatedOn(), sessionEntity.getUpdatedOn(), sessionEntity.getCreatedBy(), sessionEntity.getUpdatedBy());
         }
 
         public Session justMinimal() {
-            return new Session (id, name, description, startDate, endDate, status, null, createdAt, updatedAt, createdBy, updatedBy);
+            return new Session (id, name, description, startDate, endDate, status, null, createdOn, updatedOn, createdBy, updatedBy);
         }
     }
 
@@ -183,7 +189,7 @@ public class HelperDomain {
     @Builder
     public record Challenge(UUID id, @NotBlank String name, String description, @Min(value = 1) int target,
                                     List<Session> sessions, String type,
-                            LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+                            LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
 
         @Override
         public String alternateName() {
@@ -192,13 +198,13 @@ public class HelperDomain {
 
         public static Challenge justMinimal (ChallengeEntity challengeEntity) {
             return new Challenge(challengeEntity.getId(), challengeEntity.getName(), challengeEntity.getDescription(), challengeEntity.getTarget(),
-                    null, challengeEntity.getType().name(), challengeEntity.getCreatedAt(),
-                    challengeEntity.getUpdatedAt(), challengeEntity.getCreatedBy(), challengeEntity.getUpdatedBy());
+                    null, challengeEntity.getType().name(), challengeEntity.getCreatedOn(),
+                    challengeEntity.getUpdatedOn(), challengeEntity.getCreatedBy(), challengeEntity.getUpdatedBy());
         }
 
         public Challenge justMinimal () {
-            return new Challenge(id, name, description, target, null, type, createdAt,
-                    updatedAt, createdBy, updatedBy);
+            return new Challenge(id, name, description, target, null, type, createdOn,
+                    updatedOn, createdBy, updatedBy);
         }
 
 
@@ -217,7 +223,7 @@ public class HelperDomain {
 
     @Builder
     public record Subscription(UUID id, @Min(value = 1) int target, Boolean blocked, User user, Challenge challenge,
-                                      Session session, LocalDateTime createdAt, LocalDateTime updatedAt,
+                                      Session session, LocalDateTime createdOn, LocalDateTime updatedOn,
                                UUID createdBy, UUID updatedBy) implements Domain {
 
         @Override
@@ -237,13 +243,13 @@ public class HelperDomain {
 
         public static Subscription justMinimal (SubscriptionEntity subscriptionEntity) {
             return new Subscription(subscriptionEntity.getId(), subscriptionEntity.getTarget(), subscriptionEntity.getBlocked(), null,
-                    null, null,  subscriptionEntity.getCreatedAt(),
-                    subscriptionEntity.getUpdatedAt(), subscriptionEntity.getCreatedBy(), subscriptionEntity.getUpdatedBy());
+                    null, null,  subscriptionEntity.getCreatedOn(),
+                    subscriptionEntity.getUpdatedOn(), subscriptionEntity.getCreatedBy(), subscriptionEntity.getUpdatedBy());
         }
 
         public Subscription justMinimal () {
             return new Subscription(id, target, blocked, user.justMinimal(), challenge.justMinimal(), session.justMinimal(),
-                    createdAt, updatedAt, createdBy, updatedBy);
+                    createdOn, updatedOn, createdBy, updatedBy);
         }
     }
 
@@ -263,19 +269,19 @@ public class HelperDomain {
     @Builder
     public record ChallengeReport(UUID id, int numberEvangelizedTo, int numberOfNewConverts, int numberFollowedUp,
                                   String difficulties, String remark, User user, Subscription subscription,
-                                  LocalDateTime createdAt, LocalDateTime updatedAt, UUID createdBy, UUID updatedBy) implements Domain {
+                                  LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
 
 
         public static ChallengeReport justMinimal(ChallengeReportEntity challengeReportEntity) {
             return new ChallengeReport(challengeReportEntity.getId(), challengeReportEntity.getNumberEvangelizedTo(),
                     challengeReportEntity.getNumberOfNewConverts(), challengeReportEntity.getNumberFollowedUp(),
-                    challengeReportEntity.getDifficulties(), challengeReportEntity.getRemark(), null, null, challengeReportEntity.getCreatedAt(),
-                    challengeReportEntity.getUpdatedAt(), challengeReportEntity.getCreatedBy(), challengeReportEntity.getUpdatedBy());
+                    challengeReportEntity.getDifficulties(), challengeReportEntity.getRemark(), null, null, challengeReportEntity.getCreatedOn(),
+                    challengeReportEntity.getUpdatedOn(), challengeReportEntity.getCreatedBy(), challengeReportEntity.getUpdatedBy());
         }
 
         public ChallengeReport justMinimal() {
             return new ChallengeReport(id,  numberEvangelizedTo, numberOfNewConverts, numberFollowedUp,
-                    difficulties, remark, user.justMinimal(), subscription.justMinimal(), createdAt, updatedAt, createdBy, updatedBy);
+                    difficulties, remark, user.justMinimal(), subscription.justMinimal(), createdOn, updatedOn, createdBy, updatedBy);
         }
 
         @Override

@@ -1,10 +1,8 @@
 package org.csbf.ecomie.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 
 
@@ -15,10 +13,11 @@ import org.csbf.ecomie.utils.commons.BaseEntity;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "subscriptions")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class SubscriptionEntity extends BaseEntity {
 
     @Column(unique = false, nullable = false)

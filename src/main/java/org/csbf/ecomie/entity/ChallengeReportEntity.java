@@ -2,6 +2,7 @@ package org.csbf.ecomie.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 
 
@@ -12,10 +13,11 @@ import org.csbf.ecomie.utils.commons.BaseEntity;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "challenge_reports")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class ChallengeReportEntity extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "integer default 0")

@@ -1,10 +1,13 @@
 package org.csbf.ecomie.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
 import org.csbf.ecomie.config.AuthContext;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.constant.SessionStatus;
+import org.csbf.ecomie.entity.ChallengeEntity;
+import org.csbf.ecomie.entity.SessionEntity;
 import org.csbf.ecomie.exceptions.Problems;
 import org.csbf.ecomie.mapper.SessionMapper;
 import org.csbf.ecomie.repository.ChallengeRepository;
@@ -14,6 +17,7 @@ import org.csbf.ecomie.repository.UserRepository;
 import org.csbf.ecomie.service.SessionService;
 import org.csbf.ecomie.utils.commons.Mapper;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
+import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 import org.csbf.ecomie.utils.helperclasses.ResponseMessage.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -76,10 +80,9 @@ public class SessionServiceImpl implements SessionService {
         var oldSession = mapper.asDomainObject(sessionEntity);
         var oldJsonSession = Mapper.toJsonObject(oldSession);
         var newJsonSession = Mapper.toJsonObject(session);
-        oldJsonSession.putAll(newJsonSession);
-        session = Mapper.fromJsonObject(oldJsonSession, Session.class);
-
-        var updatedSession = sessionRepo.save(mapper.asEntity(session));
+        session = Mapper.withUpdateValuesOnly(oldJsonSession, newJsonSession, Session.class);
+        sessionEntity = mapper.asEntity(session);
+        var updatedSession = sessionRepo.save(sessionEntity);
         return new SuccessResponseMessage("SessionEntity updated. Status: " + updatedSession.getStatus());
     }
 
@@ -137,6 +140,10 @@ public class SessionServiceImpl implements SessionService {
     public Session removeChallenges(UUID sessionId, List<UUID> challengeIds) {
         var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
 
+        return removeChallenges(sessionEntity, challengeIds);
+    }
+
+    private Session removeChallenges(SessionEntity sessionEntity, List<UUID> challengeIds) {
         challengeIds.forEach(challengeId -> {
             var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
             sessionEntity.removeChallenge(challenge);
@@ -149,10 +156,22 @@ public class SessionServiceImpl implements SessionService {
 //    @Transactional
     public Session removeChallenge(UUID sessionId, UUID challengeId) {
         var sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+        return removeChallenge(sessionEntity, challengeId);
+    }
+
+    private Session removeChallenge(SessionEntity sessionEntity, UUID challengeId) {
         var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
         sessionEntity.removeChallenge(challengeEntity);
 
-        return mapper.asDomainObject(sessionRepo.save(sessionEntity)) ;
+        return mapper.asDomainObject(sessionRepo.save(sessionEntity));
+    }
+
+    @Override
+    public ResponseMessage deleteSession(UUID id) {
+        var sessionEntity = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(id.toString())).toException());
+        removeChallenges(sessionEntity, sessionEntity.getChallenges().stream().map(ChallengeEntity::id).toList());
+        sessionRepo.deleteById(id);
+        return new SuccessResponseMessage("Session deleted successfully");
     }
 
     @Override

@@ -37,7 +37,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/register")
-    @Operation(summary = "Register", description = "Create account", tags = {"Unauthenticated"})
+    @Operation(summary = "Register", description = "Create account", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
         /**For Production */
         /*
@@ -55,7 +55,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = {"Unauthenticated"})
+    @Operation(summary = "Authenticate", description = "Authenticate user using email and password", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest servletRequest) {
         String appUrl = servletRequest.getContextPath();
 
@@ -71,14 +71,14 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/confirm-account", method = {RequestMethod.GET, RequestMethod.POST})
-    @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = {"Unauthenticated"})
+    @Operation(summary = "Confirm Account", description = "Confirm users email address", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<ConfirmEmailResponse> confirmUserAccount(@ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
         log.info("Email {}", email);
         return ResponseEntity.ok(service.confirmEmail(email, token));
     }
 
     @RequestMapping(value = "/resend-link", method = {RequestMethod.POST})
-    @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = {"Unauthenticated"})
+    @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
@@ -93,7 +93,7 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/reset-password/link", method = {RequestMethod.POST})
-    @Operation(summary = "Password Reset Link", description = "Send password reset link to the email sent in request body", tags = {"Unauthenticated"})
+    @Operation(summary = "Password Reset Link", description = "Send password reset link to the email sent in request body", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<ResponseMessage> requestPasswordReset(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
@@ -108,7 +108,7 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/reset-password", method = {RequestMethod.POST})
-    @Operation(summary = "Reset Password", description = "Reset password", tags = {"Unauthenticated"})
+    @Operation(summary = "Reset Password", description = "Reset password", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<ConfirmEmailResponse> resetPassword(@RequestBody PasswordDTO passwordDTO, @ExtendedEmailValidator @RequestParam("email") String email, @NotBlank  @RequestParam("token") String token) {
         log.info("AuthenticationController.resetPassword {}", AuthenticationController.class.getSimpleName());
         /**For Production */

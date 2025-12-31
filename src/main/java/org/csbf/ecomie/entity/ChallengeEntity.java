@@ -1,10 +1,8 @@
 package org.csbf.ecomie.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.constant.ChallengeType;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 
@@ -19,10 +17,11 @@ import java.util.List;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "challenges")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class ChallengeEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)

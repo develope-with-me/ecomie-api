@@ -3,6 +3,7 @@ package org.csbf.ecomie.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.csbf.ecomie.config.AuthContext;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.exceptions.*;
 import org.csbf.ecomie.entity.UserTokenEntity;
@@ -41,6 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserTokenRepository verificationTokenRepo;
     private final UserMapper userMapper;
+    private final AuthContext authContext;
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
@@ -62,11 +64,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accountEnabled(false)
                 .accountSoftDeleted(false)
                 .build();
-        UserEntity registeredUserEntity = userRepo.save(user);
+        if(authContext.isAuthorized(Role.ADMIN)) {
+            user.setAccountEnabled(true);
+        }
+
+        user = userRepo.save(user);
+        var userEntity = authContext.isAuthorized(Role.ADMIN) ? user : null;
 
         var jwtToken = jwtService.generateToken(user);
         msg = "user created";
-        return getAuthenticationResponse(true, msg, jwtToken);
+        return getAuthenticationResponse(true, msg, jwtToken, userEntity);
     }
 
     @Override

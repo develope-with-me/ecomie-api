@@ -36,11 +36,11 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     boolean existsBySession_Status_AndUser_Id(SessionStatus sessionStatus, UUID userId);
 
     @Query(value = "SELECT sub.session from SubscriptionEntity sub where sub.user=:user")
-    List<SessionEntity> selectAllSessionsThisUserHasSubscribedTo(@Param("userEntity") UserEntity userEntity);
+    List<SessionEntity> selectAllSessionsThisUserHasSubscribedTo(@Param("user") UserEntity userEntity);
     @Query(value = "SELECT sub.session from SubscriptionEntity sub where sub.session=:session and sub.blocked=true")
-    List<UserEntity> selectAllUsersBlockedInSession(@Param("sessionEntity") SessionEntity sessionEntity);
+    List<UserEntity> selectAllUsersBlockedInSession(@Param("session") SessionEntity sessionEntity);
     @Query(value = "SELECT sub.user from SubscriptionEntity sub where sub.session=:session and sub.challenge=:challenge")
-    List<UserEntity> selectAllUsersSubscribedToSessionViaChallenge(@Param("sessionEntity") SessionEntity sessionEntity, @Param("challengeEntity") ChallengeEntity challengeEntity);
+    List<UserEntity> selectAllUsersSubscribedToSessionViaChallenge(@Param("session") SessionEntity sessionEntity, @Param("challenge") ChallengeEntity challengeEntity);
     @Query(value = "SELECT sub.user from SubscriptionEntity sub where sub.session=:session")
-    List<UserEntity> selectAllUsersSubscribedToSession(@Param("sessionEntity") SessionEntity sessionEntity);
+    List<UserEntity> selectAllUsersSubscribedToSession(@Param("session") SessionEntity sessionEntity);
 }

@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                 // Allow access to unauthenticated users
-                .requestMatchers("/api/v1/auth/**", "/api/v1/demo-controller**").permitAll()
+                .requestMatchers("/api/v1/auth/**", "/api/v1/users/**", "/api/v1/sessions/**", "/api/v1/challenges/**", "/api/v1/subscriptions/**", "/api/v1/reports/**","/api/v1/demo-controller**").permitAll()
                 // Allow swagger routes
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs/**", "/webjars/**").permitAll()
                 // permit all authenticated users

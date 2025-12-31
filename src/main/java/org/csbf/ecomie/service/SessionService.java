@@ -34,4 +34,6 @@ public interface SessionService {
     Session assignChallenge(UUID sessionId, UUID challengeId);
 
     Session removeChallenge(UUID sessionId, UUID challengeId);
+
+    ResponseMessage deleteSession(UUID id);
 }

@@ -19,4 +19,6 @@ public interface ChallengeService {
     ResponseMessage update(UUID id, Challenge challenge);
     Challenge getChallenge(UUID id);
     List<Challenge> getChallenges();
+
+    ResponseMessage deleteChallenge(UUID id);
 }

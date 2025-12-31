@@ -4,7 +4,6 @@ package org.csbf.ecomie.mapper;
 import org.csbf.ecomie.entity.SubscriptionEntity;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.Challenge;
-import org.csbf.ecomie.utils.helperclasses.HelperDomain.ChallengeReport;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.Session;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.User;
 import org.mapstruct.InheritInverseConfiguration;

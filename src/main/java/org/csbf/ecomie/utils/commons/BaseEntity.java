@@ -1,5 +1,6 @@
 package org.csbf.ecomie.utils.commons;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.config.EntityConfigParams;
 import org.csbf.ecomie.entity.UserEntity;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
@@ -26,10 +26,10 @@ public abstract class BaseEntity implements Entity {
     private UUID id;
 
     @Column(name = "created_on", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdOn;
 
     @Column(name = "updated_on", nullable = false)
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedOn;
 
     @Column(name = "created_by")
     private UUID createdBy;
@@ -44,19 +44,19 @@ public abstract class BaseEntity implements Entity {
             id = UUID.randomUUID();
         }
 
-        if (createdAt == null) {
-            createdAt = now;
+        if (createdOn == null) {
+            createdOn = now;
         }
         if (createdBy == null) {
             createdBy = getOwnerId();
         }
-        updatedAt = now;
+        updatedOn = now;
         updatedBy = getOwnerId();
     }
 
     @PreUpdate
     public void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedOn = LocalDateTime.now();
         updatedBy = getOwnerId();
     }
 

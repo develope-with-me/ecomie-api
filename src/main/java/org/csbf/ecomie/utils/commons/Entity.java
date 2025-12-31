@@ -7,11 +7,11 @@ public interface Entity extends Persistable<UUID> {
 
 //    Integer getVersion();
 
-    LocalDateTime getCreatedAt();
+    LocalDateTime getCreatedOn();
 
-    void setCreatedAt(LocalDateTime createdAt);
+    void setCreatedOn(LocalDateTime createdOn);
 
-    LocalDateTime getUpdatedAt();
+    LocalDateTime getUpdatedOn();
 
     UUID getCreatedBy();
 
@@ -31,12 +31,12 @@ public interface Entity extends Persistable<UUID> {
 //        return getVersion();
 //    }
 
-    default LocalDateTime createdAt() {
-        return getCreatedAt();
+    default LocalDateTime createdOn() {
+        return getCreatedOn();
     }
 
-    default LocalDateTime updatedAt() {
-        return getUpdatedAt();
+    default LocalDateTime updatedOn() {
+        return getUpdatedOn();
     }
 
     default UUID createdBy() {

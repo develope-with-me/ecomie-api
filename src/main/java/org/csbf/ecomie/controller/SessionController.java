@@ -18,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/secure")
+@RequestMapping("/api/v1")
 @SecurityRequirement(name = "ApiKey")
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "SessionController", description = "This controller contains endpoints for sessions")
@@ -27,63 +27,74 @@ public class SessionController {
     private final SessionService sessionService;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/admin/sessions")
+    @PostMapping(value = "/secure/admin/sessions")
     @Operation(summary = "Create Session", description = "Create new session", tags = { "ADMIN" })
-    protected ResponseMessage createSession(@RequestBody Session session) {
+    public ResponseMessage createSession(@RequestBody Session session) {
         return sessionService.store(session);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/admin/sessions/{sessionId}")
+    @PutMapping(value = "/secure/admin/sessions/{id}")
     @Operation(summary = "Update Session", description = "Update session", tags = { "ADMIN" })
-    public ResponseMessage updateSession(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody Session session) {
-        return sessionService.update(sessionId, session);
+    public ResponseMessage updateSession(@PathVariable(name = "id") UUID id, @RequestBody Session session) {
+        return sessionService.update(id, session);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/user/sessions/{sessionId}")
+    @GetMapping(value = "/secure/user/sessions/{id}")
     @Operation(summary = "Get Session", description = "Get session", tags = { "USER, ADMIN" })
-    public Session getSession(@PathVariable(name = "sessionId") UUID sessionId) {
-        return sessionService.getSession(sessionId);
+    public Session getSession(@PathVariable(name = "id") UUID id) {
+        return sessionService.getSession(id);
     }
 
-    @GetMapping(value = "/user/sessions")
-    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "USER, ADMIN" })
+    @GetMapping(value = "/sessions")
+    @Operation(summary = "Get Sessions", description = "Get all sessions", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<List<Session>> getSessions() {
         return ResponseEntity.ok(sessionService.getSessions());
     }
 
-    @PutMapping(value = "/admin/sessions/{sessionId}/status")
+    @GetMapping(value = "/secure/user/sessions")
+    @Operation(summary = "Securely Get Sessions", description = "Securely get all sessions", tags = { "USER, ADMIN" })
+    public ResponseEntity<List<Session>> securelyGetSessions() {
+        return ResponseEntity.ok(sessionService.getSessions());
+    }
+
+    @PutMapping(value = "/secure/admin/sessions/{id}/status")
     @Operation(summary = "Update Session Status", description = "Update session's status. valid values {INACTIVE, ONGOING, PAUSED, ENDED}", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> changeSessionStatus(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody RequestProps props ) {
-        return new ResponseEntity<>(sessionService.changeStatus(sessionId, props.status()), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<ResponseMessage> changeSessionStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props ) {
+        return new ResponseEntity<>(sessionService.changeStatus(id, props.status()), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @PostMapping(value = "/admin/sessions/{sessionId}/assign/challenges")
+    @PostMapping(value = "/secure/admin/sessions/{id}/assign/challenges")
     @Operation(summary = "Assign Challenges", description = "Assign challenges to session", tags = { "ADMIN" })
-    public ResponseEntity<Session> assignChallenges(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody RequestProps props) {
-        return new ResponseEntity<>(sessionService.assignChallenges(sessionId, props.ids()), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<Session> assignChallenges(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
+        return new ResponseEntity<>(sessionService.assignChallenges(id, props.ids()), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/admin/sessions/{sessionId}/remove/challenges")
+    @PostMapping(value = "/secure/admin/sessions/{id}/remove/challenges")
     @Operation(summary = "Remove Challenges", description = "Remove challenges from session", tags = { "ADMIN" })
-    public ResponseEntity<Session> removeChallenges(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody RequestProps props) {
-        return new ResponseEntity<>(sessionService.removeChallenges(sessionId, props.ids()), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<Session> removeChallenges(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
+        return new ResponseEntity<>(sessionService.removeChallenges(id, props.ids()), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/admin/sessions/{sessionId}/assign/challenges/{challengeId}")
+    @PostMapping(value = "/secure/admin/sessions/{id}/assign/challenges/{challengeId}")
     @Operation(summary = "Assign Challenge", description = "Assign a challenge to session", tags = { "ADMIN" })
-    public ResponseEntity<Session> assignChallenge(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "challengeId") UUID challengeId) {
-        return new ResponseEntity<>(sessionService.assignChallenge(sessionId, challengeId), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<Session> assignChallenge(@PathVariable(name = "id") UUID id, @PathVariable(name = "challengeId") UUID challengeId) {
+        return new ResponseEntity<>(sessionService.assignChallenge(id, challengeId), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/admin/sessions/{sessionId}/remove/challenges/{challengeId}")
+    @PostMapping(value = "/secure/admin/sessions/{id}/remove/challenges/{challengeId}")
     @Operation(summary = "Remove A Challenge", description = "Remove a challenge from session", tags = { "ADMIN" })
-    public ResponseEntity<Session> removeChallenge(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "challengeId") UUID challengeId) {
-        return new ResponseEntity<>(sessionService.removeChallenge(sessionId, challengeId), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<Session> removeChallenge(@PathVariable(name = "id") UUID id, @PathVariable(name = "challengeId") UUID challengeId) {
+        return new ResponseEntity<>(sessionService.removeChallenge(id, challengeId), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @GetMapping(value = "/admin/users/{userId}/sessions")
+    @GetMapping(value = "/secure/admin/users/{userId}/sessions")
     @Operation(summary = "Get Sessions", description = "Get all user's sessions", tags = { "ADMIN" })
     public ResponseEntity<List<Session>> getUserSessions(@PathVariable(name = "userId") UUID userId) {
         return ResponseEntity.ok(sessionService.getUserSessions(userId));
     }
 
+    @DeleteMapping(value = "/secure/admin/sessions/{id}")
+    @Operation(summary = "Delete Session", description = "Delete session", tags = { "ADMIN" })
+    public ResponseEntity<ResponseMessage> deleteSession(@PathVariable(name = "id") UUID id) {
+        return ResponseEntity.ok(sessionService.deleteSession(id));
+    }
 }

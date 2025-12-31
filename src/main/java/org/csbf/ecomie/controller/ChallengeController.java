@@ -18,43 +18,49 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/secure")
+@RequestMapping("/api/v1")
 @SecurityRequirement(name = "ApiKey")
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "ChallengeController", description = "This controller contains endpoints for challenges")
 public class ChallengeController {
 
     private final ChallengeService challengeService;
-    @PostMapping(value = "/admin/challenges")
+    @PostMapping(value = "/secure/admin/challenges")
     @Operation(summary = "Create Challenges", description = "Create new challenge", tags = { "ADMIN" })
     protected ResponseEntity<ResponseMessage> createChallenge(@RequestBody Challenge challenge) {
         return new ResponseEntity<>(challengeService.store(challenge), HttpStatus.CREATED);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/admin/challenges/{challengeId}")
+    @PutMapping(value = "/secure/admin/challenges/{id}")
     @Operation(summary = "Update Challenge", description = "Update challenge", tags = { "USER, ADMIN" })
-    public ResponseMessage updateChallenge(@PathVariable(name = "challengeId") UUID challengeId, @RequestBody Challenge challenge) {
-        return challengeService.update(challengeId, challenge);
+    public ResponseMessage updateChallenge(@PathVariable(name = "id") UUID id, @RequestBody Challenge challenge) {
+        return challengeService.update(id, challenge);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/user/challenges/{challengeId}")
+    @GetMapping(value = "/secure/user/challenges/{id}")
     @Operation(summary = "Get Challenge", description = "Get challenge", tags = { "USER, ADMIN" })
-    public Challenge getChallenge(@PathVariable(name = "challengeId") UUID challengeId) {
-        return challengeService.getChallenge(challengeId);
+    public Challenge getChallenge(@PathVariable(name = "id") UUID id) {
+        return challengeService.getChallenge(id);
     }
 
-   @GetMapping(value = "/user/challenges")
-    @Operation(summary = "Get Challenges", description = "Get all challenges", tags = { "USER, ADMIN" })
+   @GetMapping(value = "/challenges")
+    @Operation(summary = "Get Challenges", description = "Get all challenges", tags = { "UNAUTHENTICATED" })
     public ResponseEntity<List<Challenge>> getChallenges() {
         return ResponseEntity.ok(challengeService.getChallenges());
     }
 
 
-    @PutMapping(value = "/admin/challenges/{challengeId}/type")
+    @PutMapping(value = "/secure/admin/challenges/{id}/type")
     @Operation(summary = "Update Challenge Type", description = "Update challenge's Type. valid values {NORMAL, EVENT}", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> changeChallengeStatus(@PathVariable(name = "challengeId") UUID challengeId, @RequestBody RequestProps props) {
-        return new ResponseEntity<>(challengeService.changeType(challengeId, props.type()), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<ResponseMessage> changeChallengeStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
+        return new ResponseEntity<>(challengeService.changeType(id, props.type()), HttpStatus.PARTIAL_CONTENT);
+    }
+
+    @DeleteMapping(value = "/secure/admin/challenges/{id}")
+    @Operation(summary = "Delete Challenge", description = "Delete Challenge", tags = { "ADMIN" })
+    public ResponseEntity<ResponseMessage> deleteChallenge(@PathVariable(name = "id") UUID id) {
+        return ResponseEntity.ok(challengeService.deleteChallenge(id));
     }
 }

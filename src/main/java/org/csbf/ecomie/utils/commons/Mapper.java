@@ -1,7 +1,9 @@
 package org.csbf.ecomie.utils.commons;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -33,8 +36,10 @@ public interface Mapper<T extends Domain, E extends Entity> {
 
     List<E> asEntities(List<T> domainObjs);
 
-    ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+   ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule())
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -232,6 +237,14 @@ public interface Mapper<T extends Domain, E extends Entity> {
 //                    "Internal Server Error", "", "00001012", List.of());
 //            throw problem.toException();
 //        }
+    }
+
+    static <O> O withUpdateValuesOnly(JSONObject original, JSONObject update, Class<O> clazz) {
+        try {
+            return fromJsonObject(OBJECT_MAPPER.updateValue(original, update), clazz);
+        } catch (JsonProcessingException e) {
+            throw Problems.JSON_DESERIALIZATION_ERROR.appendDetail(e.toString()).toException();
+        }
     }
 
 

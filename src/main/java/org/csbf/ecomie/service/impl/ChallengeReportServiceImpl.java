@@ -17,8 +17,7 @@ import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -42,21 +41,21 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
     public ResponseMessage storeReport(UUID sessionId, ChallengeReportRequest challengeReportRequest) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
 
-        var user = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+        var user = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("UserEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
         return store(sessionId, challengeReportRequest, user);
     }
 
     @Override
     public ResponseMessage storeUserReport(UUID userId, UUID sessionId, ChallengeReportRequest challengeReportRequest) {
-        var user = userRepo.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+        var user = userRepo.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("UserEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
         return store(sessionId, challengeReportRequest, user);
     }
 
     @NotNull
     private ResponseMessage store(UUID sessionId, ChallengeReportRequest challengeReportRequest, UserEntity userEntity) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("SessionEntity", "Session with id (%s) not found".formatted(sessionId.toString())).toException());
 
-        var subscription = subscriptionRepo.findBySessionAndUser(session, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withDetail("SubscriptionEntity not found").toException());
+        var subscription = subscriptionRepo.findBySessionAndUser(session, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Subscription not found").toException());
 
         var report = ChallengeReportEntity.builder()
                 .subscription(subscription)
@@ -75,7 +74,7 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
     @Override
     public ResponseMessage updateChallengeReport(UUID reportId, ChallengeReportRequest challengeReportRequest) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        var report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("report", "Report with id (%s) not found".formatted(reportId.toString())).toException());
+        var report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(reportId.toString())).toException());
         if(!report.getSubscription().getUser().getEmail().equals(authContext.getAuthUser().getName())) {
             throw Problems.BAD_REQUEST.withDetail("Report is not yours").toException();
         }
@@ -97,7 +96,7 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
 
     @Override
     public ResponseMessage updateChallengeReportForUser(UUID reportId, ChallengeReportRequest challengeReportRequest) {
-        var report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("report", "Report with id (%s) not found".formatted(reportId.toString())).toException());
+        var report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(reportId.toString())).toException());
 
         return update(challengeReportRequest, report);
 
@@ -106,29 +105,42 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
     @Override
     public ChallengeReport getChallengeReport(UUID reportId) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        var report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("report", "Report with id (%s) not found".formatted(reportId.toString())).toException());
-//        if (!authUser.getAuthorities().contains("ADMIN")) {
-//        if (authContext.getAuthUser().getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()))) {
-        if (!authContext.isAuthorized(Role.ADMIN)) {            
-            if (!report.getSubscription().getUser().getEmail().equals(authContext.getAuthUser().getName())) {
-                throw Problems.BAD_REQUEST.withDetail("UserEntity not subscribed").toException();
-            }
-
-            return mapper.asDomainObject(report).justMinimal();
+        ChallengeReportEntity report = null;
+        if (authContext.isAuthorized(Role.ADMIN)) {
+            report = reportRepo.findById(reportId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(reportId.toString())).toException());
+        } else {
+            report = reportRepo.findByIdAndUser_Email(reportId, authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "User not subscribed".formatted(reportId.toString())).toException());
         }
-
-        return mapper.asDomainObject(report);
+        return mapper.asDomainObject(report).justMinimal();
     }
 
 
 
     @Override
-    public List<ChallengeReport> getChallengeReports() {
-//        List<ChallengeReport> challengeReports = new ArrayList<>();
-//        reportRepo.findAll().forEach(report -> challengeReports.add(new ChallengeReport(report)));
-        var reportEntities = reportRepo.findAll();
-        var reports = mapper.asDomainObjects(reportEntities);
+    public List<ChallengeReport> getChallengeReports(Optional<UUID> challengeId) {
+        List<ChallengeReportEntity> reportEntities = new ArrayList<>();
+        if (authContext.isAuthorized(Role.ADMIN)) {
+            reportEntities = challengeId.isPresent() ? reportRepo.findAllBySubscription_Challenge_Id(challengeId.get()) : reportRepo.findAll();
+        } else {
+            String email = authContext.getAuthUser().getName();
+            reportEntities = challengeId.isPresent() ? reportRepo.findAllByUser_EmailAndSubscription_Challenge_Id(email, challengeId.get()) :reportRepo.findAllByUser_Email(email);
+        }
 
+        var reports = mapper.asDomainObjects(reportEntities);
         return reports.stream().map(ChallengeReport::justMinimal).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ChallengeReport> getChallengeReportsOfAChallenge(UUID challengeId) {
+        var reportEntities = reportRepo.findAllBySubscription_Challenge_Id(challengeId);
+        var reports =  mapper.asDomainObjects(reportEntities);
+        return reports.stream().map(ChallengeReport::justMinimal).collect(Collectors.toList());
+    }
+
+    @Override
+    public ResponseMessage deleteChallengeReport(UUID id) {
+        reportRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(id.toString())).toException());
+        reportRepo.deleteById(id);
+        return new ResponseMessage.SuccessResponseMessage("Report deleted successfully");
     }
 }

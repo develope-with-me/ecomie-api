@@ -118,13 +118,20 @@ public class FileUploadServiceImpl implements FileUploadService {
         String normalizedFileName = StringUtils.getFilename(fileName).replace("%20", " ");
 
         try {
+            log.info("FileUploadServiceImpl.deleteFile --- Deleting file '{}'", fileName);
+
             Path file = root.resolve(normalizedFileName).normalize();
             Resource resource = new UrlResource(file.toUri());
             File file1 = new File(file.toString());
             if (resource.exists() || resource.isReadable()) {
-                file1.delete();
+                // file1.delete() deletes and returns boolean
+                if (file1.delete()) {
+                    log.info("FileUploadServiceImpl.deleteFile --- File deleted successfully");
+                } else {
+                    log.error("FileUploadServiceImpl.deleteFile --- File could not be deleted");
+                }
             } else {
-                log.info("FileUploadServiceImpl.deleteFile --- Old file does not exist, fileName : {}", fileName);
+                log.info("FileUploadServiceImpl.deleteFile --- File does not exist, fileName : {}", fileName);
                 throw Problems.NOT_FOUND.withProblemError("file.name", "Could not read file %s or it does not exists".formatted(normalizedFileName)).toException();
             }
         } catch (MalformedURLException e) {

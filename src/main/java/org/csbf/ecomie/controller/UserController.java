@@ -11,6 +11,7 @@ import org.csbf.ecomie.config.AuthContext;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.event.OnRoleChangeRequestEvent;
 import org.csbf.ecomie.exceptions.BadRequestException;
+import org.csbf.ecomie.service.AuthenticationService;
 import org.csbf.ecomie.service.UserService;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
@@ -42,19 +43,20 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final AuthenticationService authService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final AuthContext authContext;
 
 
-    @PostMapping(value = "/user/update", consumes = { "multipart/form-data" }, produces = { "application/json" })
+    @PutMapping(value = "/user/update", consumes = { "multipart/form-data" }, produces = { "application/json" })
     @Operation(summary = "Edit My Profile", description = "Modify currently authenticated user's profile information", tags = { "USER" })
-    public ResponseEntity<ResponseMessage> updateAuthUserProfile( @RequestParam("image") Optional<MultipartFile> file, @RequestBody MinimalUser user) {
+    public ResponseEntity<ResponseMessage> updateAuthUserProfile( @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") MinimalUser user) {
         return new ResponseEntity<>(userService.updateAuthUserProfile(file, user), HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/admin/update/users/{userId}", consumes = { "multipart/form-data" }, produces = { "application/json" })
+    @PutMapping(value = "/admin/update/users/{userId}", consumes = { "multipart/form-data", "application/json" }, produces = { "application/json" })
     @Operation(summary = "Edit User Profile", description = "Modify user's profile information using his id", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> updateUserProfile(@PathVariable(name = "userId") UUID userId, @RequestParam("image") Optional<MultipartFile> file, @RequestBody User user) {
+    public ResponseEntity<ResponseMessage> updateUserProfile(@PathVariable(name = "userId") UUID userId, @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") User user) {
         return new ResponseEntity<>(userService.updateUserProfile(userId, file, user), HttpStatus.CREATED);
     }
 
@@ -131,5 +133,11 @@ public class UserController {
     @Operation(summary = "Get All Users", description = "Get all users in the system", tags = { "ADMIN" })
     public ResponseEntity<List<User>> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/users")
+    @Operation(summary = "Get All Users", description = "Get all users in the system", tags = { "ADMIN" })
+    public ResponseEntity<AuthenticationResponse> creatUser(@RequestBody RegisterRequest request) {
+        return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
 }

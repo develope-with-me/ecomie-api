@@ -79,7 +79,6 @@ public class UserServiceImpl implements UserService {
 
     @NotNull
     private ResponseMessage getUpdateResponseMessage(Optional<MultipartFile> file, User user, UserEntity userEntity) {
-        UserEntity entityToUpdate = mapper.asEntity(user);
 
         String imageFileName;
         String oldFile = userEntity.getProfilePictureFileName();
@@ -105,13 +104,17 @@ public class UserServiceImpl implements UserService {
                             file.get().getOriginalFilename() +
                             "' already exist"
             );
-            entityToUpdate.setProfilePictureFileName(imageFileName);
+            user = user.withProfilePictureFileName(imageFileName);
 
         }
-        var oldJsonUser = Mapper.toJsonObject(userEntity);
-        var newJsonUser = Mapper.toJsonObject(entityToUpdate);
-        oldJsonUser.putAll(newJsonUser);
-        entityToUpdate = Mapper.fromJsonObject(oldJsonUser, UserEntity.class);
+
+        var oldDomain = mapper.asDomainObject(userEntity);
+        var oldJsonUser = Mapper.toJsonObject(oldDomain);
+        var newJsonUser = Mapper.toJsonObject(user);
+
+        user = Mapper.withUpdateValuesOnly(oldJsonUser, newJsonUser, User.class);
+        var entityToUpdate = mapper.asEntity(user);
+        entityToUpdate.setPassword(userEntity.getPassword());
 
         userRepository.save(entityToUpdate);
 

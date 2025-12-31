@@ -2,6 +2,7 @@ package org.csbf.ecomie.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.config.EntityConfigParams;
 import org.csbf.ecomie.constant.TokenType;
 import org.csbf.ecomie.utils.commons.BaseEntity;
@@ -16,10 +17,11 @@ import java.time.LocalDateTime;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_tokens")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class UserTokenEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)
@@ -37,7 +39,7 @@ public class UserTokenEntity extends BaseEntity {
     private Boolean isValid;
 
     public void setExpiryDate(int expiryTimeInMinutes) {
-        this.expiryDate = createdAt().plusMinutes(expiryTimeInMinutes);
+        this.expiryDate = createdOn().plusMinutes(expiryTimeInMinutes);
     }
 
     public boolean isExpired() {

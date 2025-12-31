@@ -1,16 +1,13 @@
 package org.csbf.ecomie.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.constant.SessionStatus;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 /**
  * Ecomie Project.
@@ -19,10 +16,11 @@ import java.util.List;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "sessions")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class SessionEntity extends BaseEntity {
 
     @Column(unique = true, nullable = false)
@@ -62,3 +60,4 @@ public class SessionEntity extends BaseEntity {
         challengeEntity.getSessions().remove(this);
     }
 }
+

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -25,6 +26,8 @@ import java.util.UUID;
 public class ChallengeReportController {
 
 private final ChallengeReportService reportService;
+    private final ChallengeReportService challengeReportService;
+
     @PostMapping(value = "/ecomiest/report/session/{sessionId}")
     @Operation(summary = "Create Challenge Report", description = "Create new report", tags = { "ECOMIEST" })
     protected ResponseEntity<ResponseMessage> createChallengeReport(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
@@ -38,29 +41,41 @@ private final ChallengeReportService reportService;
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/ecomiest/report/{reportId}")
+    @PutMapping(value = "/ecomiest/report/{id}")
     @Operation(summary = "Update Challenge Report", description = "Update challenge report", tags = { "ECOMIEST" })
-    public ResponseMessage updateChallengeReport(@PathVariable(name = "reportId") UUID reportId, @RequestBody ChallengeReportRequest challengeReportRequest) {
-        return reportService.updateChallengeReport(reportId, challengeReportRequest);
+    public ResponseMessage updateChallengeReport(@PathVariable(name = "id") UUID id, @RequestBody ChallengeReportRequest challengeReportRequest) {
+        return reportService.updateChallengeReport(id, challengeReportRequest);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/admin/report/{reportId}")
+    @PutMapping(value = "/admin/report/{id}")
     @Operation(summary = "Update Challenge Report", description = "Update challenge report", tags = { "ADMIN" })
-    public ResponseMessage updateChallengeReportForUser(@PathVariable(name = "reportId") UUID reportId, @RequestBody ChallengeReportRequest challengeReportRequest) {
-        return reportService.updateChallengeReportForUser(reportId, challengeReportRequest);
+    public ResponseMessage updateChallengeReportForUser(@PathVariable(name = "id") UUID id, @RequestBody ChallengeReportRequest challengeReportRequest) {
+        return reportService.updateChallengeReportForUser(id, challengeReportRequest);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/ecomiest/report/{reportId}")
-    @Operation(summary = "Get Challenge Report", description = "Get challenge report", tags = { "ECOMIEST" })
-    public ChallengeReport getChallengeReport(@PathVariable(name = "reportId") UUID reportId) {
-        return reportService.getChallengeReport(reportId);
+    @GetMapping(value = "/ecomiest/report/{id}")
+    @Operation(summary = "Get Challenge Report", description = "Get challenge report", tags = { "ECOMIEST", "ADMIN" })
+    public ChallengeReport getChallengeReport(@PathVariable(name = "id") UUID id) {
+        return reportService.getChallengeReport(id);
     }
 
-    @GetMapping(value = "/admin/reports")
-    @Operation(summary = "Get Challenge Reports", description = "Get all challenge reports", tags = { "ADMIN" })
-    public ResponseEntity<List<ChallengeReport>> getChallengeReports() {
-        return ResponseEntity.ok(reportService.getChallengeReports());
+    @GetMapping(value = "/ecomiest/reports")
+    @Operation(summary = "Get Challenge Reports", description = "Get all challenge reports", tags = { "ECOMIEST", "ADMIN" })
+    public ResponseEntity<List<ChallengeReport>> getChallengeReports(@RequestParam("challengeId") Optional<UUID> challengeId) {
+        return ResponseEntity.ok(reportService.getChallengeReports(challengeId));
+    }
+
+//    @GetMapping(value = "/admin/reports/challenge/{challengeId}")
+//    @Operation(summary = "Get Challenge's Reports", description = "Get a challenge's reports", tags = { "ADMIN" })
+//    public ResponseEntity<List<ChallengeReport>> getChallengeReports() {
+//        return ResponseEntity.ok(reportService.getChallengeReports(challengeId));
+//    }
+
+    @DeleteMapping(value = "/admin/reports/{id}")
+    @Operation(summary = "Delete Report", description = "Delete Challenge", tags = { "ADMIN" })
+    public ResponseEntity<ResponseMessage> deleteChallengeReport(@PathVariable(name = "id") UUID id) {
+        return ResponseEntity.ok(reportService.deleteChallengeReport(id));
     }
 }

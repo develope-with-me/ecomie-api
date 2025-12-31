@@ -1,10 +1,11 @@
 package org.csbf.ecomie.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.utils.commons.BaseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,10 +22,11 @@ import java.util.*;
  */
 @Data
 @Entity
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "_users")
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
 public class UserEntity extends BaseEntity implements UserDetails {
 
     private String firstName;
