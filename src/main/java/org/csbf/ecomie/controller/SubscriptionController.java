@@ -37,10 +37,10 @@ public class SubscriptionController {
         return new ResponseEntity<>(subscriptionService.subscribeUser(userId, subscriptionRequest), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @DeleteMapping(value = "/admin/subscriptions/{subscriptionId}")
+    @DeleteMapping(value = "/admin/subscriptions/{id}")
     @Operation(summary = "Unsubscribe User", description = "Delete/Remove subscription", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "subscriptionId") UUID subscriptionId) {
-        return new ResponseEntity<>(subscriptionService.unSubscribeUser(subscriptionId), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "id") UUID id) {
+        return new ResponseEntity<>(subscriptionService.unSubscribeUser(id), HttpStatus.PARTIAL_CONTENT);
     }
 
     @DeleteMapping(value = "/admin/subscriptions/{sessionId}/unsubscribe/user/{userId}")
@@ -50,17 +50,17 @@ public class SubscriptionController {
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/admin/subscriptions/{subscriptionId}")
+    @PostMapping(value = "/admin/subscriptions/{id}")
     @Operation(summary = "Update Subscription", description = "Update subscription", tags = { "ADMIN" })
-    public Subscription updateSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody SubscriptionRequest subscriptionRequest) {
-        return subscriptionService.update(subscriptionId, subscriptionRequest);
+    public Subscription updateSubscription(@PathVariable(name = "id") UUID id, @RequestBody SubscriptionRequest subscriptionRequest) {
+        return subscriptionService.update(id, subscriptionRequest);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/ecomiest/subscriptions/{subscriptionId}")
+    @GetMapping(value = "/ecomiest/subscriptions/{id}")
     @Operation(summary = "Get Subscription", description = "Get subscription", tags = { "ECOMIEST" })
-    public Subscription getSubscription(@PathVariable(name = "subscriptionId") UUID subscriptionId) {
-        return subscriptionService.getSubscription(subscriptionId);
+    public Subscription getSubscription(@PathVariable(name = "id") UUID id) {
+        return subscriptionService.getSubscription(id);
     }
 
     @GetMapping(value = "/admin/subscriptions")

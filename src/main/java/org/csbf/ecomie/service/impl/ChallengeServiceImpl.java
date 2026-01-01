@@ -5,6 +5,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.csbf.ecomie.config.AuthContext;
 import org.csbf.ecomie.constant.ChallengeType;
 import org.csbf.ecomie.constant.Role;
+import org.csbf.ecomie.entity.SessionEntity;
 import org.csbf.ecomie.exceptions.Problems;
 import org.csbf.ecomie.entity.ChallengeEntity;
 import org.csbf.ecomie.mapper.ChallengeMapper;
@@ -94,13 +95,22 @@ public class ChallengeServiceImpl implements ChallengeService {
             addSessionToChallenge(challenge.sessions(), challengeEntity);
         }
 
+        List<SessionEntity> sessions = null;
+        if (challengeEntity.getSessions() != null) {
+            sessions = challengeEntity.getSessions();
+            challengeEntity.setSessions(null);
+        }
         var oldChallenge = mapper.asDomainObject(challengeEntity);
         var oldJsonChallenge = Mapper.toJsonObject(oldChallenge);
         var newJsonChallenge = Mapper.toJsonObject(challenge);
 
         challenge = Mapper.withUpdateValuesOnly(oldJsonChallenge, newJsonChallenge, Challenge.class);
 
-        var updatedChallenge = challengeRepo.save(mapper.asEntity(challenge));
+        challengeEntity = mapper.asEntity(challenge);
+        if (sessions != null) {
+            challengeEntity.setSessions(sessions);
+        }
+        var updatedChallenge = challengeRepo.save(challengeEntity);
 
         return new ResponseMessage.SuccessResponseMessage("ChallengeEntity updated. Type: " + updatedChallenge.getType());
     }

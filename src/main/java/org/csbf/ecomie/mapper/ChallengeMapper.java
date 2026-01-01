@@ -14,6 +14,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Ecomie Project.
@@ -48,7 +49,7 @@ public interface ChallengeMapper extends
     List<ChallengeEntity> asEntities(List<Challenge> domainObjects);
 
     static List<Session> mapOnlySessionIdsAndName(ChallengeEntity entity) {
-        if (entity.getSessions().isEmpty()) {
+        if (Objects.isNull(entity.getSessions()) || entity.getSessions().isEmpty()) {
             return null;
         }
         return entity.getSessions().stream()
@@ -61,7 +62,7 @@ public interface ChallengeMapper extends
     }
 
     static List<SessionEntity> mapEntireSessionEntities(Challenge domainObject) {
-        if (domainObject.sessions().isEmpty()) {
+        if (Objects.isNull(domainObject.sessions()) || domainObject.sessions().isEmpty()) {
             return null;
         }
         return domainObject.sessions().stream()

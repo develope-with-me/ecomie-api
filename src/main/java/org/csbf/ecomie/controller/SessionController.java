@@ -65,22 +65,22 @@ public class SessionController {
         return new ResponseEntity<>(sessionService.changeStatus(id, props.status()), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @PostMapping(value = "/secure/admin/sessions/{id}/assign/challenges")
+    @PutMapping(value = "/secure/admin/sessions/{id}/assign/challenges")
     @Operation(summary = "Assign Challenges", description = "Assign challenges to session", tags = { "ADMIN" })
     public ResponseEntity<Session> assignChallenges(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
         return new ResponseEntity<>(sessionService.assignChallenges(id, props.ids()), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/secure/admin/sessions/{id}/remove/challenges")
+    @PutMapping(value = "/secure/admin/sessions/{id}/remove/challenges")
     @Operation(summary = "Remove Challenges", description = "Remove challenges from session", tags = { "ADMIN" })
     public ResponseEntity<Session> removeChallenges(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
         return new ResponseEntity<>(sessionService.removeChallenges(id, props.ids()), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/secure/admin/sessions/{id}/assign/challenges/{challengeId}")
+    @PutMapping(value = "/secure/admin/sessions/{id}/assign/challenges/{challengeId}")
     @Operation(summary = "Assign Challenge", description = "Assign a challenge to session", tags = { "ADMIN" })
     public ResponseEntity<Session> assignChallenge(@PathVariable(name = "id") UUID id, @PathVariable(name = "challengeId") UUID challengeId) {
         return new ResponseEntity<>(sessionService.assignChallenge(id, challengeId), HttpStatus.PARTIAL_CONTENT);
     }
-    @PostMapping(value = "/secure/admin/sessions/{id}/remove/challenges/{challengeId}")
+    @PutMapping(value = "/secure/admin/sessions/{id}/remove/challenges/{challengeId}")
     @Operation(summary = "Remove A Challenge", description = "Remove a challenge from session", tags = { "ADMIN" })
     public ResponseEntity<Session> removeChallenge(@PathVariable(name = "id") UUID id, @PathVariable(name = "challengeId") UUID challengeId) {
         return new ResponseEntity<>(sessionService.removeChallenge(id, challengeId), HttpStatus.PARTIAL_CONTENT);

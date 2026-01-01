@@ -1,5 +1,6 @@
 package org.csbf.ecomie.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -37,6 +38,7 @@ public class ChallengeEntity extends BaseEntity {
     private ChallengeType type;
 
 
+    @JsonIgnore
     @Column(nullable = true)
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "challenges")
     private List<SessionEntity> sessions;

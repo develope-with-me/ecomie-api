@@ -131,22 +131,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private HelperDomain.Subscription createSubscription(SubscriptionRequest subscriptionRequest, @NotNull UserEntity userEntity) {
         if(!userEntity.getRole().equals(Role.ECOMIEST)) {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("userEntity", "User not an ECOMIEST").toException();
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity", "User not an ECOMIEST").toException();
         }
 //        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
 
         if (subscriptionRepo.existsBySession_Status_AndUser_Id(SessionStatus.ONGOING, userEntity.getId())){
 //        if (subscriptionRepo.existsBySession_Id_AndUser_Id(sessionEntity.getId(), userEntity.getId())){
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withDetail("User has already subscribed to this sessionEntity").toException();
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withDetail("User has already subscribed to this session").toException();
         }
         SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
 
-        ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "ChallengeEntity with id (%s) does not exist".formatted(subscriptionRequest.challengeId().toString())).toException());
+        ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "Challenge with id (%s) does not exist".formatted(subscriptionRequest.challengeId().toString())).toException());
+
+        if (sessionEntity.getChallenges().stream().noneMatch(challengeEntity::equals)) {
+            throw Problems.NOT_FOUND.withDetail("Challenge (id = %s) is not part of current current session (id = %s)".formatted(challengeEntity.getId(), sessionEntity.getId())).toException();
+        }
 
         var subscription = SubscriptionEntity.builder()
                 .target(subscriptionRequest.target())
                 .session(sessionEntity)
                 .user(userEntity)
+                .blocked(false)
                 .challenge(challengeEntity)
                 .build();
 
