@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,8 +46,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public HelperDomain.Subscription subscribe(SubscriptionRequest subscriptionRequest) {
-        UserEntity userEntity = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+    public Subscription subscribe(SubscriptionRequest subscriptionRequest) {
+        UserEntity userEntity = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
         return createSubscription(subscriptionRequest, userEntity);
 
     }
@@ -55,8 +56,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public HelperDomain.Subscription subscribeUser(UUID id, SubscriptionRequest subscriptionRequest) {
-        UserEntity userEntity = userRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(id.toString())).toException());
+    public Subscription subscribeUser(UUID id, SubscriptionRequest subscriptionRequest) {
+        UserEntity userEntity = userRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(id.toString())).toException());
         return createSubscription(subscriptionRequest, userEntity);
     }
 
@@ -65,7 +66,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public ResponseMessage removeUserFromSession(UUID sessionId, UUID userId) {
-        SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySession_IdAndUser_Id(sessionId, userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "UserEntity not subscribed to sessionEntity").toException());
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySession_IdAndUser_Id(sessionId, userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "User not subscribed to session").toException());
         return unsubscribe(subscriptionEntity);
     }
 
@@ -73,7 +74,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public ResponseMessage unSubscribeUser(UUID subscriptionId) {
-        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
         return unsubscribe(subscriptionEntity);
     }
 
@@ -85,61 +86,77 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         challengeRepo.save(challengeEntity);
 
         subscriptionRepo.delete(subscriptionEntity);
-        return new ResponseMessage.SuccessResponseMessage("SubscriptionEntity deleted");
+        return new ResponseMessage.SuccessResponseMessage("Subscription deleted");
     }
 
     @Override
-    public HelperDomain.Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest) {
-        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
+    public Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest) {
+        SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
         if (!subscriptionEntity.getSession().getStatus().equals(SessionStatus.ONGOING)) {
-            throw Problems.PAYLOAD_VALIDATION_ERROR.withDetail("Cannot modify subscriptionEntity of sessionEntity that is not ongoing").toException();
+            throw Problems.PAYLOAD_VALIDATION_ERROR.withDetail("Cannot modify subscription of session that is not ongoing").toException();
+        }
+        ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "Challenge with id (%s) does not exist".formatted(subscriptionRequest.challengeId().toString())).toException());
+
+        if (subscriptionEntity.getSession().getChallenges().stream().noneMatch(challengeEntity::equals)) {
+            throw Problems.NOT_FOUND.withDetail("Challenge (id = %s) is not part of current current session (id = %s)".formatted(challengeEntity.getId(), subscriptionEntity.getSession().getId())).toException();
         }
 
         subscriptionEntity.setTarget(subscriptionRequest.target());
-        subscriptionEntity.setChallenge(challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "challengeEntity with id (%s) not found".formatted(subscriptionRequest.challengeId())).toException()));
+        subscriptionEntity.setChallenge(challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "challenge with id (%s) not found".formatted(subscriptionRequest.challengeId())).toException()));
 
         return mapper.asDomainObject(subscriptionRepo.save(subscriptionEntity));
     }
 
     @Override
-    public HelperDomain.Subscription getSubscription(UUID subscriptionId) {
-        var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "SubscriptionEntity with id (%s) not found".formatted(subscriptionId.toString())).toException());
-        if (authContext.getAuthUser().getAuthorities().stream().noneMatch(authority -> authority.getAuthority().equals(Role.ADMIN.name()))) {
+    public Subscription getSubscription(UUID subscriptionId) {
+        var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
+        if (!authContext.isAuthorized(Role.ADMIN)) {
             if (!subscription.getUser().getEmail().equals(authContext.getAuthUser().getName())) {
-                throw Problems.INCONSISTENT_STATE_ERROR.withDetail("UserEntity not subscribed").toException();
-
+                throw Problems.INCONSISTENT_STATE_ERROR.withDetail("User not subscribed").toException();
             }
         }
 
-                return mapper.asDomainObject(subscription);
+        return mapper.asDomainObject(subscription);
     }
 
     @Override
-    public List<HelperDomain.Subscription> getSubscriptions() {
-        List<SubscriptionEntity> subscriptionEntityEntities = subscriptionRepo.findAll();
-        return mapper.asDomainObjects(subscriptionEntityEntities);
+    public List<Subscription> getSubscriptions() {
+        List<SubscriptionEntity> subscriptionEntities = new ArrayList<>();
+        if(authContext.isAuthorized(Role.ADMIN)) {
+            subscriptionEntities = subscriptionRepo.findAll();
+        } else {
+            subscriptionEntities = subscriptionRepo.findAllByUser_Email(authContext.getAuthUser().getName());
+        }
+
+        return mapper.asDomainObjects(subscriptionEntities);
     }
 
     @Override
-    public HelperDomain.Subscription getSessionSubscription(UUID sessionId) {
-        UserEntity userEntity = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
-        SessionEntity sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
-        SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySessionAndUser(sessionEntity, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "UserEntity not subscribed to sessionEntity").toException());
-        return mapper.asDomainObject(subscriptionEntity);
+    public List<Subscription> getSessionSubscription(UUID sessionId) {
+        List<SubscriptionEntity> subscriptions = new ArrayList<>();
+        if(authContext.isAuthorized(Role.ADMIN)) {
+            subscriptions = subscriptionRepo.findAllBySession_id(sessionId);
+        } else {
+            UserEntity userEntity = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+            SessionEntity sessionEntity = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "Session with id (%s) not found".formatted(sessionId.toString())).toException());
+            SubscriptionEntity subscriptionEntity = subscriptionRepo.findBySessionAndUser(sessionEntity, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity", "User not subscribed to session").toException());
+            subscriptions = List.of(subscriptionEntity);
+        }
+        return mapper.asDomainObjects(subscriptions);
     }
 
 
-    private HelperDomain.Subscription createSubscription(SubscriptionRequest subscriptionRequest, @NotNull UserEntity userEntity) {
+    private Subscription createSubscription(SubscriptionRequest subscriptionRequest, @NotNull UserEntity userEntity) {
         if(!userEntity.getRole().equals(Role.ECOMIEST)) {
             throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity", "User not an ECOMIEST").toException();
         }
-//        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
+//        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing Session found").toException());
 
         if (subscriptionRepo.existsBySession_Status_AndUser_Id(SessionStatus.ONGOING, userEntity.getId())){
 //        if (subscriptionRepo.existsBySession_Id_AndUser_Id(sessionEntity.getId(), userEntity.getId())){
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withDetail("User has already subscribed to this session").toException();
         }
-        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing SessionEntity found").toException());
+        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing Session found").toException());
 
         ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId", "Challenge with id (%s) does not exist".formatted(subscriptionRequest.challengeId().toString())).toException());
 

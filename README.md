@@ -23,3 +23,8 @@ This repo contains the api for the ecomie application.
 ## Branches
 - ___staging:___ recent branch
 - ___master:___ authentication
+
+
+## Next Version
+- Minimize Domains - Subscription, ChallengeReport, Challenge, Session
+- Permissions - Consider making use of ownerId to grant access.

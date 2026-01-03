@@ -50,7 +50,7 @@ public class SubscriptionController {
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PostMapping(value = "/admin/subscriptions/{id}")
+    @PutMapping(value = "/admin/subscriptions/{id}")
     @Operation(summary = "Update Subscription", description = "Update subscription", tags = { "ADMIN" })
     public Subscription updateSubscription(@PathVariable(name = "id") UUID id, @RequestBody SubscriptionRequest subscriptionRequest) {
         return subscriptionService.update(id, subscriptionRequest);
@@ -58,13 +58,13 @@ public class SubscriptionController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/{id}")
-    @Operation(summary = "Get Subscription", description = "Get subscription", tags = { "ECOMIEST" })
+    @Operation(summary = "Get Subscription", description = "Get subscription", tags = { "ECOMIEST", "ADMIN" })
     public Subscription getSubscription(@PathVariable(name = "id") UUID id) {
         return subscriptionService.getSubscription(id);
     }
 
-    @GetMapping(value = "/admin/subscriptions")
-    @Operation(summary = "Get Subscriptions", description = "Get all subscriptions", tags = { "ADMIN" })
+    @GetMapping(value = "/ecomiest/subscriptions")
+    @Operation(summary = "Get Subscriptions", description = "Get all subscriptions", tags = { "ECOMIEST", "ADMIN" })
     public ResponseEntity<List<Subscription>> getSubscriptions() {
         return ResponseEntity.ok(subscriptionService.getSubscriptions());
     }
@@ -72,9 +72,9 @@ public class SubscriptionController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/sessions/{sessionId}")
-    @Operation(summary = "Get A User's Subscription", description = "Get a user's subscription in a session", tags = { "ECOMIEST" })
-    public Subscription getSessionSubscription(@PathVariable(name = "sessionId") UUID sessionId) {
-        return subscriptionService.getSessionSubscription(sessionId);
+    @Operation(summary = "Get A User's Subscription / all subscriptions", description = "Get a user's subscription / all subscriptions in a session", tags = { "ECOMIEST", "ADMIN" })
+    public ResponseEntity<List<Subscription>> getSessionSubscription(@PathVariable(name = "sessionId") UUID sessionId) {
+        return ResponseEntity.ok(subscriptionService.getSessionSubscription(sessionId));
     }
 
 

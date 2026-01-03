@@ -25,5 +25,5 @@ public interface SubscriptionService {
     Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest);
     Subscription getSubscription(UUID subscriptionId);
     List<Subscription> getSubscriptions();
-    Subscription getSessionSubscription(UUID sessionId);
+    List<Subscription> getSessionSubscription(UUID sessionId);
 }

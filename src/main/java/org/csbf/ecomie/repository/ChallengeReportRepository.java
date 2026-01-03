@@ -23,6 +23,14 @@ public interface ChallengeReportRepository extends JpaRepository<ChallengeReport
 
     //    int  countChallengeReportsBySessionAndEcomiestAndChallenge(SessionEntity sessionEntity, UserEntity userEntity, ChallengeEntity challengeEntity);
     int  countAllBySubscription(SubscriptionEntity subscriptionEntity);
+
+    List<ChallengeReportEntity> findAllBySubscription_Session_IdAndSubscription_Challenge_Id(UUID subscriptionSessionId, UUID subscriptionChallengeId);
+
+    List<ChallengeReportEntity> findAllBySubscription_Session_Id(UUID sessionId);
+
+    List<ChallengeReportEntity> findAllByUser_EmailAndSubscription_Session_Id(String userEmail, UUID subscriptionSessionId);
+
+    List<ChallengeReportEntity> findAllByUser_EmailAndSubscription_Session_IdAndSubscription_Challenge_Id(String userEmail, UUID subscriptionSessionId, UUID subscriptionChallengeId);
 //    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReportEntity cr where cr.sessionEntity=:sessionEntity and cr.ecomiest=:userEntity and cr.challengeEntity=:challengeEntity" )
 //    int numberAnEcomiestEvangelizedToViaAChallengeInASession(@Param("sessionEntity") SessionEntity sessionEntity, @Param("userEntity") UserEntity userEntity, @Param("challengeEntity") ChallengeEntity challengeEntity);
 //    @Query(value = "SELECT sum(cr.numberEvangelizedTo) from ChallengeReportEntity cr where cr.sessionEntity=:sessionEntity and cr.ecomiest=:userEntity")

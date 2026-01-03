@@ -22,6 +22,8 @@ import java.util.UUID;
 public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity, UUID> {
     Optional<SubscriptionEntity> findByIdAndUser(UUID subscriptionId, UserEntity userEntity);
     List<SubscriptionEntity> findAllByUserAndChallenge(UserEntity userEntity, ChallengeEntity challengeEntity);
+    List<SubscriptionEntity> findAllBySession_id(UUID sessionId);
+    List<SubscriptionEntity> findAllByUser_Email(String userEmail);
     Optional<SubscriptionEntity> findBySession(SessionEntity sessionEntity);
     Optional<SubscriptionEntity> findBySessionAndBlocked(SessionEntity sessionEntity, boolean blocked);
     Optional<SubscriptionEntity> findBySessionAndUser(SessionEntity sessionEntity, UserEntity userEntity);
@@ -43,4 +45,6 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<UserEntity> selectAllUsersSubscribedToSessionViaChallenge(@Param("session") SessionEntity sessionEntity, @Param("challenge") ChallengeEntity challengeEntity);
     @Query(value = "SELECT sub.user from SubscriptionEntity sub where sub.session=:session")
     List<UserEntity> selectAllUsersSubscribedToSession(@Param("session") SessionEntity sessionEntity);
+
+    List<SubscriptionEntity> findAllByUser_Id(UUID userId);
 }

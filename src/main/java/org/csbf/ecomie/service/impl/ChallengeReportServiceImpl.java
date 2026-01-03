@@ -3,6 +3,7 @@ package org.csbf.ecomie.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.csbf.ecomie.config.AuthContext;
 import org.csbf.ecomie.constant.Role;
+import org.csbf.ecomie.constant.SessionStatus;
 import org.csbf.ecomie.exceptions.Problems;
 import org.csbf.ecomie.entity.ChallengeReportEntity;
 import org.csbf.ecomie.entity.UserEntity;
@@ -54,11 +55,14 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
     @NotNull
     private ResponseMessage store(UUID sessionId, ChallengeReportRequest challengeReportRequest, UserEntity userEntity) {
         var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("SessionEntity", "Session with id (%s) not found".formatted(sessionId.toString())).toException());
-
+        if(!session.getStatus().equals(SessionStatus.ONGOING)) {
+            throw Problems.BAD_REQUEST.withProblemError("sessionId", "Session (%s) is not ongoing".formatted(sessionId)).toException();
+        }
         var subscription = subscriptionRepo.findBySessionAndUser(session, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Subscription not found").toException());
 
         var report = ChallengeReportEntity.builder()
                 .subscription(subscription)
+                .user(userEntity)
                 .numberEvangelizedTo(challengeReportRequest.numberEvangelizedTo())
                 .numberFollowedUp(challengeReportRequest.numberFollowedUp())
                 .numberOfNewConverts(challengeReportRequest.numberOfNewConverts())
@@ -68,7 +72,7 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
 
         reportRepo.save(report);
 
-        return new ResponseMessage.SuccessResponseMessage("Updated report successfully");
+        return new ResponseMessage.SuccessResponseMessage("Created report successfully");
     }
 
     @Override
@@ -117,13 +121,30 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
 
 
     @Override
-    public List<ChallengeReport> getChallengeReports(Optional<UUID> challengeId) {
+    public List<ChallengeReport> getChallengeReports(Optional<UUID> sessionId, Optional<UUID> challengeId) {
         List<ChallengeReportEntity> reportEntities = new ArrayList<>();
+
         if (authContext.isAuthorized(Role.ADMIN)) {
-            reportEntities = challengeId.isPresent() ? reportRepo.findAllBySubscription_Challenge_Id(challengeId.get()) : reportRepo.findAll();
+            if(sessionId.isPresent() && challengeId.isPresent()) {
+                reportEntities =reportRepo.findAllBySubscription_Session_IdAndSubscription_Challenge_Id(sessionId.get(), challengeId.get());
+            } else if(sessionId.isPresent()) {
+                reportEntities = reportRepo.findAllBySubscription_Session_Id(sessionId.get());
+            } else if(challengeId.isPresent()) {
+                reportEntities = reportRepo.findAllBySubscription_Challenge_Id(challengeId.get());
+            } else {
+                reportEntities = reportRepo.findAll();
+            }
         } else {
             String email = authContext.getAuthUser().getName();
-            reportEntities = challengeId.isPresent() ? reportRepo.findAllByUser_EmailAndSubscription_Challenge_Id(email, challengeId.get()) :reportRepo.findAllByUser_Email(email);
+            if(sessionId.isPresent() && challengeId.isPresent()) {
+                reportEntities =reportRepo.findAllByUser_EmailAndSubscription_Session_IdAndSubscription_Challenge_Id(email, sessionId.get(), challengeId.get());
+            } else if(sessionId.isPresent()) {
+                reportEntities = reportRepo.findAllByUser_EmailAndSubscription_Session_Id(email, sessionId.get());
+            } else if(challengeId.isPresent()) {
+                reportEntities = reportRepo.findAllByUser_EmailAndSubscription_Challenge_Id(email, challengeId.get());
+            } else {
+                reportEntities = reportRepo.findAllByUser_Email(email);
+            }
         }
 
         var reports = mapper.asDomainObjects(reportEntities);
@@ -139,7 +160,10 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
 
     @Override
     public ResponseMessage deleteChallengeReport(UUID id) {
-        reportRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(id.toString())).toException());
+        var report = reportRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("ReportEntity", "Report with id (%s) not found".formatted(id.toString())).toException());
+        if(!authContext.isAuthorized(Role.ADMIN) && !report.getSubscription().getUser().getEmail().equals(authContext.getAuthUser().getName())) {
+            throw Problems.UNAUTHORIZED.withDetail("Report is not yours").toException();
+        }
         reportRepo.deleteById(id);
         return new ResponseMessage.SuccessResponseMessage("Report deleted successfully");
     }

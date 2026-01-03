@@ -44,13 +44,13 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public SuccessResponseMessage store(Session session) {
         sessionRepo.findByName(session.name()).ifPresent(sessionEntity -> {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "SessionEntity %s exists".formatted(sessionEntity.getName())).toException();
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Session %s exists".formatted(sessionEntity.getName())).toException();
         });
         var sessionEntity = mapper.asEntity(session);
         sessionEntity.setStatus(SessionStatus.INACTIVE);
 
         var createdSession = sessionRepo.save(sessionEntity);
-        return new SuccessResponseMessage("SessionEntity created. Status: " + createdSession.getStatus());
+        return new SuccessResponseMessage("Session created. Status: " + createdSession.getStatus());
     }
 
     @Override

@@ -24,7 +24,7 @@ public interface ChallengeReportService {
 
     ChallengeReport getChallengeReport(UUID reportId);
 
-    List<ChallengeReport> getChallengeReports(Optional<UUID> challengeId);
+    List<ChallengeReport> getChallengeReports(Optional<UUID> sessionId, Optional<UUID> challengeId);
 
     List<ChallengeReport> getChallengeReportsOfAChallenge(UUID challengeId);
 

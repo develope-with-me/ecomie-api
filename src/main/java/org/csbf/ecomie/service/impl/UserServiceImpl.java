@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     ) {
         log.info("UserServiceImpl.updateAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
         var jsonUser = Mapper.toJsonObject(user);
         var newUser = Mapper.fromJsonObject(jsonUser, User.class);
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
     ) {
         log.info("UserServiceImpl.updateUserProfile");
         UserEntity userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
 
         return getUpdateResponseMessage(file, user, userEntity);
     }
@@ -124,14 +124,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseMessage changeUserRole(String email, String role) {
         log.info("UserServiceImpl.changeUserRole");
-        var user = userRepository.findByEmail(email).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(email)).toException());
+        var user = userRepository.findByEmail(email).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(email)).toException());
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
             throw Problems.BAD_REQUEST.withProblemError("role", "Invalid user role").toException();
         if(!user.getRole().name().equals(role.toUpperCase())) {
             user.setRole(Role.valueOf(role.toUpperCase()));
             user = userRepository.save(user);
         }
-        return new ResponseMessage.SuccessResponseMessage("UserEntity role updated - " + user.getRole());
+        return new ResponseMessage.SuccessResponseMessage("User role updated - " + user.getRole());
     }
 
 
@@ -139,7 +139,7 @@ public class UserServiceImpl implements UserService {
     public User getUserProfile(UUID userId) {
         log.info("UserServiceImpl.getUserProfile");
 
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
         return mapper.asDomainObject(userEntity);
     }
 
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
     public MinimalUser getAuthUserProfile() {
         log.info("UserServiceImpl.getAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
         var jsonUser = Mapper.toJsonObject(userEntity);
         return Mapper.fromJsonObject(jsonUser, MinimalUser.class);
@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     public User getAuthUserProfile_v2() {
         log.info("UserServiceImpl.getAuthUserProfile");
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
         return mapper.asDomainObject(userEntity).justMinimal();
     }
@@ -165,10 +165,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserProfilePic(UUID userId) {
         log.info("UserServiceImpl.deleteUserProfilePic");
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
         String fileName = userEntity.getProfilePictureFileName();
         if (fileName == null) {
-            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName", "UserEntity has no profile image").toException();
+            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName", "User has no profile image").toException();
         }
         fileUploadService.deleteFile(fileName);
         userEntity.setProfilePictureFileName(null);
@@ -190,7 +190,7 @@ public class UserServiceImpl implements UserService {
         log.info("UserServiceImpl.loadImage");
         UserEntity userEntity = userRepository
                 .findByEmail(emailRequest.email())
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(emailRequest.email())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(emailRequest.email())).toException());
         String fileName = userEntity.getProfilePictureFileName();
         if (fileName == null) return null;
         return fileUploadService.load(fileName);
@@ -201,12 +201,12 @@ public class UserServiceImpl implements UserService {
 
         UserEntity userEntity = userRepository
                 .findByEmail(authContext.getAuthUser().getName())
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
         Resource resource = loadImage(new EmailRequest(userEntity.getEmail()));
         try {
             return resource == null ? null : resource.getInputStream().readAllBytes();
         } catch (Exception exception) {
-            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName",  "Failed to extract userEntity profile picture").toException();
+            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName",  "Failed to extract user profile picture").toException();
         }
     }
 
@@ -214,18 +214,18 @@ public class UserServiceImpl implements UserService {
     public byte[] getUserProfilePicture(UUID userId) {
         UserEntity userEntity = userRepository
                 .findById(userId)
-                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
         Resource resource = loadImage(new EmailRequest(userEntity.getEmail()));
         try {
             return resource == null ? null : resource.getInputStream().readAllBytes();
         } catch (Exception exception) {
-            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName",  "Failed to extract userEntity profile picture").toException();
+            throw Problems.NOT_FOUND.withProblemError("userEntity.profilePictureFileName",  "Failed to extract user profile picture").toException();
         }
     }
 
     @Override
     public void deleteUserProfile(UUID userId) {
-        userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+        userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
         userRepository.deleteById(userId);
     }
 
@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseMessage softDelete(UUID userId) {
 
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "UserEntity with id (%s) not found".formatted(userId.toString())).toException());
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
 //        userEntity.setAccountSoftDeleted(!userEntity.isAccountSoftDeleted());
         userEntity.setAccountSoftDeleted(!userEntity.getAccountSoftDeleted());
         userRepository.save(userEntity);
@@ -243,14 +243,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getUsersInASession(UUID sessionId, boolean blocked, Optional<String> optionalChallengeId) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "SessionEntity with id (%s) not found".formatted(sessionId.toString())).toException());
+        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "Session with id (%s) not found".formatted(sessionId.toString())).toException());
         List<UserEntity> userEntities = new ArrayList<>();
 
         if(optionalChallengeId.isPresent()) {
             String challengeIdString = optionalChallengeId.get();
             try {
                 UUID challengeId = UUID.fromString(challengeIdString);
-                var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "ChallengeEntity with id (%s) not found".formatted(challengeId.toString())).toException());
+                var challenge = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "Challenge with id (%s) not found".formatted(challengeId.toString())).toException());
                 userEntities = subscriptionRepo.selectAllUsersSubscribedToSessionViaChallenge(session, challenge);
             }catch (IllegalArgumentException e) {
                 throw Problems.INVALID_PARAMETER_ERROR.withProblemError("challengeId", "Invalid challengeId (%s)".formatted(challengeIdString)).toException();
