@@ -1,0 +1,81 @@
+package org.csbf.ecomie.exceptions;
+
+//import com.sun.mail.util.MailConnectException;
+import jakarta.validation.ValidationException;
+import lombok.extern.slf4j.Slf4j;
+import org.csbf.ecomie.utils.helperclasses.ResponseMessage.ExceptionResponseMessage;
+        import org.springframework.http.ResponseEntity;
+        import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+        import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.sql.SQLException;
+
+import static org.springframework.http.HttpStatus.*;
+
+@Slf4j
+@RestControllerAdvice
+public class ResourceEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFoundException(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceExistsException.class)
+    public ResponseEntity<Object> handleResourceExistsException(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, CONFLICT);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> handleBadRequestException(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, BAD_REQUEST);
+    }
+
+    @ExceptionHandler({NullPointerException.class})
+    public ResponseEntity<Object> handleNullPointerExceptions(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({InvalidTokenException.class})
+    public ResponseEntity<Object> handleInvalidTokenExceptions(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, FORBIDDEN);
+    }
+
+    @ExceptionHandler(FailedSendEmailException.class)
+    public ResponseEntity<Object> handleFailedSendEmailException(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(BadRequestException.InvalidAuthenticationRequestException.class)
+    public ResponseEntity<Object> handleInvalidAuthenticationRequestException(Exception ex) {
+        ExceptionResponseMessage message = new ExceptionResponseMessage(ex.getMessage());
+        return new ResponseEntity<>(message, FORBIDDEN);
+    }
+
+    @ExceptionHandler(EcomieException.class)
+    public ResponseEntity<Object> handleEcomieException(EcomieException ex) {
+        Problem problem = ex.getProblem();
+        return new ResponseEntity<>(problem, valueOf(problem.statusCode()));
+    }
+
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<Object> handleSQLException(SQLException ex) {
+        Problem problem = Problems.QUERY_ERROR.withDetail(ex.getMessage());
+        return new ResponseEntity<>(problem, valueOf(problem.statusCode()));
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleValidationException(SQLException ex) {
+        Problem problem = Problems.OBJECT_VALIDATION_ERROR.withDetail(ex.getMessage());
+        return new ResponseEntity<>(problem, valueOf(problem.statusCode()));
+    }
+
+
+}

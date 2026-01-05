@@ -1,0 +1,27 @@
+<!--suppress ALL -->
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns="http://java.sun.com/xml/ns/persistence"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+    <persistence-unit name="ecomie-persistence-unit">
+        <provider>org.hibernate.reactive.provider.ReactivePersistenceProvider</provider>
+        <!--        <exclude-unlisted-classes>true</exclude-unlisted-classes>-->
+
+        <class>org.csbf.ecomie.entity.UserEntity</class>
+        <class>org.csbf.ecomie.entity.UserTokenEntity</class>
+        <class>org.csbf.ecomie.entity.SessionEntity</class>
+        <class>org.csbf.ecomie.entity.ChallengeEntity</class>
+        <class>org.csbf.ecomie.entity.SubscriptionEntity</class>
+        <class>org.csbf.ecomie.entity.ChallengeReportEntity</class>
+
+        <properties>
+            <!-- SQL statement logging -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.highlight_sql" value="true"/>
+        </properties>
+
+    </persistence-unit>
+
+</persistence>

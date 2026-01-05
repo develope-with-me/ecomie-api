@@ -9,12 +9,17 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.csbf</groupId>
-	<artifactId>security</artifactId>
+	<artifactId>ecomie</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>api-security</name>
-	<description>Demo project for Spring Boot</description>
+	<name>ecomie-api</name>
+	<description>API for the ECOMIE application</description>
 	<properties>
 		<java.version>23</java.version>
+<!--		&lt;!&ndash; Database properties from environment variables &ndash;&gt;-->
+<!--		<db.driver>${env.DATASOURCE_DRIVERCLASSNAME}</db.driver>-->
+<!--		<db.url>${env.DATASOURCE_URL}</db.url>-->
+<!--		<db.username>${env.DATASOURCE_USERNAME}</db.username>-->
+<!--		<db.password>${env.DATASOURCE_PASSWORD}</db.password>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -48,11 +53,48 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+			<version>4.27.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 			<!-- No scope specified, defaults to compile -->
 		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20250517</version> <!-- Use a recent stable version -->
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/one.util/streamex -->
+		<dependency>
+			<groupId>one.util</groupId>
+			<artifactId>streamex</artifactId>
+			<version>0.8.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.6.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>1.6.3</version>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -62,6 +104,24 @@
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
 			<version>0.11.5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.20.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>3.0-rc5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.20.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -162,7 +222,21 @@
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version> <!-- Use the latest version -->
 						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.6.3</version>
+						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>4.27.0</version>
+				<configuration>
+					<propertyFile>liquibase.properties</propertyFile>
+					<outputChangeLogFile>src/main/resources/migrations/changelog/ddl/ddl-000-existing-database-migration.xml</outputChangeLogFile>
 				</configuration>
 			</plugin>
 		</plugins>

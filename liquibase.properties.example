@@ -1,0 +1,6 @@
+driver=${DATASOURCE_DRIVERCLASSNAME}
+url=${DATASOURCE_URL}
+username=${DATASOURCE_USERNAME}
+password=${DATASOURCE_PASSWORD}
+changeLogFile=src/main/resources/migrations/changelog/db.changelog-dev.xml
+classpath=src/main/resources
