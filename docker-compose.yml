@@ -25,14 +25,14 @@ services:
 
   ecomie-db:
     container_name: ecomie-db
-    image: postgres
+    image: postgres:18-alpine
     ports:
       - "5433:5432"
     env_file:
       - ./.env
     volumes:
       - ./.env:/app/.env
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${DATASOURCE_USERNAME}" ]
       interval: 5s

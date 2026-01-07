@@ -37,3 +37,4 @@ src/main/resources/static/profile-pics**
 liquibase.properties
 ENV_SETUP.md
 docker/.env
+nohup.out

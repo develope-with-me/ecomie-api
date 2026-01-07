@@ -42,7 +42,7 @@ public class SessionController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/secure/user/sessions/{id}")
-    @Operation(summary = "Get Session", description = "Get session", tags = { "USER, ADMIN" })
+    @Operation(summary = "Get Session", description = "Get session", tags = { "USER", "ADMIN" })
     public Session getSession(@PathVariable(name = "id") UUID id) {
         return sessionService.getSession(id);
     }
@@ -54,7 +54,7 @@ public class SessionController {
     }
 
     @GetMapping(value = "/secure/user/sessions")
-    @Operation(summary = "Securely Get Sessions", description = "Securely get all sessions", tags = { "USER, ADMIN" })
+    @Operation(summary = "Securely Get Sessions", description = "Securely get all sessions", tags = { "USER", "ADMIN" })
     public ResponseEntity<List<Session>> securelyGetSessions() {
         return ResponseEntity.ok(sessionService.getSessions());
     }

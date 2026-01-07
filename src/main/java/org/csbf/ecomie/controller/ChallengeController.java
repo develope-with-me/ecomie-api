@@ -33,14 +33,14 @@ public class ChallengeController {
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PutMapping(value = "/secure/admin/challenges/{id}")
-    @Operation(summary = "Update Challenge", description = "Update challenge", tags = { "USER, ADMIN" })
+    @Operation(summary = "Update Challenge", description = "Update challenge", tags = { "USER", "ADMIN" })
     public ResponseMessage updateChallenge(@PathVariable(name = "id") UUID id, @RequestBody Challenge challenge) {
         return challengeService.update(id, challenge);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/secure/user/challenges/{id}")
-    @Operation(summary = "Get Challenge", description = "Get challenge", tags = { "USER, ADMIN" })
+    @Operation(summary = "Get Challenge", description = "Get challenge", tags = { "USER", "ADMIN" })
     public Challenge getChallenge(@PathVariable(name = "id") UUID id) {
         return challengeService.getChallenge(id);
     }
