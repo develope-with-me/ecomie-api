@@ -54,21 +54,21 @@ public class UserController {
         return new ResponseEntity<>(userService.updateAuthUserProfile(file, user), HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/admin/update/users/{userId}", consumes = { "multipart/form-data", "application/json" }, produces = { "application/json" })
+    @PutMapping(value = "/admin/update/users/{id}", consumes = { "multipart/form-data", "application/json" }, produces = { "application/json" })
     @Operation(summary = "Edit User Profile", description = "Modify user's profile information using his id", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> updateUserProfile(@PathVariable(name = "userId") UUID userId, @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") User user) {
-        return new ResponseEntity<>(userService.updateUserProfile(userId, file, user), HttpStatus.CREATED);
+    public ResponseEntity<ResponseMessage> updateUserProfile(@PathVariable(name = "id") UUID id, @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") User user) {
+        return new ResponseEntity<>(userService.updateUserProfile(id, file, user), HttpStatus.CREATED);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PutMapping(value = "/admin/update-user-role")
-    @Operation(summary = "Assign New Role", description = "Change user's role using userId", tags = { "ADMIN" })
+    @Operation(summary = "Assign New Role", description = "Change user's role using email", tags = { "ADMIN" })
     public ResponseMessage updateUserRole(@RequestBody UpdateUserRole user) { return userService.changeUserRole(user.email(), user.role()); }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/admin/users/{userId}")
+    @GetMapping(value = "/admin/users/{id}")
     @Operation(summary = "Get User Profile", description = "Get user's profile information using userId", tags = { "ADMIN" })
-    public User getUserProfile(@PathVariable(name = "userId") UUID userId) { return userService.getUserProfile(userId); }
+    public User getUserProfile(@PathVariable(name = "id") UUID id) { return userService.getUserProfile(id); }
 
 //    @PreAuthorize("hasAuthority('USER') ")
     @ResponseStatus(HttpStatus.OK)
@@ -80,10 +80,10 @@ public class UserController {
         return userService.getAuthUserProfile();
     }
 
-    @GetMapping("/admin/user-pix/{userId}")
+    @GetMapping("/admin/user-pix/{id}")
     @Operation(summary = "Get My Profile Image", description = "Get user's profile image using userId", tags = { "ADMIN" })
-    public ResponseEntity<byte[]> getUserProfileImage(@PathVariable(name = "userId") UUID userId) {
-        return new ResponseEntity<>(userService.getUserProfilePicture(userId), HttpStatus.OK);
+    public ResponseEntity<byte[]> getUserProfileImage(@PathVariable(name = "id") UUID id) {
+        return new ResponseEntity<>(userService.getUserProfilePicture(id), HttpStatus.OK);
     }
 
     @GetMapping("/user/my-pix")
@@ -92,24 +92,24 @@ public class UserController {
         return new ResponseEntity<>(userService.getProfilePicture(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/admin/user-pix/{userId}/del")
+    @DeleteMapping("/admin/user-pix/{id}/del")
     @Operation(summary = "Delete User Profile Image", description = "Delete user's profile image using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> deleteProfileImage(@PathVariable(name = "userId") UUID userId) {
-        userService.deleteUserProfilePic(userId);
+    public ResponseEntity<ResponseMessage> deleteProfileImage(@PathVariable(name = "id") UUID id) {
+        userService.deleteUserProfilePic(id);
         return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("Image deleted"), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @DeleteMapping("/admin/del/users/{userId}")
+    @DeleteMapping("/admin/del/users/{id}")
     @Operation(summary = "Delete User", description = "Delete user using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> hardDeleteProfile(@PathVariable(name = "userId") UUID userId) {
-        userService.deleteUserProfile(userId);
+    public ResponseEntity<ResponseMessage> hardDeleteProfile(@PathVariable(name = "id") UUID id) {
+        userService.deleteUserProfile(id);
         return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("User deleted"), HttpStatus.PARTIAL_CONTENT);
     }
 
-    @PutMapping("/admin/soft-del/users/{userId}")
+    @PutMapping("/admin/soft-del/users/{id}")
     @Operation(summary = "Soft delete User", description = "Soft delete user using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> softDeleteProfile(@PathVariable(name = "userId") UUID userId) {
-        return new ResponseEntity<>(userService.softDelete(userId), HttpStatus.PARTIAL_CONTENT);
+    public ResponseEntity<ResponseMessage> softDeleteProfile(@PathVariable(name = "id") UUID id) {
+        return new ResponseEntity<>(userService.softDelete(id), HttpStatus.PARTIAL_CONTENT);
     }
 
     @PostMapping("/user/request-to-become/{role}")
