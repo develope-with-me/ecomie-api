@@ -41,7 +41,9 @@ public interface Mapper<T extends Domain, E extends Entity> {
             .setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
 
     static <O> O fromJsonString(String jsonString, Class<O> clazz)  {
         if (jsonString == null || clazz == null) {
@@ -53,7 +55,7 @@ public interface Mapper<T extends Domain, E extends Entity> {
             throw  Problems.JSON_DESERIALIZATION_ERROR.appendDetail(e.toString()).toException();
         }
     }
-
+//"{"createdBy":"c6a237fb-d3e2-4884-afe5-4c12aeebffa9","createdOn":[2026,2,21,14,31,56,457845000],"description":"bla bla bla","endDate":[2026,6,21,0,0,2026,6,22,0,0],"id":"f28282c1-7f4b-4cee-b058-cf0c59f61134","name":"Session 3","startDate":[2026,2,21,0,0,2026,2,21,0,0],"status":"INACTIVE","updatedBy":"c6a237fb-d3e2-4884-afe5-4c12aeebffa9","updatedOn":[2026,2,21,15,6,16,480694000]}"
     private static String toJsonString(Object value) {
         if (value == null) {
             throw Problems.INVALID_PARAMETER_ERROR.appendDetail("Parameter value must not be null").toException();

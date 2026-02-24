@@ -3,6 +3,7 @@ package org.csbf.ecomie.utils.helperclasses;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.csbf.ecomie.utils.commons.Domain;
 
 
 /**

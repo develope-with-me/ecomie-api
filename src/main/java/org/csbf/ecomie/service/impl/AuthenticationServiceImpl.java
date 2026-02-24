@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -48,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) {
         String msg = "user already exist";
         if (userRepo.findByEmail(request.email()).isPresent())
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Email (%s) already in use".formatted(request.email())).toException();
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("RegisterRequest.email", "Email (%s) already in use".formatted(request.email())).toException();
 
 //        String appUrl = servletRequest.getContextPath();
 //        String roles = Role.USER.name()+"-"+Role.ADMIN.name();
@@ -79,13 +81,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         String message =  "user does not exist";
-        var user = userRepo.findByEmail(request.email()).orElseThrow(() -> new ResourceNotFoundException.EmailNotFoundException(request.email()));
+        var user = userRepo.findByEmail(request.email()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("UserEntity", "User with email %s not found".formatted(request.email())).toException());
 
 //        var user = userRepo.findByEmail(request.email()).get();
 
         if (!user.isEnabled()) {
             message = "account not enabled";
-            return getAuthenticationResponse(false, message, null);
+            return getAuthenticationResponse(false, message, null, null);
         }
 
         try {
@@ -159,12 +161,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
     }
 
-    private AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity... userEntities) {
+    private AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity userEntity) {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .message(message)
                 .success(success)
-                .user(!ArrayUtils.isEmpty(userEntities) ? userMapper.asDomainObject(userEntities[0]).justMinimal() : null)
+                .user(Objects.nonNull(userEntity) ? MinimalUser.fromUser(userMapper.asDomainObject(userEntity)) : null)
                 .build();
     }
 }

@@ -34,7 +34,7 @@ public class HelperDomain {
     }
 
     @Builder
-    public record AuthenticationResponse(String token, String message, boolean success, User user) {
+    public record AuthenticationResponse(String token, String message, boolean success, MinimalUser user) {
         public AuthenticationResponse(String token, String message, boolean success) {
             this(token, message, success, null);
         }
@@ -134,6 +134,12 @@ public class HelperDomain {
         @Override
         public String alternateName() {
             return "";
+        }
+
+        public static MinimalUser fromUser(User user) {
+            return new MinimalUser(user.id(), user.firstName(), user.lastName(), user.email(), user.role(),
+                    user.phoneNumber(), user.country(), user.region(), user.city(), user.language(),
+                    user.profilePictureFileName(), user.createdOn(), user.updatedOn(), user.createdBy(), user.updatedBy());
         }
     }
 

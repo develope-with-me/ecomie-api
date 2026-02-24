@@ -58,12 +58,7 @@ public class SessionServiceImpl implements SessionService {
         var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "Session with id (%s) not found".formatted(id.toString())).toException());
 
         String statusUpperCase = status.toUpperCase();
-        if (!EnumUtils.isValidEnum(SessionStatus.class, statusUpperCase)) {
-            throw Problems.BAD_REQUEST.withProblemError("status", "Invalid session status(%s)".formatted(status)).toException();
-        }
-        if ( SessionStatus.ONGOING.name().equals(statusUpperCase) && sessionRepo.existsByStatus(SessionStatus.valueOf(statusUpperCase))) {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Only one session can be active at a time. Please end currently ongoing sessionEntity first").toException();
-        }
+        validateUniquenessOfOngoingSession(status, statusUpperCase);
         session.setStatus(SessionStatus.valueOf(statusUpperCase));
 
         var updatedSession = sessionRepo.save(session);
@@ -73,9 +68,17 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public SuccessResponseMessage update(UUID id, Session session) {
         var sessionEntity = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "Session with id (%s) not found".formatted(id.toString())).toException());
-        sessionRepo.findByName(session.name()).ifPresent(ses -> {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Session %s exists".formatted(ses.getName())).toException();
-        });
+        if(!sessionEntity.getName().equalsIgnoreCase(session.name())) {
+            sessionRepo.findByName(session.name()).ifPresent(ses -> {
+                throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Session %s exists".formatted(ses.getName())).toException();
+            });
+        }
+
+        if(Objects.nonNull(session.status())) {
+            var status = session.status();
+            var statusUpperCase = session.status().toUpperCase();
+            validateUniquenessOfOngoingSession(status, statusUpperCase);
+        }
 
         List<ChallengeEntity> challenges = null;
         if (sessionEntity.getChallenges() != null) {
@@ -92,6 +95,15 @@ public class SessionServiceImpl implements SessionService {
         }
         var updatedSession = sessionRepo.save(sessionEntity);
         return new SuccessResponseMessage("Session updated. Status: " + updatedSession.getStatus());
+    }
+
+    private void validateUniquenessOfOngoingSession(String status, String statusUpperCase) {
+        if (!EnumUtils.isValidEnum(SessionStatus.class, statusUpperCase)) {
+            throw Problems.BAD_REQUEST.withProblemError("status", "Invalid session status(%s)".formatted(status)).toException();
+        }
+        if (SessionStatus.ONGOING.name().equals(statusUpperCase) && sessionRepo.existsByStatus(SessionStatus.valueOf(statusUpperCase))) {
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("sessionEntity", "Only one session can be active at a time. Please end currently ongoing session first").toException();
+        }
     }
 
     @Override

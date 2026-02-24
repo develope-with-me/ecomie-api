@@ -60,7 +60,7 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build();
 
         if (challenge.sessions() != null) {
-            addSessionToChallenge(challenge.sessions(), challengeEntity);
+            addSessionsToChallenge(challenge.sessions(), challengeEntity);
         }
         challengeRepo.save(challengeEntity);
         return new ResponseMessage.SuccessResponseMessage("Challenge created. Type: " + type);
@@ -92,7 +92,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
 
         if (challenge.sessions() != null) {
-            addSessionToChallenge(challenge.sessions(), challengeEntity);
+            addSessionsToChallenge(challenge.sessions(), challengeEntity);
         }
 
         List<SessionEntity> sessions = null;
@@ -115,7 +115,7 @@ public class ChallengeServiceImpl implements ChallengeService {
         return new ResponseMessage.SuccessResponseMessage("ChallengeEntity updated. Type: " + updatedChallenge.getType());
     }
 
-    private ChallengeEntity addSessionToChallenge(List<Session> sessions, ChallengeEntity challengeEntity) {
+    private ChallengeEntity addSessionsToChallenge(List<Session> sessions, ChallengeEntity challengeEntity) {
         var sessionIds = sessions.stream().map(Session::id).toList();
         if (!sessionIds.isEmpty()) {
             sessionIds.forEach(id -> {
