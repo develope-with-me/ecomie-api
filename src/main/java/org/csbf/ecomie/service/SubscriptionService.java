@@ -17,10 +17,10 @@ import java.util.UUID;
 public interface SubscriptionService {
     Subscription subscribe(SubscriptionRequest subscriptionRequest);
     Subscription subscribeUser(UUID userId, SubscriptionRequest subscriptionRequest);
-    ResponseMessage unSubscribeUser(UUID subscriptionId);
+    ResponseMessage<Subscription> unSubscribeUser(UUID subscriptionId);
 
     @Transactional
-    ResponseMessage removeUserFromSession(UUID sessionId, UUID userId);
+    ResponseMessage<Subscription> removeUserFromSession(UUID sessionId, UUID userId);
 
     Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest);
     Subscription getSubscription(UUID subscriptionId);

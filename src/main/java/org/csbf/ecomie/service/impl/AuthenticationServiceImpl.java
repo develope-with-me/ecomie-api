@@ -81,7 +81,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         String message =  "user does not exist";
-        var user = userRepo.findByEmail(request.email()).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("UserEntity", "User with email %s not found".formatted(request.email())).toException());
+        var user = userRepo.findByEmail(request.email()).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("UserEntity",
+                        "User with email %s not found".formatted(request.email())).toException());
 
 //        var user = userRepo.findByEmail(request.email()).get();
 
@@ -116,7 +118,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Token not found").toException());
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(
+                () -> Problems.NOT_FOUND.withDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
             throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
         }
@@ -127,10 +130,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             userRepo.save(userEntity);
             tokenEntity.setIsValid(false);
             tokenRepo.save(tokenEntity);
-            return new ConfirmEmailResponse(tokenEntity.getToken(), new ResponseMessage.SuccessResponseMessage("account verified"));
+            return new ConfirmEmailResponse(tokenEntity.getToken(),
+                    new ResponseMessage.SuccessResponseMessage<>("account verified"));
         }
 
-        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
+        return new ConfirmEmailResponse(null,
+                new ResponseMessage.ExceptionResponseMessage<>("user and token do not match"));
     }
 
     @Override
@@ -142,7 +147,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("decodedEmail {}", email);
         log.info("UserEntity {}", obj.get());
 
-        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Token not found").toException());
+        UserTokenEntity tokenEntity = tokenRepo.findByTokenAndUser_Email(token, email).orElseThrow(
+                () -> Problems.NOT_FOUND.withDetail("Token not found").toException());
         if (!tokenEntity.isExpired() || !tokenEntity.getIsValid()) {
             throw Problems.INCONSISTENT_DATA_ERROR.withDetail("Invalid or expired token").toException();
         }
@@ -155,10 +161,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             userRepo.save(userEntity);
             tokenEntity.setIsValid(false);
             tokenRepo.save(tokenEntity);
-            return new ConfirmEmailResponse(tokenEntity.getToken(), new ResponseMessage.SuccessResponseMessage("Password reset successful, please login with your new password"));
+            return new ConfirmEmailResponse(tokenEntity.getToken(), new ResponseMessage.SuccessResponseMessage<>("Password reset successful, please login with your new password"));
         }
 
-        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage("user and token do not match"));
+        return new ConfirmEmailResponse(null, new ResponseMessage.ExceptionResponseMessage<>("user and token do not match"));
     }
 
     private AuthenticationResponse getAuthenticationResponse(boolean success, String message, String jwtToken, UserEntity userEntity) {

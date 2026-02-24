@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
 
     @Override
-    public ResponseMessage updateAuthUserProfile(
+    public ResponseMessage<User> updateAuthUserProfile(
             Optional<MultipartFile> file,
             MinimalUser user
     ) {
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseMessage updateUserProfile(
+    public ResponseMessage<User> updateUserProfile(
             UUID userId,
             Optional<MultipartFile> file,
             User user
@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @NotNull
-    private ResponseMessage getUpdateResponseMessage(Optional<MultipartFile> file, User user, UserEntity userEntity) {
+    private ResponseMessage<User> getUpdateResponseMessage(Optional<MultipartFile> file, User user, UserEntity userEntity) {
 
         String imageFileName;
         String oldFile = userEntity.getProfilePictureFileName();
@@ -116,22 +116,28 @@ public class UserServiceImpl implements UserService {
         var entityToUpdate = mapper.asEntity(user);
         entityToUpdate.setPassword(userEntity.getPassword());
 
-        userRepository.save(entityToUpdate);
+        var updatedUserEntity = userRepository.save(entityToUpdate);
+        var updatedUser = authContext.isAuthorized(Role.ADMIN)
+                ?  mapper.asDomainObject(updatedUserEntity)
+                : mapper.asDomainObject(updatedUserEntity).justMinimal();
 
-        return new ResponseMessage.SuccessResponseMessage("Updated!");
+        return new ResponseMessage.SuccessResponseMessage<>("Updated!", updatedUser);
     }
 
     @Override
-    public ResponseMessage changeUserRole(String email, String role) {
+    public ResponseMessage<User> changeUserRole(String email, String role) {
         log.info("UserServiceImpl.changeUserRole");
-        var user = userRepository.findByEmail(email).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(email)).toException());
+        var user = userRepository.findByEmail(email).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("userEntity",
+                        "User with email (%s) not found".formatted(email)).toException());
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
             throw Problems.BAD_REQUEST.withProblemError("role", "Invalid user role").toException();
         if(!user.getRole().name().equals(role.toUpperCase())) {
             user.setRole(Role.valueOf(role.toUpperCase()));
             user = userRepository.save(user);
         }
-        return new ResponseMessage.SuccessResponseMessage("User role updated - " + user.getRole());
+        return new ResponseMessage.SuccessResponseMessage<>("User role updated - " + user.getRole(),
+                mapper.asDomainObject(user));
     }
 
 
@@ -231,14 +237,14 @@ public class UserServiceImpl implements UserService {
 
     // Soft delete userEntity account
     @Override
-    public ResponseMessage softDelete(UUID userId) {
+    public ResponseMessage<User> softDelete(UUID userId) {
 
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(userId.toString())).toException());
 //        userEntity.setAccountSoftDeleted(!userEntity.isAccountSoftDeleted());
         userEntity.setAccountSoftDeleted(!userEntity.getAccountSoftDeleted());
-        userRepository.save(userEntity);
+        UserEntity updatedUser = userRepository.save(userEntity);
 
-        return userEntity.getAccountSoftDeleted() ? new ResponseMessage.SuccessResponseMessage("Account soft deleted") : new ResponseMessage.SuccessResponseMessage("Account restored");
+        return userEntity.getAccountSoftDeleted() ? new ResponseMessage.SuccessResponseMessage<>("Account soft deleted", mapper.asDomainObject(updatedUser)) : new ResponseMessage.SuccessResponseMessage<>("Account restored", mapper.asDomainObject(updatedUser));
     }
 
     @Override

@@ -27,14 +27,14 @@ public class ChallengeController {
     private final ChallengeService challengeService;
     @PostMapping(value = "/secure/admin/challenges")
     @Operation(summary = "Create Challenges", description = "Create new challenge", tags = { "ADMIN" })
-    protected ResponseEntity<ResponseMessage> createChallenge(@RequestBody Challenge challenge) {
+    protected ResponseEntity<ResponseMessage<Challenge>> createChallenge(@RequestBody Challenge challenge) {
         return new ResponseEntity<>(challengeService.store(challenge), HttpStatus.CREATED);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PutMapping(value = "/secure/admin/challenges/{id}")
     @Operation(summary = "Update Challenge", description = "Update challenge", tags = { "USER", "ADMIN" })
-    public ResponseMessage updateChallenge(@PathVariable(name = "id") UUID id, @RequestBody Challenge challenge) {
+    public ResponseMessage<Challenge> updateChallenge(@PathVariable(name = "id") UUID id, @RequestBody Challenge challenge) {
         return challengeService.update(id, challenge);
     }
 
@@ -54,13 +54,13 @@ public class ChallengeController {
 
     @PutMapping(value = "/secure/admin/challenges/{id}/type")
     @Operation(summary = "Update Challenge Type", description = "Update challenge's Type. valid values {NORMAL, EVENT}", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> changeChallengeStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
+    public ResponseEntity<ResponseMessage<Challenge>> changeChallengeStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props) {
         return new ResponseEntity<>(challengeService.changeType(id, props.type()), HttpStatus.PARTIAL_CONTENT);
     }
 
     @DeleteMapping(value = "/secure/admin/challenges/{id}")
     @Operation(summary = "Delete Challenge", description = "Delete Challenge", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> deleteChallenge(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<Challenge>> deleteChallenge(@PathVariable(name = "id") UUID id) {
         return ResponseEntity.ok(challengeService.deleteChallenge(id));
     }
 }

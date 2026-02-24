@@ -13,12 +13,12 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface ChallengeService {
-    ResponseMessage store(Challenge challenge);
-    ResponseMessage changeType(UUID id, String status);
+    ResponseMessage<Challenge> store(Challenge challenge);
+    ResponseMessage<Challenge> changeType(UUID id, String status);
 
-    ResponseMessage update(UUID id, Challenge challenge);
+    ResponseMessage<Challenge> update(UUID id, Challenge challenge);
     Challenge getChallenge(UUID id);
     List<Challenge> getChallenges();
 
-    ResponseMessage deleteChallenge(UUID id);
+    ResponseMessage<Challenge> deleteChallenge(UUID id);
 }

@@ -39,13 +39,13 @@ public class SubscriptionController {
 
     @DeleteMapping(value = "/admin/subscriptions/{id}")
     @Operation(summary = "Unsubscribe User", description = "Delete/Remove subscription", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<Subscription>> removeUserFromSession(@PathVariable(name = "id") UUID id) {
         return new ResponseEntity<>(subscriptionService.unSubscribeUser(id), HttpStatus.PARTIAL_CONTENT);
     }
 
     @DeleteMapping(value = "/admin/subscriptions/{sessionId}/unsubscribe/user/{userId}")
     @Operation(summary = "Unsubscribe User", description = "Remove a user from a session", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "userId") UUID userId) {
+    public ResponseEntity<ResponseMessage<Subscription>> removeUserFromSession(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "userId") UUID userId) {
         return new ResponseEntity<>(subscriptionService.removeUserFromSession(sessionId, userId), HttpStatus.PARTIAL_CONTENT);
     }
 

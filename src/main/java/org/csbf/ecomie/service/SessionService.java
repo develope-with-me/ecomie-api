@@ -14,11 +14,11 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface SessionService {
-    ResponseMessage store(Session session);
+    ResponseMessage<Session> store(Session session);
 
-    ResponseMessage changeStatus(UUID id, String status);
+    ResponseMessage<Session> changeStatus(UUID id, String status);
 
-    ResponseMessage update(UUID id, Session session);
+    ResponseMessage<Session> update(UUID id, Session session);
 
     Session getSession(UUID id);
 
@@ -35,5 +35,5 @@ public interface SessionService {
 
     Session removeChallenge(UUID sessionId, UUID challengeId);
 
-    ResponseMessage deleteSession(UUID id);
+    ResponseMessage<Session> deleteSession(UUID id);
 }
