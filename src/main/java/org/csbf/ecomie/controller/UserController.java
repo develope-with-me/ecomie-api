@@ -136,7 +136,7 @@ public class UserController {
     }
 
     @PostMapping("/admin/users")
-    @Operation(summary = "Get All Users", description = "Get all users in the system", tags = { "ADMIN" })
+    @Operation(summary = "Create User", description = "Create a new user", tags = { "ADMIN" })
     public ResponseEntity<AuthenticationResponse> creatUser(@RequestBody RegisterRequest request) {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
