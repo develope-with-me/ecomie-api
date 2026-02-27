@@ -39,30 +39,28 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
 
 
     @Override
-    public ResponseMessage<ChallengeReport> storeReport(UUID sessionId, ChallengeReportRequest challengeReportRequest) {
+    public ResponseMessage<ChallengeReport> storeReport(UUID subscriptionId, ChallengeReportRequest challengeReportRequest) {
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
 
         var user = userRepo.findByEmail(authContext.getAuthUser().getName()).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("UserEntity",
                         "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
-        return store(sessionId, challengeReportRequest, user);
+        return store(subscriptionId, challengeReportRequest, user);
     }
 
     @Override
-    public ResponseMessage<ChallengeReport> storeUserReport(UUID userId, UUID sessionId, ChallengeReportRequest challengeReportRequest) {
+    public ResponseMessage<ChallengeReport> storeUserReport(UUID userId, UUID subscriptionId, ChallengeReportRequest challengeReportRequest) {
         var user = userRepo.findById(userId).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("UserEntity",
                         "User with id (%s) not found".formatted(userId.toString())).toException());
-        return store(sessionId, challengeReportRequest, user);
+        return store(subscriptionId, challengeReportRequest, user);
     }
 
     @NotNull
-    private ResponseMessage<ChallengeReport> store(UUID sessionId, ChallengeReportRequest challengeReportRequest, UserEntity userEntity) {
-        var session = sessionRepo.findById(sessionId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("SessionEntity", "Session with id (%s) not found".formatted(sessionId.toString())).toException());
-        if(!session.getStatus().equals(SessionStatus.ONGOING)) {
-            throw Problems.BAD_REQUEST.withProblemError("sessionId", "Session (%s) is not ongoing".formatted(sessionId)).toException();
-        }
-        var subscription = subscriptionRepo.findBySessionAndUser(session, userEntity).orElseThrow(() -> Problems.NOT_FOUND.withDetail("Subscription not found").toException());
+    private ResponseMessage<ChallengeReport> store(UUID subscriptionId, ChallengeReportRequest challengeReportRequest, UserEntity userEntity) {
+        var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity",
+                        "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
 
         var report = ChallengeReportEntity.builder()
                 .subscription(subscription)

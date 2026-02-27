@@ -1,5 +1,6 @@
 package org.csbf.ecomie.repository;
 
+import org.csbf.ecomie.constant.ChallengeType;
 import org.csbf.ecomie.constant.SessionStatus;
 import org.csbf.ecomie.entity.ChallengeEntity;
 import org.csbf.ecomie.entity.SessionEntity;
@@ -26,8 +27,8 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<SubscriptionEntity> findAllByUser_Email(String userEmail);
     Optional<SubscriptionEntity> findBySession(SessionEntity sessionEntity);
     Optional<SubscriptionEntity> findBySessionAndBlocked(SessionEntity sessionEntity, boolean blocked);
-    Optional<SubscriptionEntity> findBySessionAndUser(SessionEntity sessionEntity, UserEntity userEntity);
-    Optional<SubscriptionEntity> findBySession_IdAndUser_Id(UUID sessionId, UUID userId);
+    List<SubscriptionEntity> findAllBySessionAndUser(SessionEntity sessionEntity, UserEntity userEntity);
+    List<SubscriptionEntity> findAllBySession_IdAndUser_Id(UUID sessionId, UUID userId);
     Optional<SubscriptionEntity> findBySessionAndUserAndBlocked(SessionEntity sessionEntity, UserEntity userEntity, boolean blocked);
     Optional<SubscriptionEntity> findBySessionAndChallenge(SessionEntity sessionEntity, ChallengeEntity challengeEntity);
     Optional<SubscriptionEntity> findBySessionAndChallengeAndUser(SessionEntity sessionEntity, ChallengeEntity challengeEntity, UserEntity userEntity);
@@ -35,7 +36,8 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     boolean existsBySession_Id(UUID sessionId);
 
     boolean existsBySession_Id_AndUser_Id(UUID sessionId, UUID userId);
-    boolean existsBySession_Status_AndUser_Id(SessionStatus sessionStatus, UUID userId);
+
+    boolean existsBySession_Status_AndUser_IdAndChallenge_Type(SessionStatus sessionStatus, UUID userId, ChallengeType challengeType);
 
     @Query(value = "SELECT sub.session from SubscriptionEntity sub where sub.user=:user")
     List<SessionEntity> selectAllSessionsThisUserHasSubscribedTo(@Param("user") UserEntity userEntity);

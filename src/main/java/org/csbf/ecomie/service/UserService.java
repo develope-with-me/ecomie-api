@@ -53,4 +53,8 @@ public interface UserService {
 //    List<HelperDomain.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
 
     List<User> getAllUsers();
+
+    ResponseMessage<User> toggleBlock(UUID id);
+
+    ResponseMessage<User> enableUser(UUID id);
 }

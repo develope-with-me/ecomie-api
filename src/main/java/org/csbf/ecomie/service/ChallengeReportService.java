@@ -14,9 +14,9 @@ import java.util.UUID;
  * @author DB.Tech
  */
 public interface ChallengeReportService {
-    ResponseMessage<ChallengeReport> storeReport(UUID sessionId, ChallengeReportRequest challengeReportRequest);
+    ResponseMessage<ChallengeReport> storeReport(UUID subscriptionId, ChallengeReportRequest challengeReportRequest);
 
-    ResponseMessage<ChallengeReport> storeUserReport(UUID userId, UUID sessionId, ChallengeReportRequest challengeReportRequest);
+    ResponseMessage<ChallengeReport> storeUserReport(UUID userId, UUID subscriptionId, ChallengeReportRequest challengeReportRequest);
 
     ResponseMessage<ChallengeReport> updateChallengeReport(UUID reportId, ChallengeReportRequest challengeReportRequest);
 

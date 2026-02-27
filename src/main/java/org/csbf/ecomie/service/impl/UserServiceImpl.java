@@ -274,6 +274,37 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUsers() {
         return mapper.asDomainObjects(userRepository.findAll());
     }
+
+    @Override
+    public ResponseMessage<User> toggleBlock(UUID id) {
+        log.info("UserServiceImpl.toggleBlock");
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(id.toString())).toException());
+
+        userEntity.setAccountBlocked(!userEntity.getAccountBlocked());
+        UserEntity updatedUser = userRepository.save(userEntity);
+
+        return new ResponseMessage.SuccessResponseMessage<>(updatedUser.getAccountBlocked() ? "Account Blocked" : "Account Unblocked",
+                mapper.asDomainObject(updatedUser));
+    }
+
+    @Override
+    public ResponseMessage<User> enableUser(UUID id) {
+        log.info("UserServiceImpl.enableUser");
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with id (%s) not found".formatted(id.toString())).toException());
+
+        UserEntity updatedUser = userEntity;
+
+        if (!userEntity.isEnabled()) {
+            userEntity.setAccountEnabled(true) ;
+            updatedUser = userRepository.save(userEntity);
+        }
+
+
+        return new ResponseMessage.SuccessResponseMessage<>("Account Enabled",
+                mapper.asDomainObject(updatedUser));
+    }
     /**
      * / Create userEntity basic userEntity profile details from auth service route
      */

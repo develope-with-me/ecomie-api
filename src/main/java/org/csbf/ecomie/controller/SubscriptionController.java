@@ -56,6 +56,11 @@ public class SubscriptionController {
         return subscriptionService.update(id, subscriptionRequest);
     }
 
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/subscriptions/{id}/block")
+    @Operation(summary = "Block/Unblock Subscription", description = "Block or unblock user Subscription", tags = { "ADMIN" })
+    public ResponseMessage<Subscription> toggleBlock(@PathVariable(name = "id") UUID id) { return subscriptionService.toggleBlock(id); }
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/{id}")
     @Operation(summary = "Get Subscription", description = "Get subscription", tags = { "ECOMIEST", "ADMIN" })

@@ -65,6 +65,16 @@ public class UserController {
     @Operation(summary = "Assign New Role", description = "Change user's role using email", tags = { "ADMIN" })
     public ResponseMessage<User> updateUserRole(@RequestBody UpdateUserRole user) { return userService.changeUserRole(user.email(), user.role()); }
 
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/block/users/{id}")
+    @Operation(summary = "Block/Unblock Account", description = "Block or unblock user account", tags = { "ADMIN" })
+    public ResponseMessage<User> toggleBlock(@PathVariable(name = "id") UUID id) { return userService.toggleBlock(id); }
+
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/enable/users/{id}")
+    @Operation(summary = "Enable Account", description = "Enable account", tags = { "ADMIN" })
+    public ResponseMessage<User> enableUser(@PathVariable(name = "id") UUID id) { return userService.enableUser(id); }
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/admin/users/{id}")
     @Operation(summary = "Get User Profile", description = "Get user's profile information using userId", tags = { "ADMIN" })

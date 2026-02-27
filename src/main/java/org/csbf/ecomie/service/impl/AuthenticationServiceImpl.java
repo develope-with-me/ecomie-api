@@ -88,7 +88,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 //        var user = userRepo.findByEmail(request.email()).get();
 
         if (!user.isEnabled()) {
-            message = "account not enabled";
+            message = "Account not enabled";
+            return getAuthenticationResponse(false, message, null, null);
+        }
+
+        if (!user.isAccountNonLocked()) {
+            message = "Account is blocked. Contact Administrator";
+            return getAuthenticationResponse(false, message, null, null);
+        }
+
+        if (user.getAccountSoftDeleted()) {
+            message = "Account is deleted. Contact Administrator";
             return getAuthenticationResponse(false, message, null, null);
         }
 

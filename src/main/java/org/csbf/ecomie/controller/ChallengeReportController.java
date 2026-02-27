@@ -28,16 +28,16 @@ public class ChallengeReportController {
 private final ChallengeReportService reportService;
     private final ChallengeReportService challengeReportService;
 
-    @PostMapping(value = "/ecomiest/reports/session/{sessionId}")
+    @PostMapping(value = "/ecomiest/reports/session/{subscriptionId}")
     @Operation(summary = "Create Challenge Report", description = "Create new report", tags = { "ECOMIEST" })
-    protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReport(@PathVariable(name = "sessionId") UUID sessionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
-        return new ResponseEntity<>(reportService.storeReport(sessionId, challengeReportRequest), HttpStatus.CREATED);
+    protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReport(@PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
+        return new ResponseEntity<>(reportService.storeReport(subscriptionId, challengeReportRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/admin/reports/user/{userId}/session/{sessionId}")
+    @PostMapping(value = "/admin/reports/user/{userId}/session/{subscriptionId}")
     @Operation(summary = "Create Challenge Report", description = "Create new report", tags = { "ADMIN" })
-    protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReportForUser(@PathVariable(name = "userId") UUID userId, @PathVariable(name = "sessionId") UUID sessionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
-        return new ResponseEntity<>(reportService.storeUserReport(userId, sessionId, challengeReportRequest), HttpStatus.CREATED);
+    protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReportForUser(@PathVariable(name = "userId") UUID userId, @PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
+        return new ResponseEntity<>(reportService.storeUserReport(userId, subscriptionId, challengeReportRequest), HttpStatus.CREATED);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)

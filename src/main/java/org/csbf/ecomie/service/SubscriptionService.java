@@ -26,4 +26,6 @@ public interface SubscriptionService {
     Subscription getSubscription(UUID subscriptionId);
     List<Subscription> getSubscriptions();
     List<Subscription> getSessionSubscription(UUID sessionId);
+
+    ResponseMessage<Subscription> toggleBlock(UUID id);
 }
