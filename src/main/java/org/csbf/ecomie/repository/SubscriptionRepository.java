@@ -25,6 +25,8 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<SubscriptionEntity> findAllByUserAndChallenge(UserEntity userEntity, ChallengeEntity challengeEntity);
     List<SubscriptionEntity> findAllBySession_id(UUID sessionId);
     List<SubscriptionEntity> findAllByUser_Email(String userEmail);
+    List<SubscriptionEntity> findAllBySession_StatusAndUser_Email(SessionStatus sessionStatus, String userEmail);
+    List<SubscriptionEntity> findAllBySession_Status(SessionStatus sessionStatus);
     Optional<SubscriptionEntity> findBySession(SessionEntity sessionEntity);
     Optional<SubscriptionEntity> findBySessionAndBlocked(SessionEntity sessionEntity, boolean blocked);
     List<SubscriptionEntity> findAllBySessionAndUser(SessionEntity sessionEntity, UserEntity userEntity);
@@ -47,6 +49,8 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     List<UserEntity> selectAllUsersSubscribedToSessionViaChallenge(@Param("session") SessionEntity sessionEntity, @Param("challenge") ChallengeEntity challengeEntity);
     @Query(value = "SELECT sub.user from SubscriptionEntity sub where sub.session=:session")
     List<UserEntity> selectAllUsersSubscribedToSession(@Param("session") SessionEntity sessionEntity);
+    @Query(value = "SELECT sub.user from SubscriptionEntity sub where sub.session.status='ONGOING'")
+    List<UserEntity> selectAllUsersSubscribedToOngoingSession();
 
     List<SubscriptionEntity> findAllByUser_Id(UUID userId);
 }

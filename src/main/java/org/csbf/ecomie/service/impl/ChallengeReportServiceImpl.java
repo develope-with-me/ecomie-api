@@ -61,6 +61,10 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
         var subscription = subscriptionRepo.findById(subscriptionId).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity",
                         "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
+        if (subscription.getUser().getId() != userEntity.getId()) {
+            throw Problems.BAD_REQUEST.withProblemError("Subscription - User",
+                    "User not subscribed or subscribed via different challenge. Select a different subscription").toException();
+        }
 
         var report = ChallengeReportEntity.builder()
                 .subscription(subscription)

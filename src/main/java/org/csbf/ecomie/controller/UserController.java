@@ -139,6 +139,12 @@ public class UserController {
         return new ResponseEntity<>(userService.getUsersInASession(sessionId, blocked, challengeId), HttpStatus.OK);
     }
 
+    @GetMapping("/admin/current-sessions/users")
+    @Operation(summary = "Get Ongoing Session's Users", description = "Get all users in ongoing session", tags = { "ADMIN" })
+    public ResponseEntity<List<User>> getUsersInOngoingSession() {
+        return new ResponseEntity<>(userService.getUsersInOngoingSession(), HttpStatus.OK);
+    }
+
     @GetMapping("/admin/users")
     @Operation(summary = "Get All Users", description = "Get all users in the system", tags = { "ADMIN" })
     public ResponseEntity<List<User>> getAllUsers() {

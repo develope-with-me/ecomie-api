@@ -57,4 +57,6 @@ public interface UserService {
     ResponseMessage<User> toggleBlock(UUID id);
 
     ResponseMessage<User> enableUser(UUID id);
+
+    List<User> getUsersInOngoingSession();
 }

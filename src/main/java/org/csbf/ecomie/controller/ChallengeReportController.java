@@ -28,13 +28,13 @@ public class ChallengeReportController {
 private final ChallengeReportService reportService;
     private final ChallengeReportService challengeReportService;
 
-    @PostMapping(value = "/ecomiest/reports/session/{subscriptionId}")
+    @PostMapping(value = "/ecomiest/reports/subscriptions/{subscriptionId}")
     @Operation(summary = "Create Challenge Report", description = "Create new report", tags = { "ECOMIEST" })
     protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReport(@PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
         return new ResponseEntity<>(reportService.storeReport(subscriptionId, challengeReportRequest), HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/admin/reports/user/{userId}/session/{subscriptionId}")
+    @PostMapping(value = "/admin/reports/user/{userId}/subscriptions/{subscriptionId}")
     @Operation(summary = "Create Challenge Report", description = "Create new report", tags = { "ADMIN" })
     protected ResponseEntity<ResponseMessage<ChallengeReport>> createChallengeReportForUser(@PathVariable(name = "userId") UUID userId, @PathVariable(name = "subscriptionId") UUID subscriptionId, @RequestBody ChallengeReportRequest challengeReportRequest) {
         return new ResponseEntity<>(reportService.storeUserReport(userId, subscriptionId, challengeReportRequest), HttpStatus.CREATED);

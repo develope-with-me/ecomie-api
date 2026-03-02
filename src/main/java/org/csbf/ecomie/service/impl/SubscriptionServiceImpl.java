@@ -149,12 +149,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public List<Subscription> getSubscriptions() {
+    public List<Subscription> getSubscriptions(boolean isOngoing) {
         List<SubscriptionEntity> subscriptionEntities = new ArrayList<>();
         if(authContext.isAuthorized(Role.ADMIN)) {
-            subscriptionEntities = subscriptionRepo.findAll();
+            subscriptionEntities = isOngoing
+                    ? subscriptionRepo.findAllBySession_Status(SessionStatus.ONGOING)
+                    : subscriptionRepo.findAll();
         } else {
-            subscriptionEntities = subscriptionRepo.findAllByUser_Email(authContext.getAuthUser().getName());
+            String userEmail = authContext.getAuthUser().getName();
+            subscriptionEntities = isOngoing
+                    ?  subscriptionRepo.findAllBySession_StatusAndUser_Email(SessionStatus.ONGOING, userEmail)
+                    : subscriptionRepo.findAllByUser_Email(userEmail);
         }
 
         return mapper.asDomainObjects(subscriptionEntities);
@@ -210,6 +215,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId",
                         "Challenge with id (%s) does not exist"
                                 .formatted(subscriptionRequest.challengeId().toString())).toException());
+
+        if (subscriptionRequest.target() > challengeEntity.getTarget()) {
+            throw Problems.BAD_REQUEST
+                    .withDetail("Target must be greater than or equal to %s".formatted(Integer.toString(challengeEntity.getTarget()))).toException();
+        }
 
         if (subscriptionRepo.existsBySession_Status_AndUser_IdAndChallenge_Type(SessionStatus.ONGOING, userEntity.getId(), challengeEntity.getType())){
 //        if (subscriptionRepo.existsBySession_Id_AndUser_Id(sessionEntity.getId(), userEntity.getId())){

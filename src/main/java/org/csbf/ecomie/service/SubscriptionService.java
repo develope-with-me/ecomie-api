@@ -24,7 +24,7 @@ public interface SubscriptionService {
 
     Subscription update(UUID subscriptionId, @NotNull SubscriptionRequest subscriptionRequest);
     Subscription getSubscription(UUID subscriptionId);
-    List<Subscription> getSubscriptions();
+    List<Subscription> getSubscriptions(boolean isOngoing);
     List<Subscription> getSessionSubscription(UUID sessionId);
 
     ResponseMessage<Subscription> toggleBlock(UUID id);

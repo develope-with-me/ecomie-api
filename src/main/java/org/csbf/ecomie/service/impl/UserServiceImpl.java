@@ -305,6 +305,13 @@ public class UserServiceImpl implements UserService {
         return new ResponseMessage.SuccessResponseMessage<>("Account Enabled",
                 mapper.asDomainObject(updatedUser));
     }
+
+    @Override
+    public List<User> getUsersInOngoingSession() {
+        var userEntities = subscriptionRepo.selectAllUsersSubscribedToOngoingSession();
+
+        return mapper.asDomainObjects(userEntities);
+    }
     /**
      * / Create userEntity basic userEntity profile details from auth service route
      */

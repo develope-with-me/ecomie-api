@@ -70,8 +70,8 @@ public class SubscriptionController {
 
     @GetMapping(value = "/ecomiest/subscriptions")
     @Operation(summary = "Get Subscriptions", description = "Get all subscriptions", tags = { "ECOMIEST", "ADMIN" })
-    public ResponseEntity<List<Subscription>> getSubscriptions() {
-        return ResponseEntity.ok(subscriptionService.getSubscriptions());
+    public ResponseEntity<List<Subscription>> getSubscriptions(@RequestParam("isOngoing") boolean isOngoing) {
+        return ResponseEntity.ok(subscriptionService.getSubscriptions(isOngoing));
     }
 
 
