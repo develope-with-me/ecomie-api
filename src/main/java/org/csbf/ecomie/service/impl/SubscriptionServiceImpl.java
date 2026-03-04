@@ -216,7 +216,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         "Challenge with id (%s) does not exist"
                                 .formatted(subscriptionRequest.challengeId().toString())).toException());
 
-        if (subscriptionRequest.target() > challengeEntity.getTarget()) {
+        if (subscriptionRequest.target() < challengeEntity.getTarget()) {
             throw Problems.BAD_REQUEST
                     .withDetail("Target must be greater than or equal to %s".formatted(Integer.toString(challengeEntity.getTarget()))).toException();
         }

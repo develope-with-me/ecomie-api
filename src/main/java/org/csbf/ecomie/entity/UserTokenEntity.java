@@ -6,7 +6,6 @@ import lombok.experimental.SuperBuilder;
 import org.csbf.ecomie.config.EntityConfigParams;
 import org.csbf.ecomie.constant.TokenType;
 import org.csbf.ecomie.utils.commons.BaseEntity;
-import org.hibernate.annotations.OnDelete;
 
 import java.time.LocalDateTime;
 

@@ -234,6 +234,17 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public Session getOngoingSession() {
+        var sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() ->
+                Problems.NOT_FOUND.withProblemError("Session", "No Ongoing session").toException());
+
+        var session = mapper.asDomainObject(sessionEntity);
+        return !authContext.isAuthorized(Role.ADMIN)
+                ? session.justMinimal()
+                : session;
+    }
+
+    @Override
     public List<Session> getUserSessions(UUID userId) {
         var user = userRepo.findById(userId).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("userEntity",

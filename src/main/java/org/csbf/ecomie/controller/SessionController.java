@@ -53,6 +53,12 @@ public class SessionController {
         return ResponseEntity.ok(sessionService.getSessions());
     }
 
+    @GetMapping(value = "/sessions/current")
+    @Operation(summary = "Get Current Sessions", description = "Get ongoing session", tags = { "UNAUTHENTICATED" })
+    public ResponseEntity<Session> getOngoingSession() {
+        return ResponseEntity.ok(sessionService.getOngoingSession());
+    }
+
     @GetMapping(value = "/secure/user/sessions")
     @Operation(summary = "Securely Get Sessions", description = "Securely get all sessions", tags = { "USER", "ADMIN" })
     public ResponseEntity<List<Session>> securelyGetSessions() {

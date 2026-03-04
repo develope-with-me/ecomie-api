@@ -36,4 +36,6 @@ public interface SessionService {
     Session removeChallenge(UUID sessionId, UUID challengeId);
 
     ResponseMessage<Session> deleteSession(UUID id);
+
+    Session getOngoingSession();
 }
