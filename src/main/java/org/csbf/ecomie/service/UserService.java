@@ -16,18 +16,18 @@ import java.util.UUID;
  */
 public interface UserService {
 
-    ResponseMessage updateAuthUserProfile(
+    ResponseMessage<User> updateAuthUserProfile(
             Optional<MultipartFile> file,
             MinimalUser user
     );
 
-    ResponseMessage updateUserProfile(
+    ResponseMessage<User> updateUserProfile(
             UUID userId,
             Optional<MultipartFile> file,
             User user
     );
 
-    ResponseMessage changeUserRole(String email, String role);
+    ResponseMessage<User> changeUserRole(String email, String role);
 
     User getUserProfile(UUID userId);
 
@@ -44,7 +44,7 @@ public interface UserService {
     byte[] getUserProfilePicture(UUID userId);
 
     // Soft delete userEntity account
-    ResponseMessage softDelete(UUID userId);
+    ResponseMessage<User> softDelete(UUID userId);
 
     void deleteUserProfile(UUID userId);
 
@@ -53,4 +53,10 @@ public interface UserService {
 //    List<HelperDomain.UserFullDto> getUsersSubscribedToSessionViaChallenge(UUID sessionId, UUID challengeId);
 
     List<User> getAllUsers();
+
+    ResponseMessage<User> toggleBlock(UUID id);
+
+    ResponseMessage<User> enableUser(UUID id);
+
+    List<User> getUsersInOngoingSession();
 }

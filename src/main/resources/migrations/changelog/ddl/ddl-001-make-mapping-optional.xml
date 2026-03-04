@@ -1,0 +1,61 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+   <changeSet author="dbryzz" id="ddl-001-1">
+        <dropNotNullConstraint
+                tableName="user_tokens"
+                columnName="user_id"
+                columnDataType="UUID"/>
+        <dropNotNullConstraint
+                tableName="subscriptions"
+                columnName="user_id"
+                columnDataType="UUID"/>
+        <dropNotNullConstraint
+                tableName="subscriptions"
+                columnName="challenge_id"
+                columnDataType="UUID"/>
+        <dropNotNullConstraint
+                tableName="subscriptions"
+                columnName="session_id"
+                columnDataType="UUID"/>
+        <dropNotNullConstraint
+                tableName="challenge_reports"
+                columnName="user_id"
+                columnDataType="UUID"/>
+        <dropNotNullConstraint
+                tableName="challenge_reports"
+                columnName="subscription_id"
+                columnDataType="UUID"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-2">
+        <dropForeignKeyConstraint baseTableName="challenge_reports" constraintName="fk_challenge_reports_subscriptions_subscription_id"/>
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="challenge_reports" constraintName="fk_challenge_reports_subscriptions_subscription_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="subscriptions" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-3">
+        <dropForeignKeyConstraint baseTableName="session_challenge" constraintName="fk_session_challenge_sessions_session_id"/>
+        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="session_challenge" constraintName="fk_session_challenge_sessions_session_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-4">
+        <dropForeignKeyConstraint baseTableName="session_challenge" constraintName="fk_session_challenge_challenges_challenge_id"/>
+        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="session_challenge" constraintName="fk_session_challenge_challenges_challenge_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-5">
+        <dropForeignKeyConstraint baseTableName="subscriptions" constraintName="fk_subscriptions_challenges_challenge_id"/>
+        <addForeignKeyConstraint baseColumnNames="challenge_id" baseTableName="subscriptions" constraintName="fk_subscriptions_challenges_challenge_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="challenges" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-6">
+        <dropForeignKeyConstraint baseTableName="subscriptions" constraintName="fk_subscriptions_sessions_session_id"/>
+        <addForeignKeyConstraint baseColumnNames="session_id" baseTableName="subscriptions" constraintName="fk_subscriptions_sessions_session_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="sessions" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-7">
+        <dropForeignKeyConstraint baseTableName="user_tokens" constraintName="fk_user_tokens_users_user_id"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_tokens" constraintName="fk_user_tokens_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-8">
+        <dropForeignKeyConstraint baseTableName="challenge_reports" constraintName="fk_challenge_reports_users_user_id"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="challenge_reports" constraintName="fk_challenge_reports_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    </changeSet>
+    <changeSet author="dbryzz" id="ddl-001-9">
+        <dropForeignKeyConstraint baseTableName="subscriptions" constraintName="fk_subscriptions_users_user_id"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="subscriptions" constraintName="fk_subscriptions_users_user_id" deferrable="false" initiallyDeferred="false" onDelete="SET NULL" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="_users" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

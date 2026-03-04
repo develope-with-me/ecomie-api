@@ -45,13 +45,17 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     @Transactional
-    public ResponseMessage store(Challenge challenge) {
+    public ResponseMessage<Challenge> store(Challenge challenge) {
 
         if (!EnumUtils.isValidEnum(ChallengeType.class, challenge.type().toUpperCase())) {
-            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challenge type (%s)".formatted(challenge.type())).toException();
+            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type",
+                    "Invalid challenge type (%s)".formatted(challenge.type())).toException();
         }
         var type = challenge.type().toUpperCase();
-        challengeRepo.findByName(challenge.name()).ifPresent(_ -> {throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Challenge with name (%s) already exist".formatted(challenge.name())).toException();});
+        challengeRepo.findByName(challenge.name()).ifPresent(_ -> {
+            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name",
+                    "Challenge with name (%s) already exist".formatted(challenge.name())).toException();
+        });
         var challengeEntity = ChallengeEntity.builder()
                 .name(challenge.name())
                 .description(challenge.description())
@@ -60,39 +64,51 @@ public class ChallengeServiceImpl implements ChallengeService {
                 .build();
 
         if (challenge.sessions() != null) {
-            addSessionToChallenge(challenge.sessions(), challengeEntity);
+            addSessionsToChallenge(challenge.sessions(), challengeEntity);
         }
-        challengeRepo.save(challengeEntity);
-        return new ResponseMessage.SuccessResponseMessage("Challenge created. Type: " + type);
+        ChallengeEntity savedChallenge = challengeRepo.save(challengeEntity);
+        return new ResponseMessage.SuccessResponseMessage<>("Challenge created. Type: " + type,
+                mapper.asDomainObject(savedChallenge));
 
     }
 
     @Override
-    public ResponseMessage changeType(UUID id, String type) {
-        var challenge = challengeRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "Challenge with id (%s) not found".formatted(id.toString())).toException());
+    public ResponseMessage<Challenge> changeType(UUID id, String type) {
+        var challenge = challengeRepo.findById(id).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("challengeEntity",
+                        "Challenge with id (%s) not found".formatted(id.toString())).toException());
         if (!EnumUtils.isValidEnum(ChallengeType.class, type.toUpperCase())) {
-            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challenge type (%s)".formatted(type)).toException();
+            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type",
+                    "Invalid challenge type (%s)".formatted(type)).toException();
         }
         challenge.setType(ChallengeType.valueOf(type.toUpperCase()));
 
         var updatedChallenge = challengeRepo.save(challenge);
-        return new ResponseMessage.SuccessResponseMessage("Challenge type changed. Type: " + updatedChallenge.getType());
+        return new ResponseMessage.SuccessResponseMessage<>("Challenge type changed. Type: " + updatedChallenge.getType(),
+                mapper.asDomainObject(updatedChallenge));
     }
 
     @Override
     @Transactional
-    public ResponseMessage update(UUID challengeId, Challenge challenge) {
-        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "Challenge with id (%s) not found".formatted(challengeId.toString())).toException());
-        challengeRepo.findByName(challenge.name()).ifPresent(chal -> {
-            throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name", "Challenge with the name (%s) already exist".formatted(chal.getName())).toException();
-        });
+    public ResponseMessage<Challenge> update(UUID challengeId, Challenge challenge) {
+        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("challengeEntity",
+                        "Challenge with id (%s) not found".formatted(challengeId.toString())).toException());
+
+        if(!challengeEntity.getName().equalsIgnoreCase(challenge.name())) {
+            challengeRepo.findByName(challenge.name()).ifPresent(chal -> {
+                throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR.withProblemError("challengeEntity.name",
+                        "Challenge with the name (%s) already exist".formatted(chal.getName())).toException();
+            });
+        }
 
         if (!EnumUtils.isValidEnum(ChallengeType.class, challenge.type().toUpperCase())) {
-            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type", "Invalid challenge type (%s)".formatted(challenge.type())).toException();
+            throw Problems.BAD_REQUEST.withProblemError("challengeEntity.type",
+                    "Invalid challenge type (%s)".formatted(challenge.type())).toException();
         }
 
         if (challenge.sessions() != null) {
-            addSessionToChallenge(challenge.sessions(), challengeEntity);
+            addSessionsToChallenge(challenge.sessions(), challengeEntity);
         }
 
         List<SessionEntity> sessions = null;
@@ -112,14 +128,17 @@ public class ChallengeServiceImpl implements ChallengeService {
         }
         var updatedChallenge = challengeRepo.save(challengeEntity);
 
-        return new ResponseMessage.SuccessResponseMessage("ChallengeEntity updated. Type: " + updatedChallenge.getType());
+        return new ResponseMessage.SuccessResponseMessage<>("ChallengeEntity updated. Type: " + updatedChallenge.getType(),
+                mapper.asDomainObject(updatedChallenge));
     }
 
-    private ChallengeEntity addSessionToChallenge(List<Session> sessions, ChallengeEntity challengeEntity) {
+    private ChallengeEntity addSessionsToChallenge(List<Session> sessions, ChallengeEntity challengeEntity) {
         var sessionIds = sessions.stream().map(Session::id).toList();
         if (!sessionIds.isEmpty()) {
             sessionIds.forEach(id -> {
-                var session = sessionRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "Session with id (%s) not found".formatted(id.toString())).toException());
+                var session = sessionRepo.findById(id).orElseThrow(
+                        () -> Problems.NOT_FOUND.withProblemError("sessionEntity",
+                                "Session with id (%s) not found".formatted(id.toString())).toException());
                 challengeEntity.addSession(session);
             });
         }
@@ -129,9 +148,12 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public Challenge getChallenge(UUID challengeId) {
         Authentication authUser = authContext.getAuthUser();
-        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "Challenge with id (%s) not found".formatted(challengeId.toString())).toException());
+        var challengeEntity = challengeRepo.findById(challengeId).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("challengeEntity",
+                        "Challenge with id (%s) not found".formatted(challengeId.toString())).toException());
         var challenge = mapper.asDomainObject(challengeEntity);
-        if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))){
+        if (authUser.getAuthorities().stream().noneMatch(authority
+                -> authority.getAuthority().contains(Role.ADMIN.name()))){
             return challenge.justMinimal();
         }
 
@@ -145,7 +167,8 @@ public class ChallengeServiceImpl implements ChallengeService {
         var challengeEntities = challengeRepo.findAll();
         var challenges = mapper.asDomainObjects(challengeEntities);
 
-        if (authUser.getAuthorities().stream().noneMatch(authority -> authority.getAuthority().contains(Role.ADMIN.name()))){
+        if (authUser.getAuthorities().stream().noneMatch(authority
+                -> authority.getAuthority().contains(Role.ADMIN.name()))){
             return challenges.stream().map(Challenge::justMinimal).collect(Collectors.toList());
 
         }
@@ -154,10 +177,11 @@ public class ChallengeServiceImpl implements ChallengeService {
     }
 
     @Override
-    public ResponseMessage deleteChallenge(UUID id) {
-        challengeRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity", "Challenge with id (%s) not found".formatted(id.toString())).toException());
+    public ResponseMessage<Challenge> deleteChallenge(UUID id) {
+        challengeRepo.findById(id).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("challengeEntity",
+                "Challenge with id (%s) not found".formatted(id.toString())).toException());
         challengeRepo.deleteById(id);
-        return new ResponseMessage.SuccessResponseMessage("Challenge deleted successfully");
+        return new ResponseMessage.SuccessResponseMessage<>("Challenge deleted successfully");
     }
 
 }

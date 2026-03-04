@@ -29,14 +29,14 @@ public class SessionController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/secure/admin/sessions")
     @Operation(summary = "Create Session", description = "Create new session", tags = { "ADMIN" })
-    public ResponseMessage createSession(@RequestBody Session session) {
+    public ResponseMessage<Session> createSession(@RequestBody Session session) {
         return sessionService.store(session);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PutMapping(value = "/secure/admin/sessions/{id}")
     @Operation(summary = "Update Session", description = "Update session", tags = { "ADMIN" })
-    public ResponseMessage updateSession(@PathVariable(name = "id") UUID id, @RequestBody Session session) {
+    public ResponseMessage<Session> updateSession(@PathVariable(name = "id") UUID id, @RequestBody Session session) {
         return sessionService.update(id, session);
     }
 
@@ -53,6 +53,12 @@ public class SessionController {
         return ResponseEntity.ok(sessionService.getSessions());
     }
 
+    @GetMapping(value = "/sessions/current")
+    @Operation(summary = "Get Current Sessions", description = "Get ongoing session", tags = { "UNAUTHENTICATED" })
+    public ResponseEntity<Session> getOngoingSession() {
+        return ResponseEntity.ok(sessionService.getOngoingSession());
+    }
+
     @GetMapping(value = "/secure/user/sessions")
     @Operation(summary = "Securely Get Sessions", description = "Securely get all sessions", tags = { "USER", "ADMIN" })
     public ResponseEntity<List<Session>> securelyGetSessions() {
@@ -61,7 +67,7 @@ public class SessionController {
 
     @PutMapping(value = "/secure/admin/sessions/{id}/status")
     @Operation(summary = "Update Session Status", description = "Update session's status. valid values {INACTIVE, ONGOING, PAUSED, ENDED}", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> changeSessionStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props ) {
+    public ResponseEntity<ResponseMessage<Session>> changeSessionStatus(@PathVariable(name = "id") UUID id, @RequestBody RequestProps props ) {
         return new ResponseEntity<>(sessionService.changeStatus(id, props.status()), HttpStatus.PARTIAL_CONTENT);
     }
 
@@ -94,7 +100,7 @@ public class SessionController {
 
     @DeleteMapping(value = "/secure/admin/sessions/{id}")
     @Operation(summary = "Delete Session", description = "Delete session", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> deleteSession(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<Session>> deleteSession(@PathVariable(name = "id") UUID id) {
         return ResponseEntity.ok(sessionService.deleteSession(id));
     }
 }

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.csbf.ecomie.event.OnRegistrationCompleteEvent;
 import org.csbf.ecomie.service.AuthenticationService;
 import org.csbf.ecomie.service.EmailService;
+import org.csbf.ecomie.utils.commons.Domain;
 import org.csbf.ecomie.utils.commons.ExtendedEmailValidator;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
@@ -79,7 +80,7 @@ public class AuthenticationController {
 
     @RequestMapping(value = "/resend-link", method = {RequestMethod.POST})
     @Operation(summary = "Resend Confirmation Link", description = "Sends confirmation link to the email sent in request body", tags = { "UNAUTHENTICATED" })
-    public ResponseEntity<ResponseMessage> resendUserEmailConfirmationLink(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
+    public ResponseEntity<ResponseMessage<Domain>> resendUserEmailConfirmationLink(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
         /*
@@ -89,12 +90,12 @@ public class AuthenticationController {
 
         applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(servletRequest.getHeader("host"), emailDTO.email()));
 
-        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage("email resent"));
+        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage<>("email resent"));
     }
 
     @RequestMapping(value = "/reset-password/link", method = {RequestMethod.POST})
     @Operation(summary = "Password Reset Link", description = "Send password reset link to the email sent in request body", tags = { "UNAUTHENTICATED" })
-    public ResponseEntity<ResponseMessage> requestPasswordReset(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
+    public ResponseEntity<ResponseMessage<Domain>> requestPasswordReset(@RequestBody EmailDTO emailDTO, HttpServletRequest servletRequest) {
         log.info("Email {}", emailDTO);
         /**For Production */
         /*
@@ -104,7 +105,7 @@ public class AuthenticationController {
 
         emailService.requestPasswordReset(servletRequest.getHeader("host"), emailDTO.email());
 
-        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage("email sent"));
+        return ResponseEntity.ok(new ResponseMessage.SuccessResponseMessage<>("email sent"));
     }
 
     @RequestMapping(value = "/reset-password", method = {RequestMethod.POST})

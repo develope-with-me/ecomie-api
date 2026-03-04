@@ -39,13 +39,13 @@ public class SubscriptionController {
 
     @DeleteMapping(value = "/admin/subscriptions/{id}")
     @Operation(summary = "Unsubscribe User", description = "Delete/Remove subscription", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<Subscription>> removeUserFromSession(@PathVariable(name = "id") UUID id) {
         return new ResponseEntity<>(subscriptionService.unSubscribeUser(id), HttpStatus.PARTIAL_CONTENT);
     }
 
     @DeleteMapping(value = "/admin/subscriptions/{sessionId}/unsubscribe/user/{userId}")
     @Operation(summary = "Unsubscribe User", description = "Remove a user from a session", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> removeUserFromSession(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "userId") UUID userId) {
+    public ResponseEntity<ResponseMessage<Subscription>> removeUserFromSession(@PathVariable(name = "sessionId") UUID sessionId, @PathVariable(name = "userId") UUID userId) {
         return new ResponseEntity<>(subscriptionService.removeUserFromSession(sessionId, userId), HttpStatus.PARTIAL_CONTENT);
     }
 
@@ -56,6 +56,11 @@ public class SubscriptionController {
         return subscriptionService.update(id, subscriptionRequest);
     }
 
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/subscriptions/{id}/block")
+    @Operation(summary = "Block/Unblock Subscription", description = "Block or unblock user Subscription", tags = { "ADMIN" })
+    public ResponseMessage<Subscription> toggleBlock(@PathVariable(name = "id") UUID id) { return subscriptionService.toggleBlock(id); }
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/ecomiest/subscriptions/{id}")
     @Operation(summary = "Get Subscription", description = "Get subscription", tags = { "ECOMIEST", "ADMIN" })
@@ -65,8 +70,8 @@ public class SubscriptionController {
 
     @GetMapping(value = "/ecomiest/subscriptions")
     @Operation(summary = "Get Subscriptions", description = "Get all subscriptions", tags = { "ECOMIEST", "ADMIN" })
-    public ResponseEntity<List<Subscription>> getSubscriptions() {
-        return ResponseEntity.ok(subscriptionService.getSubscriptions());
+    public ResponseEntity<List<Subscription>> getSubscriptions(@RequestParam("isOngoing") boolean isOngoing) {
+        return ResponseEntity.ok(subscriptionService.getSubscriptions(isOngoing));
     }
 
 

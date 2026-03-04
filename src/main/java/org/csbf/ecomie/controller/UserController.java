@@ -50,20 +50,30 @@ public class UserController {
 
     @PutMapping(value = "/user/update", consumes = { "multipart/form-data" }, produces = { "application/json" })
     @Operation(summary = "Edit My Profile", description = "Modify currently authenticated user's profile information", tags = { "USER" })
-    public ResponseEntity<ResponseMessage> updateAuthUserProfile( @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") MinimalUser user) {
+    public ResponseEntity<ResponseMessage<User>> updateAuthUserProfile( @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") MinimalUser user) {
         return new ResponseEntity<>(userService.updateAuthUserProfile(file, user), HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/admin/update/users/{id}", consumes = { "multipart/form-data", "application/json" }, produces = { "application/json" })
     @Operation(summary = "Edit User Profile", description = "Modify user's profile information using his id", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> updateUserProfile(@PathVariable(name = "id") UUID id, @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") User user) {
+    public ResponseEntity<ResponseMessage<User>> updateUserProfile(@PathVariable(name = "id") UUID id, @RequestPart("file") Optional<MultipartFile> file, @RequestPart("json") User user) {
         return new ResponseEntity<>(userService.updateUserProfile(id, file, user), HttpStatus.CREATED);
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     @PutMapping(value = "/admin/update-user-role")
     @Operation(summary = "Assign New Role", description = "Change user's role using email", tags = { "ADMIN" })
-    public ResponseMessage updateUserRole(@RequestBody UpdateUserRole user) { return userService.changeUserRole(user.email(), user.role()); }
+    public ResponseMessage<User> updateUserRole(@RequestBody UpdateUserRole user) { return userService.changeUserRole(user.email(), user.role()); }
+
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/block/users/{id}")
+    @Operation(summary = "Block/Unblock Account", description = "Block or unblock user account", tags = { "ADMIN" })
+    public ResponseMessage<User> toggleBlock(@PathVariable(name = "id") UUID id) { return userService.toggleBlock(id); }
+
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/enable/users/{id}")
+    @Operation(summary = "Enable Account", description = "Enable account", tags = { "ADMIN" })
+    public ResponseMessage<User> enableUser(@PathVariable(name = "id") UUID id) { return userService.enableUser(id); }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/admin/users/{id}")
@@ -94,39 +104,45 @@ public class UserController {
 
     @DeleteMapping("/admin/user-pix/{id}/del")
     @Operation(summary = "Delete User Profile Image", description = "Delete user's profile image using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> deleteProfileImage(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<User>> deleteProfileImage(@PathVariable(name = "id") UUID id) {
         userService.deleteUserProfilePic(id);
-        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("Image deleted"), HttpStatus.PARTIAL_CONTENT);
+        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage<>("Image deleted"), HttpStatus.PARTIAL_CONTENT);
     }
 
     @DeleteMapping("/admin/del/users/{id}")
     @Operation(summary = "Delete User", description = "Delete user using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> hardDeleteProfile(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<User>> hardDeleteProfile(@PathVariable(name = "id") UUID id) {
         userService.deleteUserProfile(id);
-        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("User deleted"), HttpStatus.PARTIAL_CONTENT);
+        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage<>("User deleted"), HttpStatus.PARTIAL_CONTENT);
     }
 
     @PutMapping("/admin/soft-del/users/{id}")
     @Operation(summary = "Soft delete User", description = "Soft delete user using userId", tags = { "ADMIN" })
-    public ResponseEntity<ResponseMessage> softDeleteProfile(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<ResponseMessage<User>> softDeleteProfile(@PathVariable(name = "id") UUID id) {
         return new ResponseEntity<>(userService.softDelete(id), HttpStatus.PARTIAL_CONTENT);
     }
 
     @PostMapping("/user/request-to-become/{role}")
     @Operation(summary = "Request For Access Clearance", description = "Request for higher clearance eg ECOMIEST, ADMIN, SPONSOR, MISSIONARY, etc", tags = { "USER" })
-    public ResponseEntity<ResponseMessage> becomeAn( @PathVariable(name = "role") String role, HttpServletRequest servletRequest) {
+    public ResponseEntity<ResponseMessage<User>> becomeAn( @PathVariable(name = "role") String role, HttpServletRequest servletRequest) {
         if (!EnumUtils.isValidEnum(Role.class, role.toUpperCase()))
             throw new BadRequestException("Invalid user role");
 //        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
         applicationEventPublisher.publishEvent(new OnRoleChangeRequestEvent(servletRequest.getHeader("host"), authContext.getAuthUser().getName(), role));
 
-        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage("Request sent successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(new ResponseMessage.SuccessResponseMessage<>("Request sent successfully"), HttpStatus.OK);
     }
 
     @GetMapping("/admin/sessions/{sessionId}/users")
     @Operation(summary = "Get Session Users", description = "Get all blocked and/or unblocked users in a session", tags = { "ADMIN" })
     public ResponseEntity<List<User>> getUsersInASession(@PathVariable(name = "sessionId") UUID sessionId, @RequestParam("blocked") boolean blocked, @RequestParam("challenge") Optional<String> challengeId) {
         return new ResponseEntity<>(userService.getUsersInASession(sessionId, blocked, challengeId), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/current-sessions/users")
+    @Operation(summary = "Get Ongoing Session's Users", description = "Get all users in ongoing session", tags = { "ADMIN" })
+    public ResponseEntity<List<User>> getUsersInOngoingSession() {
+        return new ResponseEntity<>(userService.getUsersInOngoingSession(), HttpStatus.OK);
     }
 
     @GetMapping("/admin/users")
@@ -136,7 +152,7 @@ public class UserController {
     }
 
     @PostMapping("/admin/users")
-    @Operation(summary = "Get All Users", description = "Get all users in the system", tags = { "ADMIN" })
+    @Operation(summary = "Create User", description = "Create a new user", tags = { "ADMIN" })
     public ResponseEntity<AuthenticationResponse> creatUser(@RequestBody RegisterRequest request) {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }

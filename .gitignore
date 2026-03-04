@@ -38,3 +38,4 @@ liquibase.properties
 ENV_SETUP.md
 docker/.env
 nohup.out
+AGENTS.md
