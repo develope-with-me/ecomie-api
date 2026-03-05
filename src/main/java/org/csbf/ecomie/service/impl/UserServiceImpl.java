@@ -155,6 +155,19 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(authContext.getAuthUser().getName())
                 .orElseThrow(() -> Problems.NOT_FOUND.withProblemError("userEntity", "User with email (%s) not found".formatted(authContext.getAuthUser().getName())).toException());
 
+        if (!userEntity.isEnabled()) {
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity", "Account not enabled").toException();
+        }
+
+        if (!userEntity.isAccountNonLocked()) {
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity", "Account is blocked. Contact Administrator").toException();
+
+        }
+
+        if (userEntity.getAccountSoftDeleted()) {
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity", "Account is deleted. Contact Administrator").toException();
+        }
+
         var jsonUser = Mapper.toJsonObject(userEntity);
         return Mapper.fromJsonObject(jsonUser, MinimalUser.class);
     }

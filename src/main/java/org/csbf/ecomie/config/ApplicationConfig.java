@@ -2,6 +2,7 @@ package org.csbf.ecomie.config;
 
 import lombok.RequiredArgsConstructor;
 import org.csbf.ecomie.repository.UserRepository;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.context.request.RequestContextListener;
+import org.springframework.web.filter.RequestContextFilter;
 
 
 /**
@@ -48,4 +51,17 @@ public class ApplicationConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//    public RequestContextListener requestContextListener() {
+//        return new RequestContextListener();
+//    }
+//
+//    @Bean
+//    public FilterRegistrationBean<RequestContextFilter> requestContextFilter() {
+//        FilterRegistrationBean<RequestContextFilter> registrationBean = new FilterRegistrationBean<>();
+//        registrationBean.setFilter(new RequestContextFilter());
+//        registrationBean.addUrlPatterns("/*"); // Adjust the URL pattern as needed
+//        return registrationBean;
+//    }
 }

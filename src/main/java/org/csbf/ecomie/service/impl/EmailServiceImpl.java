@@ -104,7 +104,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
 
-    @Async
     @Override
     public void sendEmail(String recipient, String subject, String body, String... from ) throws MessagingException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -125,7 +124,6 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    @Async
     @Override
     public void sendCustomEmail(String requestHost, String from, String to, String purpose) throws MessagingException {
         String encodedToEmail;

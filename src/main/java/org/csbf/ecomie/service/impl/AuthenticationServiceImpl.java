@@ -71,11 +71,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         user = userRepo.save(user);
-        var userEntity = authContext.isAuthorized(Role.ADMIN) ? user : null;
+//        var userEntity = authContext.isAuthorized(Role.ADMIN) ? user : null;
 
         var jwtToken = jwtService.generateToken(user);
         msg = "user created";
-        return getAuthenticationResponse(true, msg, jwtToken, userEntity);
+        return getAuthenticationResponse(true, msg, jwtToken, user);
     }
 
     @Override

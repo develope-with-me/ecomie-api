@@ -10,9 +10,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 
 /**
  * Ecomie Project.
@@ -20,6 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author DB.Tech
  */
 @Slf4j
+//@EnableAsync
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class EcomieApplication implements CommandLineRunner {
 
@@ -56,3 +57,4 @@ public class EcomieApplication implements CommandLineRunner {
 		fileUploadService.init();
 	}
 }
+
