@@ -185,7 +185,6 @@ public class EmailServiceImpl implements EmailService {
         String templateContent;
         try {
             log.info("EmailServiceImpl.processHandleBar - Reading Template");
-            templateContent = Files.readString(Paths.get("src/main/resources/templates/password-reset-template.hbs"));
             templateContent = Files.readString(Paths.get(templatePath));
             log.info("EmailServiceImpl.processHandleBar - Successfully Read Template");
 
