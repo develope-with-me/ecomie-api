@@ -3,6 +3,25 @@ volumes:
     driver: local
 
 services:
+  ecomie-web:
+    container_name: ecomie-web
+    image: dbryzz/ecomie-web:latest
+    env_file:
+      - ./.env
+    ports:
+      - "${WEB_PORT}:80"
+    depends_on:
+      ecomie-api:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${WEB_PORT:-80}" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ecomie-network
+    restart: on-failure:3
   ecomie-api:
     container_name: ecomie-api
     build:
@@ -20,9 +39,15 @@ services:
     depends_on:
       ecomie-db:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${HTTP_PORT:-8081}${API_BASE_URL:-/api/v1}/health" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - ecomie-network
-    restart: always
+    restart: on-failure:3
 
   ecomie-db:
     container_name: ecomie-db

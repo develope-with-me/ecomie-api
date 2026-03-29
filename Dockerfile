@@ -15,6 +15,8 @@ RUN mvn clean package -DskipTests
 
 FROM amazoncorretto:23-alpine AS runtime
 
+RUN apk add --no-cache curl
+
 # Set the working directory for the runtime container
 WORKDIR /app
 COPY ./src/main/resources ./src/main/resources

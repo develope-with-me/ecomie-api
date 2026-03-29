@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("${app.api.base.url}")
 @SecurityRequirement(name = "api")
 public class TestController {
-    @GetMapping("/demo-controller")
-    @Operation(summary = "Unprotected test endpoint", description = "Endpoint to test unsecure request", tags = {"test"})
+    @GetMapping("/health")
+    @Operation(summary = "Health Check", description = "Health check end point", tags = {"test"})
     public ResponseEntity<String> sayHello() {
-        return ResponseEntity.ok("Hello unauthenticated userEntity");
+        return ResponseEntity.ok("Application up and running");
     }
 
     @GetMapping("/secure/user")
