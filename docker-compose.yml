@@ -22,6 +22,7 @@ services:
         condition: service_healthy
     networks:
       - ecomie-network
+    restart: always
 
   ecomie-db:
     container_name: ecomie-db
@@ -40,6 +41,7 @@ services:
       retries: 3
     networks:
       - ecomie-network
+    restart: always
 
 networks:
   ecomie-network:

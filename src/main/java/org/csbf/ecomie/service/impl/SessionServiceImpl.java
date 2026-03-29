@@ -238,10 +238,7 @@ public class SessionServiceImpl implements SessionService {
         var sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() ->
                 Problems.NOT_FOUND.withProblemError("Session", "No Ongoing session").toException());
 
-        var session = mapper.asDomainObject(sessionEntity);
-        return !authContext.isAuthorized(Role.ADMIN)
-                ? session.justMinimal()
-                : session;
+        return mapper.asDomainObject(sessionEntity);
     }
 
     @Override
