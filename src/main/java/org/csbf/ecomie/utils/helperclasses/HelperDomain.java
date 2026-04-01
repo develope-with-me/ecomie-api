@@ -1,5 +1,6 @@
 package org.csbf.ecomie.utils.helperclasses;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -147,7 +148,7 @@ public class HelperDomain {
     public record UpdateUserRole(String email, String role) {
     }
 
-
+    @Valid
     public record EmailDTO(@ExtendedEmailValidator String email) {
     }
 
