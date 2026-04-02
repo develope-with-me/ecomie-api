@@ -15,7 +15,7 @@ public interface EmailService {
     @Async
     void sendEmail(String recipient, String subject, String body, String... from) throws MessagingException;
     @Async
-    void sendCustomEmail(String requestHeaderHost, String from, String to, String purpose) throws MessagingException;
+    void requestRoleChange(String requestHeaderHost, String from, String to, String purpose) throws MessagingException;
 
     @Async
     void requestPasswordReset(String requestHost, String email);

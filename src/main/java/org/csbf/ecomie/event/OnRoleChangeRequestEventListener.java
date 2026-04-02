@@ -25,6 +25,6 @@ public class OnRoleChangeRequestEventListener implements ApplicationListener<OnR
 
     }
     private void sendEmail(OnRoleChangeRequestEvent event) throws MessagingException {
-        service.sendCustomEmail(event.getRequestHeaderHost(), event.getEmail(), env.getProperty("SUPER_ADMIN_EMAIL"), event.getRole());
+        service.requestRoleChange(event.getRequestHeaderHost(), event.getEmail(), env.getProperty("SUPER_ADMIN_EMAIL"), event.getRole());
 }
 }

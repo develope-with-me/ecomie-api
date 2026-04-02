@@ -239,6 +239,24 @@
 					<outputChangeLogFile>src/main/resources/migrations/changelog/ddl/ddl-000-existing-database-migration.xml</outputChangeLogFile>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>semver-check-maven-plugin</artifactId>
+				<groupId>io.github.jagodevreede</groupId>
+				<version>1.0.2</version>
+				<configuration>
+					<haltOnFailure>true</haltOnFailure>
+					<outputFileName>nextVersion.txt</outputFileName>
+				</configuration>
+				<executions>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

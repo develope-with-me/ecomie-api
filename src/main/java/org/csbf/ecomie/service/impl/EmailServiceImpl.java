@@ -54,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
 //    private final int PASSWORD_RESET_TOKEN_DURATION_IN_MINUTES = Integer.parseInt(Objects.requireNonNull(env.getProperty("password-reset.token.duration")));
     private static final String REGISTRATION_TEMPLATE = "src/main/resources/templates/registration-template.hbs";
     private static final String PASSWORD_RESET_TEMPLATE = "src/main/resources/templates/password-reset-template.hbs";
+    private static final String CHANGE_ROLE_TEMPLATE = "src/main/resources/templates/change-role-template.hbs";
 
     @Async
     @Override
@@ -85,8 +86,9 @@ public class EmailServiceImpl implements EmailService {
             }
 
             // Construct the confirmation link
-            String confirmationLink = String.format("%s://%s/api/v1/auth/confirm-account?email=%s&token=%s",
-                    request.getScheme(), requestHost, encodedEmail, tokenEntity.getToken());
+            String confirmationLink = String.format("%s://%s?email=%s&token=%s", request.getScheme(), env.getProperty("web.email.confirm"), encodedEmail, tokenEntity.getToken());
+//            String confirmationLink = String.format("%s://%s/api/v1/auth/confirm-account?email=%s&token=%s",
+//                    request.getScheme(), requestHost, encodedEmail, tokenEntity.getToken());
             log.info("Confirmation Link: {}", confirmationLink);
             String logoUrl = env.getProperty("app.logo.url");
             log.info("Logo URL: {}", logoUrl);
@@ -125,15 +127,44 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendCustomEmail(String requestHost, String from, String to, String purpose) throws MessagingException {
+    public void requestRoleChange(String requestHost, String from, String to, String purpose) throws MessagingException {
         String encodedToEmail;
         String encodedFromEmail;
 
         encodedToEmail = URLEncoder.encode(to, StandardCharsets.UTF_8);
         encodedFromEmail = URLEncoder.encode(from, StandardCharsets.UTF_8);
-        String subject = "@ECOMIE - Request To Be " + purpose;
-        String body = "I will like to become a/an " + purpose + ": \n\n If you approve of this userEntity, click on the link to approve his/her request " + requestHost +  "/api/v1/secure/admin/update-userEntity-role?email="+encodedFromEmail+"&role="+purpose;
-        sendEmail(to, subject, body, from);
+
+        UserEntity userEntity = userRepo.findByEmail(from).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("email", "User with email (%s) not found".formatted(from)).toException());
+
+        String encodedEmail;
+        encodedEmail = URLEncoder.encode(userEntity.getEmail(), StandardCharsets.UTF_8);
+
+        String recipient = userEntity.getEmail();
+        String subject = "Request Role Change!";
+
+
+        // Construct the Reset link
+//            String resetLink = String.format("%s://%s/api/v1/auth/reset-password?email=%s&token=%s",
+//                    request.getScheme(), requestHost, encodedEmail, tokenEntity.getToken());
+
+        String roleChangeLink = String.format("%s://%s", request.getScheme(), env.getProperty("web.admin.dashboard"));
+        log.info("Role Change Link: {}", roleChangeLink);
+        String logoUrl = env.getProperty("app.logo.url");
+        log.info("Logo URL: {}", logoUrl);
+
+        // Create the data map
+        Map<String, Object> data = new HashMap<>();
+        data.put("userFullName", userEntity.getFirstName() + userEntity.getLastName());
+        data.put("userEmail", userEntity.getEmail());
+        data.put("requestedRole", purpose);
+        data.put("approveLink", roleChangeLink);
+        data.put("logoUrl", logoUrl);
+
+        processHandleBar(data, recipient, subject, CHANGE_ROLE_TEMPLATE);
+
+//        String subject = "@ECOMIE - Request To Be " + purpose;
+//        String body = "I will like to become a/an " + purpose + ": \n\n If you approve of this userEntity, click on the link to approve his/her request " + requestHost +  "/api/v1/secure/admin/update-userEntity-role?email="+encodedFromEmail+"&role="+purpose;
+//        sendEmail(to, subject, body, from);
 
     }
 
@@ -164,8 +195,10 @@ public class EmailServiceImpl implements EmailService {
             }
 
             // Construct the Reset link
-            String resetLink = String.format("%s://%s/api/v1/auth/reset-password?email=%s&token=%s",
-                    request.getScheme(), requestHost, encodedEmail, tokenEntity.getToken());
+//            String resetLink = String.format("%s://%s/api/v1/auth/reset-password?email=%s&token=%s",
+//                    request.getScheme(), requestHost, encodedEmail, tokenEntity.getToken());
+
+            String resetLink = String.format("%s://%s?email=%s&token=%s", request.getScheme(), env.getProperty("web.reset.password"), encodedEmail, tokenEntity.getToken());
             log.info("Reset Link: {}", resetLink);
             String logoUrl = env.getProperty("app.logo.url");
             log.info("Logo URL: {}", logoUrl);
