@@ -1,0 +1,24 @@
+
+
+EEEEEEEEEEEEEEEEEEEEEE       CCCCCCCCCCCCC     OOOOOOOOO     MMMMMMMM               MMMMMMMMIIIIIIIIIIEEEEEEEEEEEEEEEEEEEEEE
+E::::::::::::::::::::E    CCC::::::::::::C   OO:::::::::OO   M:::::::M             M:::::::MI::::::::IE::::::::::::::::::::E
+E::::::::::::::::::::E  CC:::::::::::::::C OO:::::::::::::OO M::::::::M           M::::::::MI::::::::IE::::::::::::::::::::E
+EE::::::EEEEEEEEE::::E C:::::CCCCCCCC::::CO:::::::OOO:::::::OM:::::::::M         M:::::::::MII::::::IIEE::::::EEEEEEEEE::::E
+  E:::::E       EEEEEEC:::::C       CCCCCCO::::::O   O::::::OM::::::::::M       M::::::::::M  I::::I    E:::::E       EEEEEE
+  E:::::E            C:::::C              O:::::O     O:::::OM:::::::::::M     M:::::::::::M  I::::I    E:::::E
+  E::::::EEEEEEEEEE  C:::::C              O:::::O     O:::::OM:::::::M::::M   M::::M:::::::M  I::::I    E::::::EEEEEEEEEE
+  E:::::::::::::::E  C:::::C              O:::::O     O:::::OM::::::M M::::M M::::M M::::::M  I::::I    E:::::::::::::::E
+  E:::::::::::::::E  C:::::C              O:::::O     O:::::OM::::::M  M::::M::::M  M::::::M  I::::I    E:::::::::::::::E
+  E::::::EEEEEEEEEE  C:::::C              O:::::O     O:::::OM::::::M   M:::::::M   M::::::M  I::::I    E::::::EEEEEEEEEE
+  E:::::E            C:::::C              O:::::O     O:::::OM::::::M    M:::::M    M::::::M  I::::I    E:::::E
+  E:::::E       EEEEEEC:::::C       CCCCCCO::::::O   O::::::OM::::::M     MMMMM     M::::::M  I::::I    E:::::E       EEEEEE
+EE::::::EEEEEEEE:::::E C:::::CCCCCCCC::::CO:::::::OOO:::::::OM::::::M               M::::::MII::::::IIEE::::::EEEEEEEE:::::E
+E::::::::::::::::::::E  CC:::::::::::::::C OO:::::::::::::OO M::::::M               M::::::MI::::::::IE::::::::::::::::::::E
+E::::::::::::::::::::E    CCC::::::::::::C   OO:::::::::OO   M::::::M               M::::::MI::::::::IE::::::::::::::::::::E
+EEEEEEEEEEEEEEEEEEEEEE       CCCCCCCCCCCCC     OOOOOOOOO     MMMMMMMM               MMMMMMMMIIIIIIIIIIEEEEEEEEEEEEEEEEEEEEEE
+
+
+
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
