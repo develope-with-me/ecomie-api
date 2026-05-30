@@ -28,4 +28,6 @@ public interface SubscriptionService {
     List<Subscription> getSessionSubscription(UUID sessionId);
 
     ResponseMessage<Subscription> toggleBlock(UUID id);
+
+    ResponseMessage<Subscription> updateStatus(UUID id, String status);
 }

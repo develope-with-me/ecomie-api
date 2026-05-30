@@ -221,7 +221,7 @@ public class HelperDomain {
      * Subscription Domain
      */
     @Builder
-    public record SubscriptionRequest(int target, UUID challengeId) {
+    public record SubscriptionRequest(int target, UUID challengeId, UUID userId, String status) {
 //        public SubscriptionCreateDto withUserId(UUID userId) {
 //            return new SubscriptionCreateDto(target, userId, challengeId, sessionId);
 //        }
@@ -229,7 +229,7 @@ public class HelperDomain {
     }
 
     @Builder
-    public record Subscription(UUID id, @Min(value = 1) int target, Boolean blocked, User user, Challenge challenge,
+    public record Subscription(UUID id, @Min(value = 1) int target, Boolean blocked, String status, User user, Challenge challenge,
                                       Session session, LocalDateTime createdOn, LocalDateTime updatedOn,
                                UUID createdBy, UUID updatedBy) implements Domain {
 
@@ -249,13 +249,13 @@ public class HelperDomain {
         }
 
         public static Subscription justMinimal (SubscriptionEntity subscriptionEntity) {
-            return new Subscription(subscriptionEntity.getId(), subscriptionEntity.getTarget(), subscriptionEntity.getBlocked(), null,
-                    null, null,  subscriptionEntity.getCreatedOn(),
+            return new Subscription(subscriptionEntity.getId(), subscriptionEntity.getTarget(), subscriptionEntity.getBlocked(),
+                    subscriptionEntity.getStatus().name(), null, null, null,  subscriptionEntity.getCreatedOn(),
                     subscriptionEntity.getUpdatedOn(), subscriptionEntity.getCreatedBy(), subscriptionEntity.getUpdatedBy());
         }
 
         public Subscription justMinimal () {
-            return new Subscription(id, target, blocked, user.justMinimal(), challenge.justMinimal(), session.justMinimal(),
+            return new Subscription(id, target, blocked, status, user.justMinimal(), challenge.justMinimal(), session.justMinimal(),
                     createdOn, updatedOn, createdBy, updatedBy);
         }
     }
@@ -266,7 +266,8 @@ public class HelperDomain {
      */
     @Builder
     public record ChallengeReportRequest(int numberEvangelizedTo, int numberOfNewConverts,
-                                         int numberFollowedUp, String difficulties, String remark) {
+                                         int numberFollowedUp, String difficulties,
+                                         String remark,  LocalDateTime reportDate) {
     }
 
     public record RequestProps(UUID id, String status, String type, String role, List<UUID> ids, boolean blocked, UUID challengeId) {
@@ -276,19 +277,21 @@ public class HelperDomain {
     @Builder
     public record ChallengeReport(UUID id, int numberEvangelizedTo, int numberOfNewConverts, int numberFollowedUp,
                                   String difficulties, String remark, User user, Subscription subscription,
-                                  LocalDateTime createdOn, LocalDateTime updatedOn, UUID createdBy, UUID updatedBy) implements Domain {
+                                  LocalDateTime reportDate, LocalDateTime createdOn, LocalDateTime updatedOn,
+                                  UUID createdBy, UUID updatedBy) implements Domain {
 
 
         public static ChallengeReport justMinimal(ChallengeReportEntity challengeReportEntity) {
             return new ChallengeReport(challengeReportEntity.getId(), challengeReportEntity.getNumberEvangelizedTo(),
                     challengeReportEntity.getNumberOfNewConverts(), challengeReportEntity.getNumberFollowedUp(),
-                    challengeReportEntity.getDifficulties(), challengeReportEntity.getRemark(), null, null, challengeReportEntity.getCreatedOn(),
+                    challengeReportEntity.getDifficulties(), challengeReportEntity.getRemark(), null, null,
+                    challengeReportEntity.getReportDate(), challengeReportEntity.getCreatedOn(),
                     challengeReportEntity.getUpdatedOn(), challengeReportEntity.getCreatedBy(), challengeReportEntity.getUpdatedBy());
         }
 
         public ChallengeReport justMinimal() {
             return new ChallengeReport(id,  numberEvangelizedTo, numberOfNewConverts, numberFollowedUp,
-                    difficulties, remark, user.justMinimal(), subscription.justMinimal(), createdOn, updatedOn, createdBy, updatedBy);
+                    difficulties, remark, user.justMinimal(), subscription.justMinimal(), reportDate, createdOn, updatedOn, createdBy, updatedBy);
         }
 
         @Override

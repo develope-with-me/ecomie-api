@@ -50,10 +50,17 @@ public class SubscriptionController {
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
-    @PutMapping(value = "/admin/subscriptions/{id}")
+    @PutMapping(value = "/ecomiest/subscriptions/{id}")
     @Operation(summary = "Update Subscription", description = "Update subscription", tags = { "ADMIN" })
     public Subscription updateSubscription(@PathVariable(name = "id") UUID id, @RequestBody SubscriptionRequest subscriptionRequest) {
         return subscriptionService.update(id, subscriptionRequest);
+    }
+
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @PutMapping(value = "/admin/subscriptions/{id}")
+    @Operation(summary = "Update Subscription Status", description = "Update subscription status", tags = { "ADMIN" })
+    public ResponseMessage<Subscription> updateSubscriptionStatus(@PathVariable(name = "id") UUID id, @RequestBody SubscriptionRequest subscriptionRequest) {
+        return subscriptionService.updateStatus(id, subscriptionRequest.status());
     }
 
     @ResponseStatus(HttpStatus.PARTIAL_CONTENT)

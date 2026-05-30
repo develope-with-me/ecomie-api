@@ -40,6 +40,7 @@ public interface SubscriptionRepository extends JpaRepository<SubscriptionEntity
     boolean existsBySession_Id_AndUser_Id(UUID sessionId, UUID userId);
 
     boolean existsBySession_Status_AndUser_IdAndChallenge_Type(SessionStatus sessionStatus, UUID userId, ChallengeType challengeType);
+    boolean existsBySession_Status_AndUser_IdAndChallenge_Id(SessionStatus sessionStatus, UUID userId, UUID challengeId);
 
     @Query(value = "SELECT sub.session from SubscriptionEntity sub where sub.user=:user")
     List<SessionEntity> selectAllSessionsThisUserHasSubscribedTo(@Param("user") UserEntity userEntity);

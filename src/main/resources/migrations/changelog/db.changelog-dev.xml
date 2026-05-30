@@ -9,5 +9,6 @@
     <!-- Only including files that actually exist -->
     <include file="ddl/ddl-000-existing-database-migration.xml" relativeToChangelogFile="true"/>
     <include file="ddl/ddl-001-make-mapping-optional.xml" relativeToChangelogFile="true"/>
+    <include file="ddl/ddl-002-first-review-changes.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

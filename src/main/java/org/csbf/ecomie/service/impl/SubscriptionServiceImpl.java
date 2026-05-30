@@ -2,21 +2,20 @@ package org.csbf.ecomie.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
 import org.csbf.ecomie.config.AuthContext;
+import org.csbf.ecomie.constant.ChallengeType;
 import org.csbf.ecomie.constant.Role;
 import org.csbf.ecomie.constant.SessionStatus;
+import org.csbf.ecomie.constant.SubscriptionStatus;
 import org.csbf.ecomie.exceptions.Problems;
 import org.csbf.ecomie.entity.ChallengeEntity;
 import org.csbf.ecomie.entity.SessionEntity;
 import org.csbf.ecomie.entity.SubscriptionEntity;
 import org.csbf.ecomie.entity.UserEntity;
 import org.csbf.ecomie.mapper.SubscriptionMapper;
-import org.csbf.ecomie.repository.ChallengeRepository;
-import org.csbf.ecomie.repository.SessionRepository;
-import org.csbf.ecomie.repository.SubscriptionRepository;
-import org.csbf.ecomie.repository.UserRepository;
+import org.csbf.ecomie.repository.*;
 import org.csbf.ecomie.service.SubscriptionService;
-import org.csbf.ecomie.utils.helperclasses.HelperDomain;
 import org.csbf.ecomie.utils.helperclasses.HelperDomain.*;
 import org.csbf.ecomie.utils.helperclasses.ResponseMessage;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -44,6 +44,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final ChallengeRepository challengeRepo;
     private final AuthContext authContext;
     private final SubscriptionMapper mapper;
+    private final ChallengeReportRepository reportRepo;
+
 
 
     @Override
@@ -91,14 +93,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private ResponseMessage<Subscription> unsubscribe(SubscriptionEntity subscriptionEntity) {
 
-        // TODO: Find out why I wrote these comment lines innitially
-//        SessionEntity sessionEntity = subscriptionEntity.getSession();
-//        sessionRepo.save (sessionEntity);
-//
-//        ChallengeEntity challengeEntity = subscriptionEntity.getChallenge();
-//        challengeRepo.save(challengeEntity);
+        if (reportRepo.existsBySubscription_Id(subscriptionEntity.id())) {
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withDetail(
+                    "Cannot unsubscribe till the end of the session as you have associated reports").toException();
+        }
 
-        subscriptionRepo.delete(subscriptionEntity);
+        subscriptionEntity.setStatus(SubscriptionStatus.CANCELED);
+
+        subscriptionRepo.save(subscriptionEntity);
         return new ResponseMessage.SuccessResponseMessage<>("Subscription deleted");
     }
 
@@ -112,24 +114,55 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubscriptionEntity subscriptionEntity = subscriptionRepo.findById(subscriptionId).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity",
                         "Subscription with id (%s) not found".formatted(subscriptionId.toString())).toException());
+
+        if(!authContext.isAuthorized(Role.ADMIN)) {
+            if(Objects.isNull(subscriptionEntity.getUser()) || !subscriptionEntity.getUser().getEmail().equals(authContext.getAuthUser().getName())) {
+                throw Problems.FORBIDDEN_OPERATION_ERROR.withDetail("Subscription is not yours").toException();
+            }
+        }
+
+        if (reportRepo.existsBySubscription_Id(subscriptionEntity.id())) {
+            throw Problems.FORBIDDEN_OPERATION_ERROR.withDetail(
+                    "Current subscription cannot be updated as it already has associated reports").toException();
+        }
+
         if (!subscriptionEntity.getSession().getStatus().equals(SessionStatus.ONGOING)) {
             throw Problems.PAYLOAD_VALIDATION_ERROR
                     .withDetail("Cannot modify subscription of session that is not ongoing").toException();
         }
+
         ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(
-                () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId",
+                () -> Problems.NOT_FOUND.withProblemError("challengeId",
                         "Challenge with id (%s) does not exist"
                                 .formatted(subscriptionRequest.challengeId().toString())).toException());
 
-        if (subscriptionEntity.getSession().getChallenges().stream().noneMatch(challengeEntity::equals)) {
+        if (Objects.nonNull(subscriptionEntity.getSession()) &&
+                Objects.nonNull(subscriptionEntity.getSession().getChallenges()) &&
+                subscriptionEntity.getSession().getChallenges().stream().noneMatch(challengeEntity::equals)) {
             throw Problems.NOT_FOUND.withDetail("Challenge (id = %s) is not part of current current session (id = %s)"
                     .formatted(challengeEntity.getId(), subscriptionEntity.getSession().getId())).toException();
         }
 
+        if (subscriptionRequest.target() != challengeEntity.getTarget()) {
+            throw Problems.BAD_REQUEST
+                    .withProblemError("target", "Target must be  equal to %s".formatted(Integer.toString(challengeEntity.getTarget()))).toException();
+        }
+
+
+
         subscriptionEntity.setTarget(subscriptionRequest.target());
-        subscriptionEntity.setChallenge(challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(
-                () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity.challengeId",
-                        "challenge with id (%s) not found".formatted(subscriptionRequest.challengeId())).toException()));
+        subscriptionEntity.setChallenge(challengeEntity);
+
+        if(authContext.isAuthorized(Role.ADMIN) && Objects.nonNull(subscriptionRequest.userId())) {
+            UserEntity user = userRepo.findById(subscriptionRequest.userId()).orElseThrow(() ->
+                    Problems.NOT_FOUND.withProblemError("userId",
+                            "User with specified id (%s) not found".formatted(subscriptionRequest.userId())).toException());
+
+            subscriptionEntity.setUser(user);
+            if(!user.getRole().equals(Role.ECOMIEST)) {
+                subscriptionEntity.setStatus(SubscriptionStatus.PENDING);
+            }
+        }
 
         return mapper.asDomainObject(subscriptionRepo.save(subscriptionEntity));
     }
@@ -203,12 +236,33 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 mapper.asDomainObject(updatedSub));
     }
 
+    @Override
+    public ResponseMessage<Subscription> updateStatus(UUID id, String status) {
+        log.info("SubscriptionServiceImpl.updateStatus");
+        var subscription = subscriptionRepo.findById(id).orElseThrow(
+                () -> Problems.NOT_FOUND.withProblemError("subscriptionEntity",
+                        "Subscription with id (%s) not found".formatted(id.toString())).toException());
+
+        if(!EnumUtils.isValidEnum(SubscriptionStatus.class, status.toUpperCase())) {
+            final String[] enums = {""};
+            EnumUtils.getEnumList(SubscriptionStatus.class).stream().map(Enum::toString).toList()
+                    .forEach(str -> {
+                        enums[0] = enums[0] +str+", ";
+                    });
+            throw Problems.INCONSISTENT_DATA_ERROR.withProblemError("status",
+                            "%s not a valid status. [ %s ]".formatted(status, enums[0]))
+                    .toException();
+        }
+
+        subscription.setStatus(SubscriptionStatus.valueOf(status.toUpperCase()));
+        SubscriptionEntity updatedSub = subscriptionRepo.save(subscription);
+
+        return new ResponseMessage.SuccessResponseMessage<>("Subscription status updated",
+                mapper.asDomainObject(updatedSub));
+    }
+
 
     private Subscription createSubscription(SubscriptionRequest subscriptionRequest, @NotNull UserEntity userEntity) {
-        if(!userEntity.getRole().equals(Role.ECOMIEST)) {
-            throw Problems.FORBIDDEN_OPERATION_ERROR.withProblemError("userEntity",
-                    "User not an ECOMIEST").toException();
-        }
 //        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(() -> Problems.NOT_FOUND.withProblemError("sessionEntity", "No ongoing Session found").toException());
 
         ChallengeEntity challengeEntity = challengeRepo.findById(subscriptionRequest.challengeId()).orElseThrow(
@@ -216,17 +270,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         "Challenge with id (%s) does not exist"
                                 .formatted(subscriptionRequest.challengeId().toString())).toException());
 
-        if (subscriptionRequest.target() < challengeEntity.getTarget()) {
+        if (subscriptionRequest.target() != challengeEntity.getTarget()) {
             throw Problems.BAD_REQUEST
-                    .withDetail("Target must be greater than or equal to %s".formatted(Integer.toString(challengeEntity.getTarget()))).toException();
+                    .withProblemError("target", "Target must be  equal to %s".formatted(Integer.toString(challengeEntity.getTarget()))).toException();
         }
 
-        if (subscriptionRepo.existsBySession_Status_AndUser_IdAndChallenge_Type(SessionStatus.ONGOING, userEntity.getId(), challengeEntity.getType())){
-//        if (subscriptionRepo.existsBySession_Id_AndUser_Id(sessionEntity.getId(), userEntity.getId())){
+        if (subscriptionRepo.existsBySession_Status_AndUser_IdAndChallenge_Id(SessionStatus.ONGOING, userEntity.getId(), challengeEntity.getId())) {
             throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR
-                    .withDetail("User has already subscribed to this session").toException();
+                    .withDetail("User has already subscribed to this session's Challenge").toException();
+
         }
-        SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(
+
+        if (subscriptionRepo.existsBySession_Status_AndUser_IdAndChallenge_Type(SessionStatus.ONGOING, userEntity.getId(), challengeEntity.getType())) {
+            if (!challengeEntity.getType().equals(ChallengeType.EVENT)) {
+                throw Problems.UNIQUE_CONSTRAINT_VIOLATION_ERROR
+                        .withDetail("User has already subscribed to a NORMAL Challenge in this session").toException();
+            }
+        }
+
+            SessionEntity sessionEntity = sessionRepo.findByStatus(SessionStatus.ONGOING).orElseThrow(
                 () -> Problems.NOT_FOUND.withProblemError("sessionEntity",
                         "No ongoing Session found").toException());
 
@@ -241,9 +303,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .target(subscriptionRequest.target())
                 .session(sessionEntity)
                 .user(userEntity)
+                .status(SubscriptionStatus.ACTIVE)
                 .blocked(false)
                 .challenge(challengeEntity)
                 .build();
+
+        if(!userEntity.getRole().equals(Role.ECOMIEST)) {
+            subscription.setStatus(SubscriptionStatus.PENDING);
+        }
 
         subscription = subscriptionRepo.save(subscription);
 

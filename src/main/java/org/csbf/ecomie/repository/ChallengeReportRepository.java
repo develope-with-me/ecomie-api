@@ -15,6 +15,8 @@ import java.util.UUID;
  */
 public interface ChallengeReportRepository extends JpaRepository<ChallengeReportEntity, UUID> {
     List<ChallengeReportEntity> findAllBySubscription(SubscriptionEntity subscriptionEntity);
+
+    boolean existsBySubscription_Id(UUID subscriptionId);
     Optional<ChallengeReportEntity> findByIdAndUser_Email(UUID uuid, String userEmail);
     List<ChallengeReportEntity> findAllByUser_Email(String userEmail);
     List<ChallengeReportEntity> findAllBySubscription_Challenge_Id(UUID subscriptionChallengeId);

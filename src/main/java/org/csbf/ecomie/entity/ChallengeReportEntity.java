@@ -3,7 +3,11 @@ package org.csbf.ecomie.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.csbf.ecomie.constant.Role;
+import org.csbf.ecomie.exceptions.Problems;
 import org.csbf.ecomie.utils.commons.BaseEntity;
+
+import java.time.LocalDateTime;
 
 
 /**
@@ -40,4 +44,15 @@ public class ChallengeReportEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private SubscriptionEntity subscription;
+
+    @Column(name = "report_date", nullable = false)
+    private LocalDateTime reportDate;
+
+
+    public void setUser(UserEntity user) {
+        if(user.getRole() != Role.ECOMIEST) {
+            throw Problems.BAD_REQUEST.withProblemError("user", "User with specified id (%s) not an ECOMIEST".formatted(user.getId())).toException();
+        }
+        this.user = user;
+    }
 }

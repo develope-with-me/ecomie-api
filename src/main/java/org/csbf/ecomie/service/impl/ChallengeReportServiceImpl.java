@@ -74,6 +74,7 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
                 .numberOfNewConverts(challengeReportRequest.numberOfNewConverts())
                 .difficulties(challengeReportRequest.difficulties())
                 .remark(challengeReportRequest.remark())
+                .reportDate(challengeReportRequest.reportDate())
                 .build();
 
         ChallengeReportEntity savedReport = reportRepo.save(report);
@@ -102,6 +103,7 @@ public class ChallengeReportServiceImpl implements ChallengeReportService {
         report.setNumberOfNewConverts(challengeReportRequest.numberOfNewConverts());
         report.setDifficulties(challengeReportRequest.difficulties());
         report.setRemark(challengeReportRequest.remark());
+        report.setReportDate(challengeReportRequest.reportDate());
 
         ChallengeReportEntity updatedReport = reportRepo.save(report);
         return new ResponseMessage.SuccessResponseMessage<>("Updated report successfully",

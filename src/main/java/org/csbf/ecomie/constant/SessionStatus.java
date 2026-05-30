@@ -10,5 +10,6 @@ public enum SessionStatus {
     INACTIVE,
     ONGOING,
     PAUSED,
-    ENDED
+    ENDED,
+    UPCOMING
 }
